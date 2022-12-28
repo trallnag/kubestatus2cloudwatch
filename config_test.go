@@ -82,6 +82,16 @@ func TestNewConfig(t *testing.T) {
 		name:       "14_log_level_default",
 		configFile: "config-log-level-default.yaml",
 		expSuccess: true,
+	}, {
+		name:       "15_target_no_name",
+		configFile: "config-target-no-name.yaml",
+		ErrSubstr:  "missing config: target[1].name",
+		expSuccess: false,
+	}, {
+		name:       "16_target_no_mode",
+		configFile: "config-target-no-mode.yaml",
+		ErrSubstr:  "missing config: target[1].mode",
+		expSuccess: false,
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
 			c, err := NewConfig(filepath.Join("testdata", tc.configFile))
