@@ -8,3 +8,4 @@ uses that to update a metric in Amazon CloudWatch.
 
 - CodeCov: https://app.codecov.io/gh/trallnag/kubestatus2cloudwatch
 - Docker Hub: https://hub.docker.com/r/trallnag/kubestatus2cloudwatch
+- Pre-commit: https://results.pre-commit.ci/repo/github/582991925
