@@ -5,12 +5,15 @@ name: Pre-commit
 #
 # - <https://pre-commit.ci/lite.html>
 #
-# Relies on pre-commit.ci lite to be configured with the repository.
+# Relies on pre-commit.ci lite to be configured with the repository. It works
+# in combination with it. The GitHub app takes care of PRs and autoupgrades.
+# This workflow runs pre-commit on push events.
 #
+# If I want to drop pre-commit.ci I can add pre-commit-ci/lite-action to this
+# workflow and adjust the workflow to also run on PRs.
 
 on:
   workflow_dispatch:
-  pull_request:
   push:
     branches: [master, dev]
 
@@ -19,18 +22,34 @@ jobs:
     name: Pre-commit
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-      - uses: actions/setup-python@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
           python-version: 3.x
 
-      - uses: actions/setup-go@v3
+      - name: Setup Go
+        uses: actions/setup-go@v3
         with:
           go-version-file: go.mod
           cache: true
 
-      - uses: pre-commit/action@v3.0.0
+      - name: Install pre-commit
+        run: |
+          python -m pip install pre-commit
+          python -m pip freeze --local
 
-      - uses: pre-commit-ci/lite-action@v1.0.0
-        if: always()
+      - name: Cache pre-commit
+        uses: actions/cache@v3
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ env.pythonLocation }}-${{ hashFiles(".pre-commit-config.yaml") }}
+
+      # Why is golangci-lint being skipped? It is already run as part of the
+      # lint job in the general ci workflow. So we can spare the effort here.
+      - name: Run pre-commit
+        run: pre-commit run --all-files --show-diff-on-failure --color=always
+        env:
+          SKIP: golangci-lint
