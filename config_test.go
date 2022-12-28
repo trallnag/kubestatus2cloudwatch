@@ -92,6 +92,11 @@ func TestNewConfig(t *testing.T) {
 		configFile: "config-target-no-mode.yaml",
 		ErrSubstr:  "missing config: target[1].mode",
 		expSuccess: false,
+	}, {
+		name:       "17_target_no_namespace",
+		configFile: "config-target-no-namespace.yaml",
+		ErrSubstr:  "missing config: target[1].namespace",
+		expSuccess: false,
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
 			c, err := NewConfig(filepath.Join("testdata", tc.configFile))
