@@ -45,7 +45,7 @@ jobs:
         uses: actions/cache@v3
         with:
           path: ~/.cache/pre-commit
-          key: pre-commit-${{ env.pythonLocation }}-${{ hashFiles(".pre-commit-config.yaml") }}
+          key: pre-commit-${{ env.pythonLocation }}-${{ hashFiles('.pre-commit-config.yaml') }}
 
       # Why is golangci-lint being skipped? It is already run as part of the
       # lint job in the general ci workflow. So we can spare the effort here.
