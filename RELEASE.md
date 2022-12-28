@@ -40,7 +40,7 @@ Ensure that the tag is signed.
 git show v$VERSION
 ```
 
-Push changes, but not the commit.
+Push changes, but not the tag.
 
 ```
 git push
