@@ -1,0 +1,5 @@
+seconds: 5
+
+metric:
+  namespace: MyNamespace
+  name: ""

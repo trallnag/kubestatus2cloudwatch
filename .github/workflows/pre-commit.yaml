@@ -1,0 +1,36 @@
+name: Pre-commit
+
+#
+# Run pre-commit hooks.
+#
+# - <https://pre-commit.ci/lite.html>
+#
+# Relies on pre-commit.ci lite to be configured with the repository.
+#
+
+on:
+  workflow_dispatch:
+  pull_request:
+  push:
+    branches: [master, dev]
+
+jobs:
+  pre-commit:
+    name: Pre-commit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - uses: actions/setup-go@v3
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - uses: pre-commit/action@v3.0.0
+
+      - uses: pre-commit-ci/lite-action@v1.0.0
+        if: always()

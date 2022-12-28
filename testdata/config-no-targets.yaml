@@ -1,0 +1,10 @@
+seconds: 5
+
+metric:
+  namespace: MyNamespace
+  name: PromstackUp
+  dimensions:
+    - name: Cluster
+      value: MyCluster
+
+targets: []

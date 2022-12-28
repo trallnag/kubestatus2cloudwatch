@@ -1,0 +1,32 @@
+
+dry: false
+seconds: 60
+
+logging:
+  level: debug
+  pretty: true
+
+metric:
+  namespace: Compound360
+  name: PromstackUp
+  dimensions:
+    - name: Cluster
+      value: c360-dev
+
+targets:
+  - kind: Deployment
+    namespace: default
+    name: socat-tunnel
+    mode: AtLeastOne
+  - kind: Deployment
+    namespace: default
+    name: debug-long-queries
+    mode: AllOfThem
+  - kind: StatefulSet
+    namespace: observability
+    name: prometheus-promstack-kube-prometheus-prometheus
+    mode: AllOfThem
+  - kind: StatefulSet
+    namespace: observability
+    name: alertmanager-promstack-kube-prometheus-alertmanager
+    mode: AllOfThem

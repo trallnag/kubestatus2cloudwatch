@@ -1,0 +1,26 @@
+seconds: 5
+
+metric:
+  namespace: MyNamespace
+  name: PromstackUp
+  dimensions:
+    - name: Cluster
+      value: MyCluster
+
+targets:
+  - kind: Deployment
+    namespace: default
+    name: socat-tunnel
+    mode: AtLeastOne
+  - kind: DaemonSet
+    namespace: default
+    name: debug-long-queries
+    mode: AllOfThem
+  - kind: ""
+    namespace: observability
+    name: prometheus-promstack-kube-prometheus-prometheus
+    mode: AllOfThem
+  - kind: StatefulSet
+    namespace: observability
+    name: alertmanager-promstack-kube-prometheus-alertmanager
+    mode: AllOfThem
