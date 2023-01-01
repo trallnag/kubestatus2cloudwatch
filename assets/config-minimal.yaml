@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=config.schema.json
+
+seconds: 60
+
+metric:
+  namespace: MyNamespace
+  name: MyMetric
+
+targets:
+  - kind: StatefulSet
+    namespace: observability
+    name: prometheus
+    mode: AllOfThem

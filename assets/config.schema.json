@@ -1,0 +1,145 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "kubestatus2cloudwatch-2023-01-01",
+  "type": "object",
+  "title": "KubeStatus2CloudWatch Configuration",
+  "required": ["seconds", "metric", "targets"],
+  "properties": {
+    "dry": {
+      "description": "Skip updating CLoudWatch metric. Optional. Defaults to false.",
+      "type": "boolean",
+      "default": false
+    },
+    "seconds": {
+      "description": "Scan interval. 60 seconds are recommended. Must be >= 5. Required.",
+      "type": "integer",
+      "minimum": 5,
+      "default": 0
+    },
+    "logging": {
+      "description": "Logging configuration. Optional. Defaults to debug log level and structured logs using JSON.",
+      "type": "object",
+      "required": ["level", "pretty"],
+      "examples": [
+        {
+          "level": "info",
+          "pretty": true
+        }
+      ],
+      "properties": {
+        "level": {
+          "description": "Logging Level. Supported are \"debug\" and \"info\". Optional. Defaults to \"debug\".",
+          "type": "string",
+          "default": "debug",
+          "enum": ["debug", "info"],
+          "examples": ["debug", "info"]
+        },
+        "pretty": {
+          "description": "Output logs in human-friendly format. Optional. Defaults to false which emits structured logs using JSON.",
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "metric": {
+      "description": "Metric configuration. Required.",
+      "type": "object",
+      "required": ["namespace", "name"],
+      "properties": {
+        "namespace": {
+          "description": "CloudWatch metric namespace. Required.",
+          "type": "string",
+          "examples": ["MyMetricNamespace"]
+        },
+        "name": {
+          "description": "CloudWatch metric name. Required.",
+          "type": "string",
+          "examples": ["MyMetricName"]
+        },
+        "dimensions": {
+          "description": "CloudWatch metric dimensions. Optional. Defaults to empty list.",
+          "type": "array",
+          "default": [],
+          "examples": [
+            [
+              {
+                "name": "Cluster",
+                "value": "MyCluster"
+              },
+              {
+                "name": "Environment",
+                "value": "PROD"
+              }
+            ]
+          ],
+          "items": {
+            "description": "Dimension.",
+            "type": "object",
+            "required": ["name", "value"],
+            "examples": [
+              {
+                "name": "Cluster",
+                "value": "MyCluster"
+              }
+            ],
+            "properties": {
+              "name": {
+                "description": "Dimension name. Required.",
+                "type": "string",
+                "examples": ["Cluster"]
+              },
+              "value": {
+                "description": "Dimension value. Required.",
+                "type": "string",
+                "examples": ["MyCluster"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "targets": {
+      "description": "Target configuration. Required. At least one target must be configured.",
+      "type": "array",
+      "minItems": 1,
+      "examples": [
+        {
+          "kind": "StatefulSet",
+          "namespace": "default",
+          "name": "prometheus",
+          "mode": "AllOfThem"
+        }
+      ],
+      "items": {
+        "type": "object",
+        "required": ["kind", "namespace", "name", "mode"],
+        "properties": {
+          "kind": {
+            "description": "Type of target. Supported are \"DaemonSet\", \"Deployment\", and \"StatefulSet\". Required.",
+            "type": "string",
+            "enum": ["DaemonSet", "Deployment", "StatefulSet"],
+            "examples": ["DaemonSet", "Deployment", "StatefulSet"]
+          },
+          "namespace": {
+            "description": "Namespace of target. Required.",
+            "type": "string",
+            "minLength": 1,
+            "examples": ["kube-system"]
+          },
+          "name": {
+            "description": "Name of target. Required.",
+            "type": "string",
+            "minLength": 1,
+            "examples": ["prometheus"]
+          },
+          "mode": {
+            "description": "Mode used for scan and evaluation. Supported are \"AllOfThem\" (requires all replicas to be ready) and \"AtLeastOn\" (requires at least one replica to be ready).",
+            "type": "string",
+            "enum": ["AllOfThem", "AtLeastOne"],
+            "examples": ["AllOfThem", "AtLeastOne"]
+          }
+        }
+      }
+    }
+  }
+}

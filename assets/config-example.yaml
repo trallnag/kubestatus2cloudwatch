@@ -1,0 +1,58 @@
+# yaml-language-server: $schema=config.schema.json
+
+# Skip updating CLoudWatch metric. Optional. Defaults to false.
+dry: false
+
+# Scan interval. 60 seconds are recommended. Must be >= 5. Required.
+seconds: 60
+
+# Logging configuration. Optional. Defaults to debug log level and structured
+# logs using JSON.
+logging:
+  # Logging level. Supported are "debug" and "info". Optional. Defaults to "debug".
+  level: debug
+  # Output logs in human-friendly format. Optional. Defaults to false which
+  # emits structured logs using JSON.
+  pretty: true
+
+# Metric configuration. Required.
+metric:
+  # CloudWatch metric namespace. Required.
+  namespace: MyNamespace
+  # CloudWatch metric name. Required.
+  name: MyMetric
+  # CloudWatch metric dimensions. Optional. Defaults to empty list.
+  dimensions:
+    - # Dimension name. Required.
+      name: Cluster
+      # Dimension value. Required.
+      value: MyCluster
+
+# Target configuration. Required. At least one target must be configured.
+targets:
+  - # Type of target. Supported are "DaemonSet", "Deployment",
+    # and "StatefulSet". Required.
+    kind: Deployment
+    # Namespace of target. Required.
+    namespace: default
+    # Name of target. Required.
+    name: socat-tunnel
+    # Mode used for scan and evaluation. Supported are "AllOfThem" (requires
+    # all replicas to be ready) and "AtLeastOn" (requires at least one replica
+    # to be ready).
+    mode: AtLeastOne
+
+  - kind: Deployment
+    namespace: default
+    name: debug-long-queries
+    mode: AllOfThem
+
+  - kind: StatefulSet
+    namespace: observability
+    name: prometheus
+    mode: AllOfThem
+
+  - kind: StatefulSet
+    namespace: observability
+    name: alertmanager
+    mode: AllOfThem
