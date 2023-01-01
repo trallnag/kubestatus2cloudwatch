@@ -31,6 +31,7 @@ repos:
     rev: 0.7.16
     hooks:
       - id: mdformat
+        args: [--wrap=80]
 
   - repo: https://github.com/golangci/golangci-lint
     rev: v1.50.1
