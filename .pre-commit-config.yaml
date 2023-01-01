@@ -33,6 +33,11 @@ repos:
       - id: mdformat
         args: [--wrap=80]
 
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: v3.0.0-alpha.4
+    hooks:
+      - id: prettier
+
   - repo: https://github.com/golangci/golangci-lint
     rev: v1.50.1
     hooks:
