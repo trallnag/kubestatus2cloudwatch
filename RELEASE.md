@@ -63,7 +63,7 @@ Docker Hub
 [here](https://hub.docker.com/repository/docker/trallnag/kubestatus2cloudwatch).
 
 Go to the release page of this project on GitHub
-[here](https://github.com/trallnag/kubestatus2cloudwatch/releases) and
-review the automatically created release draft.
+[here](https://github.com/trallnag/kubestatus2cloudwatch/releases) and review
+the automatically created release draft.
 
 Publish the draft.
