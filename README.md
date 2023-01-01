@@ -1,4 +1,8 @@
+![status](https://img.shields.io/badge/status-active-brightgreen)
+[![build](https://img.shields.io/github/actions/workflow/status/trallnag/kubestatus2cloudwatch/ci.yaml?branch=master)](https://github.com/trallnag/kubestatus2cloudwatch/actions)
 [![codecov](https://codecov.io/gh/trallnag/kubestatus2cloudwatch/branch/master/graph/badge.svg?token=DBT93R547B)](https://codecov.io/gh/trallnag/kubestatus2cloudwatch)
+[![release](https://img.shields.io/github/v/release/trallnag/kubestatus2cloudwatch)](https://github.com/trallnag/kubestatus2cloudwatch/releases)
+[![docker pulls](https://img.shields.io/docker/pulls/trallnag/kubestatus2cloudwatch)](https://hub.docker.com/r/trallnag/kubestatus2cloudwatch)
 
 # KubeStatus2CloudWatch
 
