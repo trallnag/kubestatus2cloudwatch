@@ -1,3 +1,5 @@
+[![codecov](https://codecov.io/gh/trallnag/kubestatus2cloudwatch/branch/master/graph/badge.svg?token=DBT93R547B)](https://codecov.io/gh/trallnag/kubestatus2cloudwatch)
+
 # KubeStatus2CloudWatch
 
 Small app written in Go that continuously watches the status of certain
@@ -83,18 +85,18 @@ We need a **IAM role** with the following **trust policy**:
 
 ```json
 {
-  "Version" : "2012-10-17",
-  "Statement" : [
+  "Version": "2012-10-17",
+  "Statement": [
     {
-      "Effect" : "Allow",
-      "Principal" : {
-        "Federated" : "arn:aws:iam::${ACCOUNT_ID}:oidc-provider/${ISSUER_URL}"
+      "Effect": "Allow",
+      "Principal": {
+        "Federated": "arn:aws:iam::${ACCOUNT_ID}:oidc-provider/${ISSUER_URL}"
       },
-      "Action" : "sts:AssumeRoleWithWebIdentity",
-      "Condition" : {
-        "StringEquals" : {
-          "${ISSUER_URL}:aud" : "sts.amazonaws.com",
-          "${ISSUER_URL}:sub" : "system:serviceaccount:${KUBE_NAMESPACE}:kubestatus2cloudwatch"
+      "Action": "sts:AssumeRoleWithWebIdentity",
+      "Condition": {
+        "StringEquals": {
+          "${ISSUER_URL}:aud": "sts.amazonaws.com",
+          "${ISSUER_URL}:sub": "system:serviceaccount:${KUBE_NAMESPACE}:kubestatus2cloudwatch"
         }
       }
     }
@@ -106,15 +108,15 @@ The **inline policy** should look like this:
 
 ```json
 {
-  "Version" : "2012-10-17",
-  "Statement" : [
+  "Version": "2012-10-17",
+  "Statement": [
     {
-      "Effect" : "Allow",
-      "Action" : "cloudwatch:PutMetricData",
-      "Resource" : "*",
-      "Condition" : {
-        "StringEquals" : {
-          "cloudwatch:namespace" : "${KUBE_NAMESPACE}"
+      "Effect": "Allow",
+      "Action": "cloudwatch:PutMetricData",
+      "Resource": "*",
+      "Condition": {
+        "StringEquals": {
+          "cloudwatch:namespace": "${KUBE_NAMESPACE}"
         }
       }
     }
