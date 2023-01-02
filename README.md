@@ -43,7 +43,7 @@ missing data for a certain amount of time.
 
 [![assets/use-case-example.drawio.svg](assets/use-case-example.drawio.svg)](assets/use-case-example.drawio.svg)
 
-This shows that KubeStatus2CloudWatch caters to a very specific use case and
+KubeStatus2CloudWatch caters to a specific use case and
 must be combined with other tools to be useful.
 
 ## Getting Started
