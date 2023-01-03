@@ -110,14 +110,7 @@ func NewConfig(configPath string) (Config, error) {
 		allowedTargetKinds := []string{
 			KindDeployment, KindStatefulSet, KindDaemonSet,
 		}
-		targetKindAllowed := false
-		for _, allowedTargetKind := range allowedTargetKinds {
-			if target.Kind == allowedTargetKind {
-				targetKindAllowed = true
-				break
-			}
-		}
-		if !targetKindAllowed {
+		if !ContainsString(allowedTargetKinds, target.Kind) {
 			return c, fmt.Errorf(
 				"target[%v].kind not supported: %s", i, target.Kind,
 			)
@@ -137,17 +130,8 @@ func NewConfig(configPath string) (Config, error) {
 		if target.Mode == "" {
 			return c, fmt.Errorf("missing config: target[%v].mode", i)
 		}
-		allowedTargetModes := []string{
-			ModeAllOfThem, ModeAtLeastOne,
-		}
-		targetModeAllowed := false
-		for _, allowedTargetMode := range allowedTargetModes {
-			if target.Mode == allowedTargetMode {
-				targetModeAllowed = true
-				break
-			}
-		}
-		if !targetModeAllowed {
+		allowedTargetModes := []string{ModeAllOfThem, ModeAtLeastOne}
+		if !ContainsString(allowedTargetModes, target.Mode) {
 			return c, fmt.Errorf(
 				"target[%v].mode not supported: %s", i, target.Mode,
 			)
