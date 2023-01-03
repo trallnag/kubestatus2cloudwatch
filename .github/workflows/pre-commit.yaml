@@ -9,6 +9,10 @@ name: Pre-commit
 # in combination with it. The GitHub app takes care of PRs and autoupgrades.
 # This workflow runs pre-commit on push events.
 #
+# Actually I have figured out that pre-commit.ci also runs on push events to the
+# master branch. So we are kind of redundant here at the moment. One alternative
+# would be to only run hooks here that are not supported by the service.
+#
 # If I want to drop pre-commit.ci I can add pre-commit-ci/lite-action to this
 # workflow and adjust the workflow to also run on PRs.
 
