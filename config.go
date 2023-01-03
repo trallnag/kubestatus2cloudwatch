@@ -98,44 +98,8 @@ func NewConfig(configPath string) (Config, error) {
 		}
 	}
 
-	// Config.Targets[]
-	if len(c.Targets) == 0 {
-		return c, fmt.Errorf("missing config: targets")
-	}
-	for i, target := range c.Targets {
-		// Config.Targets[].Kind
-		if target.Kind == "" {
-			return c, fmt.Errorf("missing config: target[%v].kind", i)
-		}
-		allowedTargetKinds := []string{
-			KindDeployment, KindStatefulSet, KindDaemonSet,
-		}
-		if !ContainsString(allowedTargetKinds, target.Kind) {
-			return c, fmt.Errorf(
-				"target[%v].kind not supported: %s", i, target.Kind,
-			)
-		}
-
-		// Config.Targets[].Namespace
-		if target.Namespace == "" {
-			return c, fmt.Errorf("missing config: target[%v].namespace", i)
-		}
-
-		// Config.Targets[].Name
-		if target.Name == "" {
-			return c, fmt.Errorf("missing config: target[%v].name", i)
-		}
-
-		// Config.Targets[].Mode
-		if target.Mode == "" {
-			return c, fmt.Errorf("missing config: target[%v].mode", i)
-		}
-		allowedTargetModes := []string{ModeAllOfThem, ModeAtLeastOne}
-		if !ContainsString(allowedTargetModes, target.Mode) {
-			return c, fmt.Errorf(
-				"target[%v].mode not supported: %s", i, target.Mode,
-			)
-		}
+	if err = ValidateTargets(c.Targets); err != nil {
+		return c, fmt.Errorf("failed validating targets: %w", err)
 	}
 
 	// Config.Logging.Level
@@ -149,6 +113,45 @@ func NewConfig(configPath string) (Config, error) {
 	}
 
 	return c, nil
+}
+
+// ValidateTargets validates targets. Used as part of configuration parsing.
+func ValidateTargets(targets []Target) error {
+	if len(targets) == 0 {
+		return fmt.Errorf("missing config: targets")
+	}
+	for i, target := range targets {
+		if target.Kind == "" {
+			return fmt.Errorf("missing config: target[%v].kind", i)
+		}
+		allowedTargetKinds := []string{
+			KindDeployment, KindStatefulSet, KindDaemonSet,
+		}
+		if !ContainsString(allowedTargetKinds, target.Kind) {
+			return fmt.Errorf(
+				"target[%v].kind not supported: %s", i, target.Kind,
+			)
+		}
+
+		if target.Namespace == "" {
+			return fmt.Errorf("missing config: target[%v].namespace", i)
+		}
+
+		if target.Name == "" {
+			return fmt.Errorf("missing config: target[%v].name", i)
+		}
+
+		if target.Mode == "" {
+			return fmt.Errorf("missing config: target[%v].mode", i)
+		}
+		allowedTargetModes := []string{ModeAllOfThem, ModeAtLeastOne}
+		if !ContainsString(allowedTargetModes, target.Mode) {
+			return fmt.Errorf(
+				"target[%v].mode not supported: %s", i, target.Mode,
+			)
+		}
+	}
+	return nil
 }
 
 func ContainsString(s []string, str string) bool {

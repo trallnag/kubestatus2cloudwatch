@@ -6,7 +6,8 @@ import (
 	"testing"
 )
 
-// TestNewConfig tests NewConfig.
+// TestNewConfig tests NewConfig (and indirectly all the validation functions
+// that are used to reduce the complexity of NewConfig).
 func TestNewConfig(t *testing.T) {
 	for _, tc := range []struct {
 		name       string // Name of test case.
