@@ -122,3 +122,68 @@ func TestNewConfig(t *testing.T) {
 		})
 	}
 }
+
+// TestValidateMetric tests ValidateMetric.
+func TestValidateMetric(t *testing.T) {
+	for _, tc := range []struct {
+		name      string // Name of test case.
+		metric    Metric // Initialized metric struct.
+		errSubstr string // Substring expected in error string.
+	}{{
+		name: "1_namespace_empty",
+		metric: Metric{
+			Name: "Name",
+		},
+		errSubstr: "missing: metric.namespace",
+	}, {
+		name: "2_name_empty",
+		metric: Metric{
+			Namespace: "Namespace",
+		},
+		errSubstr: "missing: metric.name",
+	}, {
+		name: "3_dimension_name_empty",
+		metric: Metric{
+			Name:       "Name",
+			Namespace:  "Namespace",
+			Dimensions: []Dimension{{Value: "Value"}},
+		},
+		errSubstr: "missing: metric.dimensions[0].name",
+	}, {
+		name: "4_dimension_value_empty",
+		metric: Metric{
+			Name:       "Name",
+			Namespace:  "Namespace",
+			Dimensions: []Dimension{{Name: "Name"}},
+		},
+		errSubstr: "missing: metric.dimensions[0].value",
+	}, {
+		name: "5_all_is_good",
+		metric: Metric{
+			Name:      "Name",
+			Namespace: "Namespace",
+			Dimensions: []Dimension{
+				{Name: "Name1", Value: "Value1"},
+				{Name: "Name2", Value: "Value2"},
+			},
+		},
+	}} {
+		t.Run(tc.name, func(t *testing.T) {
+			err := ValidateMetric(tc.metric)
+			if err != nil {
+				if len(tc.errSubstr) == 0 {
+					t.Errorf("Unexpected failure: %s", err.Error())
+				} else if !strings.Contains(err.Error(), tc.errSubstr) {
+					t.Errorf(
+						"Err does not contain substr: got %q, want substr %q",
+						err.Error(), tc.errSubstr,
+					)
+				}
+			} else {
+				if len(tc.errSubstr) != 0 {
+					t.Error("Unexpected success.")
+				}
+			}
+		})
+	}
+}

@@ -74,32 +74,14 @@ func NewConfig(configPath string) (Config, error) {
 		return c, fmt.Errorf("config seconds smaller than 5: %v", c.Seconds)
 	}
 
-	// Config.Metric.Namespace
-	if c.Metric.Namespace == "" {
-		return c, fmt.Errorf("missing config: metric.namespace")
+	// Config.Metric
+	if err = ValidateMetric(c.Metric); err != nil {
+		return c, fmt.Errorf("failed validating metric config: %w", err)
 	}
 
-	// Config.Metric.Name
-	if c.Metric.Name == "" {
-		return c, fmt.Errorf("missing config: metric.namespace")
-	}
-
-	// Config.Metric.Dimensions[]
-	for i, dimension := range c.Metric.Dimensions {
-		if dimension.Name == "" {
-			return c, fmt.Errorf(
-				"missing config: metric.dimensions[%v].name", i,
-			)
-		}
-		if dimension.Value == "" {
-			return c, fmt.Errorf(
-				"missing config: metric.dimensions[%v].value", i,
-			)
-		}
-	}
-
+	// Config.Targets
 	if err = ValidateTargets(c.Targets); err != nil {
-		return c, fmt.Errorf("failed validating targets: %w", err)
+		return c, fmt.Errorf("failed validating targets config: %w", err)
 	}
 
 	// Config.Logging.Level
@@ -115,7 +97,32 @@ func NewConfig(configPath string) (Config, error) {
 	return c, nil
 }
 
-// ValidateTargets validates targets. Used as part of configuration parsing.
+// ValidateMetric validates metric configuration.
+func ValidateMetric(metric Metric) error {
+	if metric.Namespace == "" {
+		return fmt.Errorf("missing: metric.namespace")
+	}
+
+	if metric.Name == "" {
+		return fmt.Errorf("missing: metric.name")
+	}
+
+	for i, dimension := range metric.Dimensions {
+		if dimension.Name == "" {
+			return fmt.Errorf(
+				"missing: metric.dimensions[%v].name", i,
+			)
+		}
+		if dimension.Value == "" {
+			return fmt.Errorf(
+				"missing: metric.dimensions[%v].value", i,
+			)
+		}
+	}
+	return nil
+}
+
+// ValidateTargets validates targets configuration.
 func ValidateTargets(targets []Target) error {
 	if len(targets) == 0 {
 		return fmt.Errorf("missing config: targets")
