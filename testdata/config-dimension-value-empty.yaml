@@ -1,8 +1,0 @@
-seconds: 5
-
-metric:
-  namespace: MyNamespace
-  name: PromstackUp
-  dimensions:
-    - name: MyName
-      value: ""
