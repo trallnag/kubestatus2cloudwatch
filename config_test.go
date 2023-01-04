@@ -187,3 +187,92 @@ func TestValidateMetric(t *testing.T) {
 		})
 	}
 }
+
+// TestValidateTargets tests ValidateTargets.
+func TestValidateTargets(t *testing.T) {
+	for _, tc := range []struct {
+		name      string   // Name of test case.
+		targets   []Target // Initialized target structs.
+		errSubstr string   // Substring expected in error string.
+	}{{
+		name:      "1_no_targets",
+		errSubstr: "missing: targets",
+	}, {
+		name: "2_kind_not_supported",
+		targets: []Target{{
+			Kind:      KindDaemonSet,
+			Namespace: "Namespace",
+			Name:      "Name",
+			Mode:      ModeAllOfThem,
+		}, {
+			Kind:      "Job",
+			Namespace: "Namespace",
+			Name:      "Name",
+			Mode:      ModeAllOfThem,
+		}},
+		errSubstr: "target[1].kind not supported: Job",
+	}, {
+		name: "3_mode_not_supported",
+		targets: []Target{{
+			Kind:      KindDaemonSet,
+			Namespace: "Namespace",
+			Name:      "Name",
+			Mode:      "AtLeastTwo",
+		}},
+		errSubstr: "target[0].mode not supported: AtLeastTwo",
+	}, {
+		name: "4_kind_empty",
+		targets: []Target{{
+			Kind:      "",
+			Namespace: "Namespace",
+			Name:      "Name",
+			Mode:      ModeAtLeastOne,
+		}},
+		errSubstr: "missing: target[0].kind",
+	}, {
+		name: "5_name_empty",
+		targets: []Target{{
+			Kind:      KindDeployment,
+			Namespace: "Namespace",
+			Name:      "",
+			Mode:      ModeAtLeastOne,
+		}},
+		errSubstr: "missing: target[0].name",
+	}, {
+		name: "6_namespace_empty",
+		targets: []Target{{
+			Kind:      KindDeployment,
+			Namespace: "",
+			Name:      "Name",
+			Mode:      ModeAtLeastOne,
+		}},
+		errSubstr: "missing: target[0].namespace",
+	}, {
+		name: "7_mode_empty",
+		targets: []Target{{
+			Kind:      KindDeployment,
+			Namespace: "Namespace",
+			Name:      "Name",
+			Mode:      "",
+		}},
+		errSubstr: "missing: target[0].mode",
+	}} {
+		t.Run(tc.name, func(t *testing.T) {
+			err := ValidateTargets(tc.targets)
+			if err != nil {
+				if len(tc.errSubstr) == 0 {
+					t.Errorf("Unexpected failure: %s", err.Error())
+				} else if !strings.Contains(err.Error(), tc.errSubstr) {
+					t.Errorf(
+						"Err does not contain substr: got %q, want substr %q",
+						err.Error(), tc.errSubstr,
+					)
+				}
+			} else {
+				if len(tc.errSubstr) != 0 {
+					t.Error("Unexpected success.")
+				}
+			}
+		})
+	}
+}

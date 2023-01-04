@@ -125,11 +125,11 @@ func ValidateMetric(metric Metric) error {
 // ValidateTargets validates targets configuration.
 func ValidateTargets(targets []Target) error {
 	if len(targets) == 0 {
-		return fmt.Errorf("missing config: targets")
+		return fmt.Errorf("missing: targets")
 	}
 	for i, target := range targets {
 		if target.Kind == "" {
-			return fmt.Errorf("missing config: target[%v].kind", i)
+			return fmt.Errorf("missing: target[%v].kind", i)
 		}
 		allowedTargetKinds := []string{
 			KindDeployment, KindStatefulSet, KindDaemonSet,
@@ -141,15 +141,15 @@ func ValidateTargets(targets []Target) error {
 		}
 
 		if target.Namespace == "" {
-			return fmt.Errorf("missing config: target[%v].namespace", i)
+			return fmt.Errorf("missing: target[%v].namespace", i)
 		}
 
 		if target.Name == "" {
-			return fmt.Errorf("missing config: target[%v].name", i)
+			return fmt.Errorf("missing: target[%v].name", i)
 		}
 
 		if target.Mode == "" {
-			return fmt.Errorf("missing config: target[%v].mode", i)
+			return fmt.Errorf("missing: target[%v].mode", i)
 		}
 		allowedTargetModes := []string{ModeAllOfThem, ModeAtLeastOne}
 		if !ContainsString(allowedTargetModes, target.Mode) {
