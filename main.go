@@ -81,7 +81,7 @@ func main() {
 	log.Info().Msg("Done with setup. Starting aggregation.")
 
 	tickCount := 0
-	for range time.NewTicker(time.Duration(config.Seconds) * time.Second).C {
+	for ; true; <-time.NewTicker(time.Duration(config.Seconds) * time.Second).C {
 		tickCount = tickCount + 1
 		tickStart := time.Now()
 		tickLogger := log.With().Int("tickCount", tickCount).Logger()
