@@ -10,7 +10,7 @@ tasks:
     desc: Lint code.
     cmds:
       - gofmt -w .
-      - golangci-lint run -v
+      - golangci-lint run
 
   test:
     desc: Test code.
