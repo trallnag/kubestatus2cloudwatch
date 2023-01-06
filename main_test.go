@@ -358,3 +358,46 @@ func TestUpdateMetric(t *testing.T) {
 		})
 	}
 }
+
+// TestExecuteRounds tests ExecuteRounds.
+func TestExecuteRounds(t *testing.T) {
+	kubeClient := fake.NewSimpleClientset()
+	cloudwatchClient := &CWPutMetricDataImpl{false}
+	ExecuteRounds(
+		true,
+		1,
+		false,
+		Metric{
+			Namespace: "Namespace",
+			Name:      "Name",
+		},
+		[]Target{{
+			Kind:      KindDeployment,
+			Mode:      ModeAllOfThem,
+			Namespace: "Namespace",
+			Name:      "Name",
+		}},
+		kubeClient,
+		cloudwatchClient,
+	)
+
+	kubeClient = fake.NewSimpleClientset()
+	cloudwatchClient = &CWPutMetricDataImpl{true}
+	ExecuteRounds(
+		true,
+		1,
+		false,
+		Metric{
+			Namespace: "Namespace",
+			Name:      "Name",
+		},
+		[]Target{{
+			Kind:      KindDeployment,
+			Mode:      ModeAllOfThem,
+			Namespace: "Namespace",
+			Name:      "Name",
+		}},
+		kubeClient,
+		cloudwatchClient,
+	)
+}

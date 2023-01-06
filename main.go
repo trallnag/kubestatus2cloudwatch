@@ -80,26 +80,46 @@ func main() {
 
 	log.Info().Msg("Done with setup. Starting aggregation.")
 
+	ExecuteRounds(
+		false, config.Seconds, config.Dry, config.Metric, config.Targets,
+		kubeClient, cloudwatchClient,
+	)
+}
+
+// ExecuteRounds indefinitely executes tick rounds (except if single is true,
+// in which case only a single tick round is executed). From the config the
+// keys seconds, dry, metric, and targets are used. The clients for Kubernetes
+// and CloudWatch are expected to be ready to use.
+func ExecuteRounds(
+	single bool, seconds int, dry bool, metric Metric, targets []Target,
+	kubeClient kubernetes.Interface, cloudwatchClient CWPutMetricDataAPI,
+) {
 	tickCount := 0
-	for ; true; <-time.NewTicker(time.Duration(config.Seconds) * time.Second).C {
+	ticker := time.NewTicker(time.Duration(seconds) * time.Second)
+	for ; true; <-ticker.C {
 		tickCount = tickCount + 1
 		tickStart := time.Now()
 		tickLogger := log.With().Int("tickCount", tickCount).Logger()
 		tickLogger.Info().Msg("Executing new tick round.")
 
 		err := UpdateMetric(
-			config.Dry, cloudwatchClient, config.Metric.Namespace,
-			config.Metric.Name, config.Metric.Dimensions,
-			PerformScan(kubeClient, config.Targets).Success,
+			dry, cloudwatchClient, metric.Namespace,
+			metric.Name, metric.Dimensions,
+			PerformScan(kubeClient, targets).Success,
 		)
 		if err != nil {
-			log.Error().Err(err).Msg("Failed to update metric.")
+			tickLogger.Error().Err(err).Msg("Failed to update metric.")
 		}
 
 		tickDuration := time.Since(tickStart).Truncate(time.Millisecond)
 		tickLogger.Info().
 			Str("tickDuration", tickDuration.String()).
 			Msg("Done with tick round.")
+
+		if single {
+			ticker.Stop()
+			break
+		}
 	}
 }
 
