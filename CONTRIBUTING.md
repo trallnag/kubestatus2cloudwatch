@@ -45,3 +45,9 @@ brew install go-task/tap/go-task
 ```
 
 Read [`docs/devel/taskfile.md`](docs/devel/taskfile.md) for more.
+
+### Local Config <!-- omit in toc -->
+
+Place `config.yaml` in the root of this repository. It is already listed in
+`.gitignore` and so Git will ignore it. Consider setting `logging.pretty=true`
+for human-friendly logs.
