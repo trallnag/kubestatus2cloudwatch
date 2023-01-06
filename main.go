@@ -85,7 +85,7 @@ func main() {
 		tickCount = tickCount + 1
 		tickStart := time.Now()
 		tickLogger := log.With().Int("tickCount", tickCount).Logger()
-		tickLogger.Info().Msg("Running new tick round.")
+		tickLogger.Info().Msg("Executing new tick round.")
 
 		err := UpdateMetric(
 			config.Dry, cloudwatchClient, config.Metric.Namespace,
