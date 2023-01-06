@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=config.schema.json
 
-# Skip updating CLoudWatch metric. Optional. Defaults to false.
+# Skip updating CloudWatch metric. Optional. Defaults to false.
 dry: false
 
 # Scan interval. 60 seconds are recommended. Must be >= 5. Required.
