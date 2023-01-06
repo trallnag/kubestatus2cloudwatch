@@ -7,7 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0),
 
 ## Unreleased
 
-Nothing
+### Added
+
+- Log start and end of tick rounds including duration and identifier of
+  individual ticks. Log level info is used for this.
 
 ## [1.0.0](https://github.com/trallnag/kubestatus2cloudwatch/compare/ed5965484226b6ef8b1a13de14c82c7b36d33d8d...v1.0.0) / 2022-12-28
 

@@ -80,7 +80,13 @@ func main() {
 
 	log.Info().Msg("Done with setup. Starting aggregation.")
 
+	tickCount := 0
 	for range time.NewTicker(time.Duration(config.Seconds) * time.Second).C {
+		tickCount = tickCount + 1
+		tickStart := time.Now()
+		tickLogger := log.With().Int("tickCount", tickCount).Logger()
+		tickLogger.Info().Msg("Running new tick round.")
+
 		err := UpdateMetric(
 			config.Dry, cloudwatchClient, config.Metric.Namespace,
 			config.Metric.Name, config.Metric.Dimensions,
@@ -89,6 +95,11 @@ func main() {
 		if err != nil {
 			log.Error().Err(err).Msg("Failed to update metric.")
 		}
+
+		tickDuration := time.Since(tickStart).Truncate(time.Millisecond)
+		tickLogger.Info().
+			Str("tickDuration", tickDuration.String()).
+			Msg("Done with tick round.")
 	}
 }
 
