@@ -12,6 +12,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0),
 - Log start and end of tick rounds including duration and identifier of
   individual ticks. Log level info is used for this.
 
+### Changed
+
+- Updated indirect dependencies.
+
 ### Fixed
 
 - Don't wait one interval amount before starting the first tick round. Now
