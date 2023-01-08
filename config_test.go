@@ -35,14 +35,24 @@ func TestNewConfig(t *testing.T) {
 		ErrSubstr:  "seconds smaller",
 		expSuccess: false,
 	}, {
-		name:       "13_invalid_log_level",
+		name:       "5_invalid_log_level",
 		configFile: "config-invalid-log-level.yaml",
 		ErrSubstr:  "logging.level not supported",
 		expSuccess: false,
 	}, {
-		name:       "14_log_level_default",
+		name:       "6_log_level_default",
 		configFile: "config-log-level-default.yaml",
 		expSuccess: true,
+	}, {
+		name:       "7_invalid_metric",
+		configFile: "config-invalid-metric.yaml",
+		ErrSubstr:  "failed validating metric config",
+		expSuccess: false,
+	}, {
+		name:       "8_invalid_targets",
+		configFile: "config-invalid-targets.yaml",
+		ErrSubstr:  "failed validating targets config:",
+		expSuccess: false,
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
 			c, err := NewConfig(filepath.Join("testdata", tc.configFile))
