@@ -47,12 +47,11 @@ repos:
 ci:
   skip:
     - golangci-lint
-  ci:
-    autofix_commit_msg: |
-      ci(pre-commit): Auto fixes from hooks
+  autofix_commit_msg: |
+    ci(pre-commit): Auto fixes from hooks
 
-      For more information, see https://pre-commit.com and https://pre-commit.ci.
-    autoupdate_commit_msg: |
-      ci(pre-commit): Auto update hook revs
+    For more information, see https://pre-commit.com and https://pre-commit.ci.
+  autoupdate_commit_msg: |
+    ci(pre-commit): Auto update hook revs
 
-      For more information, see https://pre-commit.com and https://pre-commit.ci.
+    For more information, see https://pre-commit.com and https://pre-commit.ci.
