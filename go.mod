@@ -29,7 +29,7 @@ require (
 
 require (
 	github.com/aws/aws-sdk-go-v2/config v1.18.8
-	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.24.0
+	github.com/aws/aws-sdk-go-v2/service/cloudwatch v1.25.0
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/emicklei/go-restful/v3 v3.10.1 // indirect
 	github.com/go-logr/logr v1.2.3 // indirect
