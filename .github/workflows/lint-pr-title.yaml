@@ -1,9 +1,9 @@
 name: Lint PR Title
 
 #
-# Ensure that PR title matches the Conventional Commits spec.
+# Ensures that PR title matches the Conventional Commits spec.
 #
-# - <https://github.com/amannn/action-semantic-pull-request>
+# - https://github.com/amannn/action-semantic-pull-request
 #
 
 on:
