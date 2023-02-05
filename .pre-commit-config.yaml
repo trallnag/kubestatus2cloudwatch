@@ -46,12 +46,14 @@ repos:
 
 ci:
   skip:
+    # Why is golangci-lint being skipped? It is already run as part of the
+    # lint job in the general ci workflow. So we can spare the effort here.
     - golangci-lint
   autofix_commit_msg: |
-    ci(pre-commit): Auto fixes from hooks
+    ci(pre-commit): Apply hook auto fixes
 
     For more information, see <https://pre-commit.com> and <https://pre-commit.ci>.
   autoupdate_commit_msg: |
-    ci(pre-commit): Auto update hook revs
+    ci(pre-commit): Apply hook rev updates
 
     For more information, see <https://pre-commit.com> and <https://pre-commit.ci>.
