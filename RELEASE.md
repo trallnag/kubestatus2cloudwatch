@@ -4,27 +4,28 @@ This document describes the release process and is targeted at maintainers.
 
 ## Preparation
 
-Start by picking a name for the new release. It must follow
-[Semantic Versioning](https://semver.org).
+Pick a name for the new release. It must follow
+[Semantic Versioning](https://semver.org). For example `1.2.0` or `5.10.7`.
+
+```
+VERSION=1.0.1
+```
 
 Make sure that the "Unreleased" section in the [changelog](CHANGELOG.md) is
-up-to-date. Feel free to adjust entries.
+up-to-date. Feel free to adjust entries for example by adding additional
+examples or highlighting breaking changes.
 
 Move the content of the "Unreleased" section that will be included in the new
-release to a new section with an appropiate title for the release. Should the
+release to a new section with an appropriate title for the release. Should the
 "Unreleased" section now be empty, add "Nothing." to it.
 
 ## Trigger
 
-Commit the changes. Remember to sign the commit.
+Stage and commit the changes. Remember to sign the commit.
 
 ```
+git add CHANGELOG.md src/*/__init__.py pyproject.toml
 git commit -S -m "chore: Prepare release v$VERSION"
-```
-
-Ensure that the commit is signed.
-
-```
 git log --show-signature -1
 ```
 
@@ -32,22 +33,24 @@ Tag the commit with an annotated and signed tag.
 
 ```
 git tag -s v$VERSION -m ""
-```
-
-Ensure that the tag is signed.
-
-```
 git show v$VERSION
 ```
 
-Push changes, but not the tag.
+Make sure that the tree looks good.
 
 ```
-git push
+git log --graph --oneline --all -n 5
 ```
 
-Check workflow runs in GitHub Actions and ensure everything is fine. Now push
-the tag itself.
+Push changes on the master branch.
+
+```
+git push origin master
+```
+
+Check workflow runs in GitHub Actions and ensure everything is fine.
+
+Now push the tag itself.
 
 ```
 git push origin v$VERSION

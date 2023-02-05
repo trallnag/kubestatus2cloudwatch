@@ -1,53 +1,48 @@
-# Contributing <!-- omit in toc -->
+# Contributing
 
 Thank you for your interest in improving this project. Your contributions are
 appreciated.
 
-In the following you can find a collection of frequently asked questions and
-hopefully good answers.
+This document is a guide to help you through the process of contributing.
 
-- [How to setup local dev environment?](#how-to-setup-local-dev-environment)
+## Become a contributor
 
-Also consider taking a look at the development documentation at
-[`docs/devel`](docs/devel).
+You can contribute in several ways. Here are some examples:
 
-## How to setup local dev environment?
+- Contribute to the codebase.
+- Report and triage bugs.
+- Write documentation for users and devs.
+- Help others by answering questions.
 
-### Pre-commit <!-- omit in toc -->
+For more ways to contribute, check out the
+[Open Source Guides](https://opensource.guide/how-to-contribute).
 
-Tool written in Python used for maintaining Git hooks.
+## Submit changes
 
-- <https://pre-commit.com/>
+If you have a trivial fix or improvement, go ahead and create a pull request.
 
-Whenever this repository is initially cloned, execute:
+If you plan something more involved, first raise an issue to discuss.
 
-```
-pre-commit install --install-hooks
-pre-commit install --install-hooks --hook-type commit-msg
-```
+Should you wish to work on an issue, please claim it first by commenting on it.
 
-Pre-commit should now run on every commit.
+When submitting changes, respect the following guidelines:
 
-Note that Go must be installed for some hooks to work properly.
+- Branch from the master branch and, if needed, rebase to the master branch
+  before submitting your pull request.
+- Update [`CHANGELOG.md`](CHANGELOG.md) if the contribution is relevant for the
+  changelog according to the
+  [Keep a Changelog](https://keepachangelog.com/en/1.1.0) specification.
+- Ensure that your code has an appropriate set of tests which all pass.
+- Ensure that your code adheres to the existing style in the code to which you
+  are contributing.
+- Title your pull request following
+  [Conventional Commits](https://www.conventionalcommits.org/) styling.
 
-Read [`docs/devel/pre-commit.md`](docs/devel/pre-commit.md) for more.
+## Where to go from here?
 
-### Taskfile <!-- omit in toc -->
+There are several other documents to check out:
 
-Like Make but for tasks instead of builds. Written in Go.
+- Consult [`DEVELOPMENT.md`](DEVELOPMENT.md) for guidance regarding development.
+- Read [`RELEASE.md`](RELEASE.md) for details about the release process.
 
-- <https://taskfile.dev/>
-
-It can be installed with Homebrew (other options are available as well).
-
-```
-brew install go-task/tap/go-task
-```
-
-Read [`docs/devel/taskfile.md`](docs/devel/taskfile.md) for more.
-
-### Local Config <!-- omit in toc -->
-
-Place `config.yaml` in the root of this repository. It is already listed in
-`.gitignore` and so Git will ignore it. Consider setting `logging.pretty=true`
-for human-friendly logs.
+If some things are unclear, feel free to reach out via GitHub Discussions.
