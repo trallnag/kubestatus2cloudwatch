@@ -25,6 +25,9 @@ While pre-commit is used in GitHub Actions, there is no explicit job or workflow
 where pre-commit is executed. This happens through https://pre-commit.ci a
 GitHub App called [pre-commit ci](https://github.com/marketplace/pre-commit-ci).
 
+Configuration for this is done in the repository owner's settings and the
+https://pre-commit.ci web user interface.
+
 ## Housekeeping
 
 ### Update hooks
