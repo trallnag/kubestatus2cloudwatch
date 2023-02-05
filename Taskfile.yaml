@@ -6,14 +6,24 @@ vars:
   OCI_REG: "{{ default `docker.io/trallnag` .OCI_REG }}"
 
 tasks:
-  lint:
-    desc: Lint code.
+  default:
+    - task: fmt
+    - task: lint
+    - task: test
+
+  fmt:
+    desc: Run formatters.
     cmds:
       - gofmt -w .
+      - pre-commit run -a mdformat
+
+  lint:
+    desc: Run linters.
+    cmds:
       - golangci-lint run
 
   test:
-    desc: Test code.
+    desc: Run tests.
     cmds:
       - go test -v -race -covermode=atomic -coverprofile=coverage.out
 
@@ -31,7 +41,7 @@ tasks:
       VERSION: "{{ default .VERSION nil }}"
 
   build-buildx:
-    desc: Build and push Docker images for multiple platforms using Buildx.
+    desc: Build and push Docker images.
     cmds:
       - >-
         docker buildx build --push
@@ -46,7 +56,7 @@ tasks:
       VERSION: "{{ or .VERSION (fail `VERSION required`)}}"
 
   extract-notes:
-    desc: Extract notes for the latest release from a changelog file.
+    desc: Extract notes for latest release.
     cmds:
       - mkdir -p tmp
       - scripts/extract-notes.py --input CHANGELOG.md --output tmp/release.md
