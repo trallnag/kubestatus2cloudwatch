@@ -24,7 +24,7 @@ release to a new section with an appropriate title for the release. Should the
 Stage and commit the changes. Remember to sign the commit.
 
 ```
-git add CHANGELOG.md src/*/__init__.py pyproject.toml
+git add CHANGELOG.md
 git commit -S -m "chore: Prepare release v$VERSION"
 git log --show-signature -1
 ```
@@ -68,5 +68,7 @@ Docker Hub
 Go to the release page of this project on GitHub
 [here](https://github.com/trallnag/kubestatus2cloudwatch/releases) and review
 the automatically created release draft.
+
+Set the release title to `$VERSION / $DATE`. For example "1.0.0 / 2023-01-01".
 
 Publish the draft.
