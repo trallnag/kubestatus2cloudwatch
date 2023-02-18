@@ -52,6 +52,15 @@ Read [`devel/task.md`](devel/task.md) for more info.
 
 ## Local Config
 
-Place `config.yaml` in the root of this repository. It is already listed in
-`.gitignore` and so Git will ignore it. Consider setting `logging.pretty=true`
-for human-friendly logs.
+The local configuration is used for everything that goes beyond plain unit
+tests. For example if you want to run the code against a Kubernetes cluster and
+an AWS account.
+
+Example configurations are located in the [`assets`](assets) directory.
+
+- [`config-example.yaml`](assets/config-example.yaml)
+- [`config-minimal.yaml`](assets/config-minimal.yaml)
+
+Duplicate one of these files and place it as `config.yaml` in the root of this
+repository. It is already listed in `.gitignore` and so Git will ignore it.
+Consider setting `logging.pretty=true` for human-friendly logs.
