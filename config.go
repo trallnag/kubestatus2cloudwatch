@@ -20,12 +20,16 @@ type Metric struct {
 	Dimensions []Dimension `yaml:"dimensions"`
 }
 
-const KindDaemonSet = "DaemonSet"
-const KindDeployment = "Deployment"
-const KindStatefulSet = "StatefulSet"
+const (
+	KindDaemonSet   = "DaemonSet"
+	KindDeployment  = "Deployment"
+	KindStatefulSet = "StatefulSet"
+)
 
-const ModeAllOfThem = "AllOfThem"
-const ModeAtLeastOne = "AtLeastOne"
+const (
+	ModeAllOfThem  = "AllOfThem"
+	ModeAtLeastOne = "AtLeastOne"
+)
 
 // Target is a single Kubernetes target to scan.
 type Target struct {

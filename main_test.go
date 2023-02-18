@@ -122,16 +122,17 @@ func TestPerformScan(t *testing.T) {
 		expScanReady:     false,
 	}, {
 		name: "5_daemonset_success_ready",
-		objects: []runtime.Object{&appsv1.DaemonSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "Foo",
-				Name:      "Baz",
+		objects: []runtime.Object{
+			&appsv1.DaemonSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "Foo",
+					Name:      "Baz",
+				},
+				Status: appsv1.DaemonSetStatus{
+					DesiredNumberScheduled: 1,
+					NumberReady:            1,
+				},
 			},
-			Status: appsv1.DaemonSetStatus{
-				DesiredNumberScheduled: 1,
-				NumberReady:            1,
-			},
-		},
 		},
 		targets: []Target{
 			{KindDaemonSet, "Foo", "Baz", ModeAllOfThem},
@@ -142,16 +143,17 @@ func TestPerformScan(t *testing.T) {
 		expScanReady:     true,
 	}, {
 		name: "6_deployment_success_ready",
-		objects: []runtime.Object{&appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "Foo",
-				Name:      "Baz",
+		objects: []runtime.Object{
+			&appsv1.Deployment{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "Foo",
+					Name:      "Baz",
+				},
+				Status: appsv1.DeploymentStatus{
+					Replicas:      1,
+					ReadyReplicas: 1,
+				},
 			},
-			Status: appsv1.DeploymentStatus{
-				Replicas:      1,
-				ReadyReplicas: 1,
-			},
-		},
 		},
 		targets: []Target{
 			{KindDeployment, "Foo", "Baz", ModeAllOfThem},
@@ -162,16 +164,17 @@ func TestPerformScan(t *testing.T) {
 		expScanReady:     true,
 	}, {
 		name: "7_statefulset_success_ready",
-		objects: []runtime.Object{&appsv1.StatefulSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "Foo",
-				Name:      "Baz",
+		objects: []runtime.Object{
+			&appsv1.StatefulSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "Foo",
+					Name:      "Baz",
+				},
+				Status: appsv1.StatefulSetStatus{
+					Replicas:      1,
+					ReadyReplicas: 1,
+				},
 			},
-			Status: appsv1.StatefulSetStatus{
-				Replicas:      1,
-				ReadyReplicas: 1,
-			},
-		},
 		},
 		targets: []Target{
 			{KindStatefulSet, "Foo", "Baz", ModeAllOfThem},
@@ -182,16 +185,17 @@ func TestPerformScan(t *testing.T) {
 		expScanReady:     true,
 	}, {
 		name: "8_statefulset_success_not_ready",
-		objects: []runtime.Object{&appsv1.StatefulSet{
-			ObjectMeta: metav1.ObjectMeta{
-				Namespace: "Foo",
-				Name:      "Baz",
+		objects: []runtime.Object{
+			&appsv1.StatefulSet{
+				ObjectMeta: metav1.ObjectMeta{
+					Namespace: "Foo",
+					Name:      "Baz",
+				},
+				Status: appsv1.StatefulSetStatus{
+					Replicas:      5,
+					ReadyReplicas: 1,
+				},
 			},
-			Status: appsv1.StatefulSetStatus{
-				Replicas:      5,
-				ReadyReplicas: 1,
-			},
-		},
 		},
 		targets: []Target{
 			{KindStatefulSet, "Foo", "Baz", ModeAllOfThem},
