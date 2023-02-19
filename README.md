@@ -1,10 +1,10 @@
-![status](https://img.shields.io/badge/status-active-brightgreen)
+[![status](https://img.shields.io/badge/status-active-brightgreen)](#project-status)
 [![build](https://img.shields.io/github/actions/workflow/status/trallnag/kubestatus2cloudwatch/ci.yaml?branch=master)](https://github.com/trallnag/kubestatus2cloudwatch/actions)
 [![codecov](https://codecov.io/gh/trallnag/kubestatus2cloudwatch/branch/master/graph/badge.svg?token=DBT93R547B)](https://codecov.io/gh/trallnag/kubestatus2cloudwatch)
 [![release](https://img.shields.io/github/v/release/trallnag/kubestatus2cloudwatch)](https://github.com/trallnag/kubestatus2cloudwatch/releases)
 [![docker pulls](https://img.shields.io/docker/pulls/trallnag/kubestatus2cloudwatch)](https://hub.docker.com/r/trallnag/kubestatus2cloudwatch)
 
-# KubeStatus2CloudWatch
+# KubeStatus2CloudWatch <!-- omit from toc -->
 
 Small app written in Go that continuously watches the status of certain
 resources in a Kubernetes cluster, aggregates these into a single value, and
@@ -13,6 +13,16 @@ uses that to update a metric in Amazon CloudWatch.
 The metric will have the value 1 if all targets are health, the value 0 if at
 least one target is unhealthy (according to the configuration), and missing data
 if KubeStatus2CloudWatch is unhealthy / down.
+
+## Table of Contents <!-- omit from toc -->
+
+- [Motivation](#motivation)
+- [Use Case](#use-case)
+- [Getting Started](#getting-started)
+- [Configuration](#configuration)
+- [Project Status](#project-status)
+- [Licensing](#licensing)
+- [Links](#links)
 
 ## Motivation
 
@@ -247,8 +257,23 @@ configuration.
 As a supplement the corresponding JSON schema at
 [`assets/config.schema.json`](assets/config.schema.json) can be used as well.
 
+## Project Status
+
+The project is maintained by me, [trallnag](https://github.com/trallnag), and I
+am interested in keeping it alive as I am using it in production. I also don't
+mind developing it further as I like working with Go.
+
+Contributions are welcome, see [`CONTRIBUTING.md`](CONTRIBUTING.md) for more.
+
+## Licensing
+
+This project is licensed under the MIT License, see [`LICENSE`](LICENSE).
+
 ## Links
 
-- CodeCov: https://app.codecov.io/gh/trallnag/kubestatus2cloudwatch
-- Docker Hub: https://hub.docker.com/r/trallnag/kubestatus2cloudwatch
-- Pre-commit: https://results.pre-commit.ci/repo/github/582991925
+- CodeCov:
+  [app.codecov.io/gh/trallnag/kubestatus2cloudwatch](https://app.codecov.io/gh/trallnag/kubestatus2cloudwatch)
+- Docker Hub:
+  [hub.docker.com/r/trallnag/kubestatus2cloudwatch](https://hub.docker.com/r/trallnag/kubestatus2cloudwatch)
+- Pre-commit:
+  [results.pre-commit.ci/repo/github/582991925](https://results.pre-commit.ci/repo/github/582991925)
