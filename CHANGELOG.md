@@ -7,11 +7,15 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0),
 
 ## Unreleased
 
+Nothing.
+
+## [1.1.2](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.1...v1.1.2) / 2023-02-20
+
 ### Changed
 
 - Updated direct and indirect dependencies.
 - Switched from MIT license to functionally equivalent ISC license.
-- Remove Darwin and Windows binaries from GitHub release artifacts.
+- Removed Darwin and Windows binaries from GitHub release artifacts.
 
 ## [1.1.1](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.0...v1.1.1) / 2023-02-05
 
