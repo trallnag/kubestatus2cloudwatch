@@ -55,12 +55,12 @@ version = args.version
 # Supported platforms.
 Platform = namedtuple("Platform", ["os", "arch"])
 platforms = [
-    Platform("darwin", "amd64"),
-    Platform("darwin", "arm64"),
+    # Platform("darwin", "amd64"),
+    # Platform("darwin", "arm64"),
     Platform("linux", "amd64"),
     Platform("linux", "arm64"),
-    Platform("windows", "amd64"),
-    Platform("windows", "arm64"),
+    # Platform("windows", "amd64"),
+    # Platform("windows", "arm64"),
 ]
 
 # Delete and recreate dist dir.
