@@ -4,8 +4,8 @@ Used for maintaining Git hooks. Must be installed globally on the respective
 system. As it is written in Python, for example
 [`pipx`](https://github.com/pypa/pipx) can be used to install it.
 
-- <https://pre-commit.com>
-- <https://github.com/pre-commit/pre-commit>
+- [pre-commit.com](https://pre-commit.com)
+- [github.com/pre-commit/pre-commit](https://github.com/pre-commit/pre-commit)
 
 Whenever this repository is initially cloned, the following should be executed:
 

@@ -3,8 +3,8 @@
 Task is a task runner / build tool that aims to be simpler and easier to use
 than, for example, GNU Make.
 
-- <https://taskfile.dev>
-- <https://github.com/go-task/task>
+- [taskfile.dev](https://taskfile.dev)
+- [github.com/go-task/task](https://github.com/go-task/task)
 
 Having Task installed is not a hard-requirement for developing. It is mainly
 used to collect common scripts / commands.
