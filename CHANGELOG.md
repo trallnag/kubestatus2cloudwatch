@@ -9,6 +9,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0),
 
 ### Changed
 
+- Switched from MIT license to functionally equivalent ISC license.
 - Updated direct and indirect dependencies.
 
 ## [1.1.1](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.0...v1.1.1) / 2023-02-05
