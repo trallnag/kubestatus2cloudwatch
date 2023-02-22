@@ -267,10 +267,11 @@ Contributions are welcome, see [`CONTRIBUTING.md`](CONTRIBUTING.md) for more.
 
 ## Licensing
 
-This project is licensed under the permissive
-[ISC license](https://choosealicense.com/licenses/isc), see
-[`LICENSE`](LICENSE). The ISC license is functionally equivalent to the BSD
-2-Clause and MIT licenses, removing some language that is no longer necessary.
+The default license for this project is the
+[ISC License](https://choosealicense.com/licenses/isc). A permissive license
+functionally equivalent to the BSD 2-Clause and MIT licenses, removing some
+language that is no longer necessary. See [`LICENSE`](LICENSE) for the license
+text.
 
 ## Links
 
