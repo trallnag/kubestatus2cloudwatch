@@ -61,7 +61,7 @@ container images, and draft a GitHub release.
 
 ## Wrap Up
 
-Ensure that the new set of images has been pushed to projects repository on
+Ensure that the new set of images has been pushed to project's repository on
 Docker Hub
 [here](https://hub.docker.com/repository/docker/trallnag/kubestatus2cloudwatch).
 
