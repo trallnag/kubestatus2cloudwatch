@@ -7,6 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ## Unreleased
 
+Nothing.
+
+## [1.1.3](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.2...v1.1.3) / 2023-03-05
+
 ### Changed
 
 - Bumped minimum required Go version to 1.20. This affects release artifacts.
