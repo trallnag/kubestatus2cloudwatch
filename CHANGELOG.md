@@ -11,12 +11,13 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 - Bumped minimum required Go version to 1.20. This affects release artifacts.
 - Switched from ISC License (ISC) to Apache License (Apache-2.0).
+- Upgraded direct and indirect dependencies.
 
 ## [1.1.2](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.1...v1.1.2) / 2023-02-20
 
 ### Changed
 
-- Updated direct and indirect dependencies.
+- Upgraded direct and indirect dependencies.
 - Switched from MIT license to functionally equivalent ISC license.
 - Removed Darwin and Windows binaries from GitHub release artifacts.
 
@@ -24,7 +25,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ### Changed
 
-- Updated indirect dependencies.
+- Upgraded indirect dependencies.
 
 ## [1.1.0](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.0.0...v1.1.0) / 2023-01-07
 
@@ -35,7 +36,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ### Changed
 
-- Updated indirect dependencies.
+- Upgraded indirect dependencies.
 
 ### Fixed
 
