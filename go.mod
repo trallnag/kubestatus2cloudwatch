@@ -3,7 +3,7 @@ module github.com/trallnag/kubestatus2cloudwatch
 go 1.20
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.17.5
+	github.com/aws/aws-sdk-go-v2 v1.17.6
 	github.com/rs/zerolog v1.29.0
 	k8s.io/apimachinery v0.26.2
 	k8s.io/client-go v0.26.2
