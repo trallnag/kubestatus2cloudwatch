@@ -50,15 +50,8 @@ repos:
       - id: gofumpt
 
 ci:
+  autofix_commit_msg: "build(pre-commit): Apply hook auto fixes"
+  autoupdate_commit_msg: "build(pre-commit): Apply hook rev updates"
   skip:
-    # Why is golangci-lint being skipped? It is already run as part of the
-    # lint job in the general ci workflow. So we can spare the effort here.
+    # Already run as part of the lint job in the general ci workflow.
     - golangci-lint
-  autofix_commit_msg: |
-    ci(pre-commit): Apply hook auto fixes
-
-    For more information, see <https://pre-commit.com> and <https://pre-commit.ci>.
-  autoupdate_commit_msg: |
-    ci(pre-commit): Apply hook rev updates
-
-    For more information, see <https://pre-commit.com> and <https://pre-commit.ci>.
