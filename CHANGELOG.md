@@ -9,6 +9,12 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 Nothing.
 
+## [1.1.4](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.3...v1.1.4) / 2023-03-25
+
+### Changed
+
+- Upgraded direct and indirect dependencies.
+
 ## [1.1.3](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.2...v1.1.3) / 2023-03-05
 
 ### Changed
