@@ -69,6 +69,4 @@ Go to the release page of this project on GitHub
 [here](https://github.com/trallnag/kubestatus2cloudwatch/releases) and review
 the automatically created release draft.
 
-Set the release title to `$VERSION / $DATE`. For example "1.0.0 / 2023-01-01".
-
 Publish the draft.

@@ -19,7 +19,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Install Task
+      - name: Set up Task
         uses: arduino/setup-task@v1
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
@@ -28,6 +28,14 @@ jobs:
         uses: actions/setup-go@v4
         with:
           go-version-file: go.mod
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.x"
+
+      - name: Install mdformat
+        run: pip install mdformat
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
@@ -38,31 +46,31 @@ jobs:
           username: trallnag
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Extract release version
-        run: echo "VERSION=${GITHUB_REF#refs/*/}" | sed 's/N=v/N=/g' >> $GITHUB_ENV
+      - name: Determine release version
+        run: |
+          release_version=$(echo "${GITHUB_REF#refs/*/}" | cut -c 2-)
+          echo "RELEASE_VERSION=$release_version" >> $GITHUB_ENV
+
+      - name: Determine release name
+        run: |
+          release_name="${{ env.RELEASE_VERSION }} / $(date +%Y-%m-%d)"
+          echo "RELEASE_NAME=$release_name" >> $GITHUB_ENV
 
       - name: Extract release notes
         run: task extract-notes
 
       - name: Build distribution
-        run: task build-dist VERSION=${{ env.VERSION }}
+        run: task build-dist VERSION=${{ env.RELEASE_VERSION }}
 
       - name: Build & push images
-        run: task build-buildx VERSION=${{ env.VERSION }} LATEST=true
-
-      - name: Determine GitHub release name
-        run: |
-          version=$(echo "${GITHUB_REF#refs/*/}" | cut -c 2-)
-          current_date=$(date +%Y-%m-%d)
-          release_name="$version / $current_date"
-          echo "release_name=$release_name" >> $GITHUB_OUTPUT
+        run: task build-buildx VERSION=${{ env.RELEASE_VERSION }} LATEST=true
 
       - name: Create GitHub release
         uses: softprops/action-gh-release@v1
         with:
-          name: ${{ steps.vars.outputs.release_name }}
-          draft: true
+          name: ${{ env.RELEASE_NAME }}
           body_path: tmp/release.md
+          draft: true
           files: |
             dist/sha256sums.txt
             dist/*.tar.gz
