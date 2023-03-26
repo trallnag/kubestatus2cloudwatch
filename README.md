@@ -10,7 +10,7 @@ Small app written in Go that continuously watches the status of certain
 resources in a Kubernetes cluster, aggregates these into a single value, and
 uses that to update a metric in Amazon CloudWatch.
 
-The metric will have the value 1 if all targets are health, the value 0 if at
+The metric will have the value 1 if all targets are healthy, the value 0 if at
 least one target is unhealthy (according to the configuration), and missing data
 if KubeStatus2CloudWatch is unhealthy / down.
 
