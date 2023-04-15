@@ -55,7 +55,7 @@ repos:
       - id: gofumpt
 
 ci:
-  autofix_commit_msg: "build(pre-commit): Apply hook auto fixes"
+  autofix_commit_msg: "refactor(pre-commit): Apply hook auto fixes"
   autoupdate_commit_msg: "build(pre-commit): Apply hook rev updates"
   skip:
     # Already run as part of the lint job in the general ci workflow.
