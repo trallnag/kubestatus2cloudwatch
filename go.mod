@@ -5,7 +5,7 @@ go 1.20
 require (
 	github.com/aws/aws-sdk-go-v2 v1.17.7
 	github.com/rs/zerolog v1.29.0
-	k8s.io/apimachinery v0.26.3
+	k8s.io/apimachinery v0.27.1
 	k8s.io/client-go v0.26.3
 )
 
@@ -26,6 +26,7 @@ require (
 	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mattn/go-isatty v0.0.18 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/rogpeppe/go-internal v1.10.0 // indirect
 )
 
 require (
