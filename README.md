@@ -1,8 +1,7 @@
 [![status](https://img.shields.io/badge/status-active-brightgreen)](#project-status)
-[![build](https://img.shields.io/github/actions/workflow/status/trallnag/kubestatus2cloudwatch/ci.yaml?branch=master)](https://github.com/trallnag/kubestatus2cloudwatch/actions)
-[![codecov](https://codecov.io/gh/trallnag/kubestatus2cloudwatch/branch/master/graph/badge.svg?token=DBT93R547B)](https://codecov.io/gh/trallnag/kubestatus2cloudwatch)
 [![release](https://img.shields.io/github/v/release/trallnag/kubestatus2cloudwatch)](https://github.com/trallnag/kubestatus2cloudwatch/releases)
 [![docker pulls](https://img.shields.io/docker/pulls/trallnag/kubestatus2cloudwatch)](https://hub.docker.com/r/trallnag/kubestatus2cloudwatch)
+[![codecov](https://codecov.io/gh/trallnag/kubestatus2cloudwatch/branch/master/graph/badge.svg?token=DBT93R547B)](https://codecov.io/gh/trallnag/kubestatus2cloudwatch)
 
 # KubeStatus2CloudWatch <!-- omit from toc -->
 
@@ -21,6 +20,7 @@ if KubeStatus2CloudWatch is unhealthy / down.
 - [Getting Started](#getting-started)
 - [Configuration](#configuration)
 - [Project Status](#project-status)
+- [Contributing](#contributing)
 - [Licensing](#licensing)
 - [Links](#links)
 
@@ -29,7 +29,7 @@ if KubeStatus2CloudWatch is unhealthy / down.
 Lately I've been using Amazon EKS for running and orchestrating containerized
 workloads. To monitor the clusters and the workloads within them the popular
 tools Prometheus, Grafana, and friends are used. They are hosted within the
-clusters and they will notify me and my team if an alert fires.
+clusters and they will notify my team and me if an alert fires.
 
 But what if the observability system itself goes down? We won't get any
 notification in that case. And since it is all self-hosted and self-contained
@@ -138,7 +138,7 @@ The **inline policy** should look like this:
 }
 ```
 
-Within Kubernetes, the required **service account** references the IAM role:
+Within Kubernetes, the required **Service Account** references the IAM role:
 
 ```yaml
 apiVersion: v1
@@ -153,7 +153,7 @@ metadata:
     eks.amazonaws.com/sts-regional-endpoints: "true"
 ```
 
-But a **role** is also required:
+But a **Role** is also required:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -169,7 +169,7 @@ rules:
     verbs: [get]
 ```
 
-A **role binding** is used to associate the role with the service account:
+A **Role Binding** is used to associate the Role with the Service Account:
 
 ```yaml
 apiVersion: rbac.authorization.k8s.io/v1
@@ -189,7 +189,7 @@ subjects:
     namespace: "${KUBE_NAMESPACE}"
 ```
 
-To provide the configuration file to KubeStatus2CloudWatch, a **config map** is
+To provide the configuration file to KubeStatus2CloudWatch, a **Config Map** is
 used:
 
 ```yaml
@@ -205,7 +205,7 @@ data:
     ...
 ```
 
-Now finish it up by creating the **deployment**:
+Now finish it up by creating the **Deployment**:
 
 ```yaml
 apiVersion: apps/v1
@@ -240,7 +240,8 @@ spec:
             name: kubestatus2cloudwatch
 ```
 
-Check the pod logs and the CloudWatch metric to see if things work as expected.
+Check the container logs and the CloudWatch metric to see if things work as
+expected.
 
 ## Configuration
 
@@ -260,10 +261,16 @@ As a supplement the corresponding JSON schema at
 ## Project Status
 
 The project is maintained by me, [trallnag](https://github.com/trallnag), and I
-am interested in keeping it alive as I am using it in production. I also don't
-mind developing it further as I like working with Go.
+am interested in keeping it alive as my colleagues and I are using it in
+production. I also don't mind developing it further as I like working with Go.
 
-Contributions are welcome, see [`CONTRIBUTING.md`](CONTRIBUTING.md) for more.
+## Contributing
+
+Contributions are welcome. Please refer to [`CONTRIBUTING.md`](CONTRIBUTING).
+
+Consult [`DEVELOPMENT.md`](DEVELOPMENT.md) for guidance regarding development.
+
+Read [`RELEASE.md`](RELEASE.md) for details about the release process.
 
 ## Licensing
 

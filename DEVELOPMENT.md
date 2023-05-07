@@ -39,16 +39,20 @@ pre-commit run -a
 
 Read [`devel/pre-commit.md`](devel/pre-commit.md) for more info.
 
+### Taskfile
+
+Ensure that [Task](https://taskfile.dev) is installed. It is used to wrap common
+commands abd Can be compared to Make and its phony targets.
+
+Read [`devel/task.md`](devel/task.md) for more info.
+
 ### Running Tests
 
-Ensure that [Task](https://taskfile.dev) is installed. Run tests to make sure
-everything is setup correctly:
+Run tests to make sure everything is setup correctly:
 
 ```sh
 task test
 ```
-
-Read [`devel/task.md`](devel/task.md) for more info.
 
 ## Local Config
 

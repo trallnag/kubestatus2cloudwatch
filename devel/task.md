@@ -9,9 +9,9 @@ than, for example, GNU Make.
 Having Task installed is not a hard-requirement for developing. It is mainly
 used to collect common scripts / commands.
 
-It can be installed Homebrew (other options are available as well).
+One way to install it is using Homebrew:
 
-```
+```shell
 brew install go-task
 ```
 
@@ -25,12 +25,12 @@ just called from Task.
 
 ### List tasks
 
-```
+```shell
 task --list
 ```
 
 ### Run task
 
-```
-task <task>
+```shell
+task $task
 ```
