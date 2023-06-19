@@ -34,18 +34,18 @@ repos:
         args: [--wrap=80]
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.6.0
+    rev: v0.8.1
     hooks:
       - id: markdownlint-cli2
 
   - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v3.0.0-alpha.6
+    rev: v3.0.0-alpha.9-for-vscode
     hooks:
       - id: prettier
         types_or: [json, yaml]
 
   - repo: https://github.com/golangci/golangci-lint
-    rev: v1.52.2
+    rev: v1.53.3
     hooks:
       - id: golangci-lint
 
