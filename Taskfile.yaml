@@ -31,12 +31,8 @@ tasks:
     desc: Build distribution for multiple platforms.
     cmds:
       - >-
-        scripts/build-dist.py
-        --name={{ .APP_NAME }}
-        --dir={{ .DIST_DIR }}
-        {{ if .VERSION -}}
-        --version={{ .VERSION }}
-        {{ end }}
+        scripts/build-dist.py --name={{ .APP_NAME }} --dir={{ .DIST_DIR }} {{ if
+        .VERSION -}} --version={{ .VERSION }} {{ end }}
     vars:
       VERSION: "{{ default .VERSION nil }}"
 
@@ -44,13 +40,9 @@ tasks:
     desc: Build and push Docker images.
     cmds:
       - >-
-        docker buildx build --push
-        --platform linux/amd64,linux/arm64
-        --tag={{ .OCI_REG }}/{{ .APP_NAME }}:{{ .VERSION }}
-        {{ if .LATEST -}}
-        --tag={{ .OCI_REG }}/{{ .APP_NAME }}:latest
-        {{ end -}}
-        .
+        docker buildx build --push --platform linux/amd64,linux/arm64 --tag={{
+        .OCI_REG }}/{{ .APP_NAME }}:{{ .VERSION }} {{ if .LATEST -}} --tag={{
+        .OCI_REG }}/{{ .APP_NAME }}:latest {{ end -}} .
     vars:
       LATEST: "{{ default .LATEST nil }}"
       VERSION: "{{ or .VERSION (fail `VERSION required`)}}"
