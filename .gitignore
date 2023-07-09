@@ -2,11 +2,11 @@
 # Entries specific to this repository.
 
 
+*.dtmp
 .vscode/
+/config.yaml
 dist/
 tmp/
-/config.yaml
-*.dtmp
 
 
 # ------------------------------------------------------------------------------

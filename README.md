@@ -261,8 +261,8 @@ As a supplement the corresponding JSON schema at
 ## Project Status
 
 The project is maintained by me, [trallnag](https://github.com/trallnag), and I
-am interested in keeping it alive as my colleagues and I are using it in
-production. I also don't mind developing it further as I like working with Go.
+am interested in keeping it alive as my colleagues and I use it in production. I
+also don't mind developing it further as I like working with Go.
 
 ## Contributing
 
