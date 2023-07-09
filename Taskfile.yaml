@@ -11,6 +11,17 @@ tasks:
     - task: lint
     - task: test
 
+  init:
+    desc: Init environment.
+    cmds:
+      - pre-commit install --install-hooks
+      - pre-commit install --install-hooks --hook-type commit-msg
+
+  update:
+    desc: Update environment.
+    cmds:
+      - pre-commit autoupdate
+
   fmt:
     desc: Run formatters.
     cmds:
