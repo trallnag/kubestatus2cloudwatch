@@ -7,6 +7,7 @@ vars:
 
 tasks:
   default:
+    - task: init
     - task: fmt
     - task: lint
     - task: test
@@ -26,7 +27,7 @@ tasks:
     desc: Run formatters.
     cmds:
       - gofmt -w .
-      - pre-commit run -a mdformat
+      - pre-commit run -a prettier
 
   lint:
     desc: Run linters.
@@ -56,7 +57,7 @@ tasks:
         .OCI_REG }}/{{ .APP_NAME }}:latest {{ end -}} .
     vars:
       LATEST: "{{ default .LATEST nil }}"
-      VERSION: "{{ or .VERSION (fail `VERSION required`)}}"
+      VERSION: "{{ or .VERSION (fail `VERSION required`) }}"
 
   extract-notes:
     desc: Extract notes for latest release.
