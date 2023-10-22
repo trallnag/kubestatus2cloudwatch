@@ -26,16 +26,17 @@ var version = ""
 func main() {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
+	// Handle configuration.
 	configPath, err := filepath.Abs("config.yaml")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to find config file.")
 	}
-
 	config, err := NewConfig(configPath)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create config.")
 	}
 
+	// Set up logging based on config.
 	if config.Logging.Pretty {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
@@ -69,7 +70,7 @@ func main() {
 			Msg("Failed to create Kubernetes client.")
 	}
 
-	// AWS CloudWatch setup
+	// AWS CloudWatch setup.
 	log.Info().Msg("Creating AWS config.")
 	awsConfig, err := awsconfig.LoadDefaultConfig(context.TODO())
 	if err != nil {
