@@ -3,7 +3,7 @@ module github.com/trallnag/kubestatus2cloudwatch
 go 1.22
 
 require (
-	github.com/aws/aws-sdk-go-v2 v1.25.3
+	github.com/aws/aws-sdk-go-v2 v1.26.1
 	github.com/rs/zerolog v1.32.0
 	k8s.io/apimachinery v0.29.2
 	k8s.io/client-go v0.29.2
@@ -20,7 +20,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sso v1.20.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.23.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.28.4 // indirect
-	github.com/aws/smithy-go v1.20.1 // indirect
+	github.com/aws/smithy-go v1.20.2 // indirect
 	github.com/evanphx/json-patch v5.6.0+incompatible // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
 	github.com/google/uuid v1.3.0 // indirect
