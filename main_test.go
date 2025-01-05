@@ -3,14 +3,23 @@ package main
 import (
 	"context"
 	"fmt"
+	"os"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	appsv1 "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/kubernetes/fake"
 )
+
+func TestMain(m *testing.M) {
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+	m.Run()
+}
 
 // TestIsFittingMode tests IsFittingMode.
 func TestIsFittingMode(t *testing.T) {
