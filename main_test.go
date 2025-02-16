@@ -18,6 +18,7 @@ import (
 func TestMain(m *testing.M) {
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+
 	m.Run()
 }
 
@@ -271,25 +272,28 @@ func TestPerformScan(t *testing.T) {
 				)
 			}
 
-			for i := 0; i < len(scan.Results); i++ {
+			for i := range scan.Results {
 				if scan.Results[i].Namespace != tc.targets[i].Namespace {
 					t.Errorf(
 						"Unexpected namespace for result %v: got %v, want %v",
 						i, scan.Results[i].Namespace, tc.targets[i].Namespace,
 					)
 				}
+
 				if scan.Results[i].Name != tc.targets[i].Name {
 					t.Errorf(
 						"Unexpected name for result %v: got %v, want %v",
 						i, scan.Results[i].Name, tc.targets[i].Name,
 					)
 				}
+
 				if scan.Results[i].Success != tc.expResultSuccess[i] {
 					t.Errorf(
 						"Unexpected success status for result %v: got %v, want %v",
 						i, scan.Results[i].Success, tc.expResultSuccess[i],
 					)
 				}
+
 				if scan.Results[i].Ready != tc.expResultReady[i] {
 					t.Errorf(
 						"Unexpected ready status for result %v: got %v, want %v",
@@ -314,15 +318,15 @@ type CWPutMetricDataImpl struct {
 //
 // [here]: https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/gov2/cloudwatch/CreateCustomMetric
 func (dt CWPutMetricDataImpl) PutMetricData(
-	ctx context.Context,
-	params *cloudwatch.PutMetricDataInput,
-	optFns ...func(*cloudwatch.Options),
+	_ context.Context,
+	_ *cloudwatch.PutMetricDataInput,
+	_ ...func(*cloudwatch.Options),
 ) (*cloudwatch.PutMetricDataOutput, error) {
 	if dt.returnError {
 		return &cloudwatch.PutMetricDataOutput{}, fmt.Errorf("fake error")
-	} else {
-		return &cloudwatch.PutMetricDataOutput{}, nil
 	}
+
+	return &cloudwatch.PutMetricDataOutput{}, nil
 }
 
 // TestUpdateMetric tests UpdateMetric.
@@ -362,9 +366,11 @@ func TestUpdateMetric(t *testing.T) {
 				[]Dimension{{Name: "Cluster", Value: "MyCluster"}},
 				tc.value,
 			)
+
 			if tc.expSuccess && err != nil {
 				t.Fatalf("Unexpected failure: %s", err.Error())
 			}
+
 			if !tc.expSuccess && err == nil {
 				t.Fatal("Unexpected success")
 			}
@@ -373,7 +379,7 @@ func TestUpdateMetric(t *testing.T) {
 }
 
 // TestExecuteRounds tests ExecuteRounds.
-func TestExecuteRounds(t *testing.T) {
+func TestExecuteRounds(_ *testing.T) {
 	kubeClient := fake.NewSimpleClientset()
 	cloudwatchClient := &CWPutMetricDataImpl{false}
 	ExecuteRounds(

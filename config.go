@@ -31,6 +31,8 @@ const (
 	ModeAtLeastOne = "AtLeastOne"
 )
 
+const MinSeconds = 5
+
 // Target is a single Kubernetes target to scan.
 type Target struct {
 	// Type of target. Supported: "Deployment", "StatefulSet", and "DaemonSet".
@@ -61,7 +63,7 @@ type Config struct {
 
 // NewConfig reads configuration from provided file and performs checks.
 func NewConfig(configPath string) (Config, error) {
-	c := Config{}
+	c := Config{} //nolint:exhaustruct // Config is populated later.
 
 	configFile, err := os.ReadFile(configPath)
 	if err != nil {
@@ -74,8 +76,8 @@ func NewConfig(configPath string) (Config, error) {
 	}
 
 	// Config.Seconds
-	if c.Seconds < 5 {
-		return c, fmt.Errorf("config seconds smaller than 5: %v", c.Seconds)
+	if c.Seconds < MinSeconds {
+		return c, fmt.Errorf("config seconds smaller than %v: %v", MinSeconds, c.Seconds)
 	}
 
 	// Config.Metric
@@ -91,8 +93,7 @@ func NewConfig(configPath string) (Config, error) {
 	// Config.Logging.Level
 	if c.Logging.Level == "" {
 		c.Logging.Level = "debug"
-	}
-	if !ContainsString([]string{"info", "debug"}, c.Logging.Level) {
+	} else if !ContainsString([]string{"info", "debug"}, c.Logging.Level) {
 		return c, fmt.Errorf(
 			"logging.level not supported: %s", c.Logging.Level,
 		)
@@ -117,12 +118,14 @@ func ValidateMetric(metric Metric) error {
 				"missing: metric.dimensions[%v].name", i,
 			)
 		}
+
 		if dimension.Value == "" {
 			return fmt.Errorf(
 				"missing: metric.dimensions[%v].value", i,
 			)
 		}
 	}
+
 	return nil
 }
 
@@ -131,10 +134,12 @@ func ValidateTargets(targets []Target) error {
 	if len(targets) == 0 {
 		return fmt.Errorf("missing: targets")
 	}
+
 	for i, target := range targets {
 		if target.Kind == "" {
 			return fmt.Errorf("missing: target[%v].kind", i)
 		}
+
 		allowedTargetKinds := []string{
 			KindDeployment, KindStatefulSet, KindDaemonSet,
 		}
@@ -155,6 +160,7 @@ func ValidateTargets(targets []Target) error {
 		if target.Mode == "" {
 			return fmt.Errorf("missing: target[%v].mode", i)
 		}
+
 		allowedTargetModes := []string{ModeAllOfThem, ModeAtLeastOne}
 		if !ContainsString(allowedTargetModes, target.Mode) {
 			return fmt.Errorf(
@@ -162,6 +168,7 @@ func ValidateTargets(targets []Target) error {
 			)
 		}
 	}
+
 	return nil
 }
 
@@ -171,5 +178,6 @@ func ContainsString(s []string, str string) bool {
 			return true
 		}
 	}
+
 	return false
 }

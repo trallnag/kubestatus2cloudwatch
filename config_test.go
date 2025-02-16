@@ -17,7 +17,6 @@ func TestNewConfig(t *testing.T) {
 	}{{
 		name:       "1_complete",
 		configFile: "config-complete.yaml",
-		ErrSubstr:  "",
 		expSuccess: true,
 	}, {
 		name:       "2_file_missing",
@@ -59,9 +58,11 @@ func TestNewConfig(t *testing.T) {
 			if tc.expSuccess && err != nil {
 				t.Fatalf("Unexpected failure: %s", err.Error())
 			}
+
 			if !tc.expSuccess && err == nil {
 				t.Fatal("Unexpected success.")
 			}
+
 			if !tc.expSuccess && !strings.Contains(err.Error(), tc.ErrSubstr) {
 				t.Fatalf(
 					"Error does not contain expected substring: got %q, want substring %q",

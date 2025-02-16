@@ -21,49 +21,72 @@ import (
 	"k8s.io/client-go/util/homedir"
 )
 
-var version = ""
+var (
+	date    = "unknown"
+	version = "unknown"
+	commit  = "unknown"
+)
 
 func main() {
+	if len(os.Args) > 1 && (os.Args[1] == "-v" || os.Args[1] == "--version") {
+		fmt.Printf( //nolint:forbidigo // Using `fmt.Printf` is fine here.
+			"Welcome to KubeStatus2CloudWatch.\nDate: %s\nVersion: %s\nCommit: %s\n",
+			date, version, commit,
+		)
+		os.Exit(0)
+	}
+
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 	// Handle configuration.
+
 	configPath, err := filepath.Abs("config.yaml")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to find config file.")
 	}
+
 	config, err := NewConfig(configPath)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create config.")
 	}
 
 	// Set up logging based on config.
+
 	if config.Logging.Pretty {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 	}
+
 	if config.Logging.Level == "info" {
 		zerolog.SetGlobalLevel(zerolog.InfoLevel)
 	} else {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
-	log.Info().Str("version", version).
+	log.Info().Str("date", date).Str("version", version).Str("commit", commit).
 		Msg("Welcome to KubeStatus2CloudWatch.")
 
 	// Kubernetes setup.
+
 	var kconfig *rest.Config
+
 	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
 		log.Info().Msg("Creating in-cluster Kubernetes config.")
+
 		kconfig, err = rest.InClusterConfig()
 	} else {
 		log.Info().Msg("Creating out-of-cluster Kubernetes config.")
+
 		kconfig, err = clientcmd.BuildConfigFromFlags(
 			"", filepath.Join(homedir.HomeDir(), ".kube", "config"),
 		)
 	}
+
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create Kubernetes config.")
 	}
+
 	log.Info().Msg("Creating Kubernetes client set.")
+
 	kubeClient, err := kubernetes.NewForConfig(kconfig)
 	if err != nil {
 		log.Fatal().Err(err).
@@ -71,12 +94,15 @@ func main() {
 	}
 
 	// AWS CloudWatch setup.
+
 	log.Info().Msg("Creating AWS config.")
+
 	awsConfig, err := awsconfig.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal().Err(err).
 			Msg("Failed to create AWS SDK config.")
 	}
+
 	cloudwatchClient := cloudwatch.NewFromConfig(awsConfig)
 
 	log.Info().Msg("Done with setup. Starting aggregation.")
@@ -97,8 +123,9 @@ func ExecuteRounds(
 ) {
 	tickCount := 0
 	ticker := time.NewTicker(time.Duration(seconds) * time.Second)
+
 	for ; true; <-ticker.C {
-		tickCount = tickCount + 1
+		tickCount++
 		tickStart := time.Now()
 		tickLogger := log.With().Int("tickCount", tickCount).Logger()
 		tickLogger.Info().Msg("Executing new tick round.")
@@ -119,6 +146,7 @@ func ExecuteRounds(
 
 		if single {
 			ticker.Stop()
+
 			break
 		}
 	}
@@ -186,9 +214,11 @@ type Result struct {
 //
 // Currently only resources of the kind Deployment are supported.
 func PerformScan(kubeClient kubernetes.Interface, targets []Target) Scan {
+	//nolint:exhaustruct // Field "Results" is populated later.
 	scan := Scan{Success: true, Ready: true}
 
 	for _, target := range targets {
+		//nolint:exhaustruct // Fields "Got" and "Want" are populated later.
 		result := Result{
 			Success:   true,
 			Ready:     true,
@@ -205,6 +235,7 @@ func PerformScan(kubeClient kubernetes.Interface, targets []Target) Scan {
 				Get(context.TODO(), target.Name, metav1.GetOptions{})
 			if err != nil {
 				log.Error().Err(err).Msg("Failed to query Kubernetes API.")
+
 				scan.Success, scan.Ready = false, false
 				result.Success, result.Ready = false, false
 			} else {
@@ -217,6 +248,7 @@ func PerformScan(kubeClient kubernetes.Interface, targets []Target) Scan {
 				Get(context.TODO(), target.Name, metav1.GetOptions{})
 			if err != nil {
 				log.Error().Err(err).Msg("Failed to query Kubernetes API.")
+
 				scan.Success, scan.Ready = false, false
 				result.Success, result.Ready = false, false
 			} else {
@@ -229,6 +261,7 @@ func PerformScan(kubeClient kubernetes.Interface, targets []Target) Scan {
 				Get(context.TODO(), target.Name, metav1.GetOptions{})
 			if err != nil {
 				log.Error().Err(err).Msg("Failed to query Kubernetes API.")
+
 				scan.Success, scan.Ready = false, false
 				result.Success, result.Ready = false, false
 			} else {
@@ -255,6 +288,7 @@ func PerformScan(kubeClient kubernetes.Interface, targets []Target) Scan {
 	if err != nil {
 		log.Error().Err(err).Msg("Extraordinary error.")
 	}
+
 	if scan.Success && scan.Ready {
 		log.Debug().RawJSON("scan", scanJSON).
 			Msg("Done with scan. All looking good.")
