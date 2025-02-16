@@ -10,8 +10,8 @@ name: CodeQL
 on:
   workflow_dispatch:
   schedule:
-    # At 06:01 on day-of-month 8.
-    - cron: 1 6 8 * *
+    # At 04:29 on Tuesday.
+    - cron: 29 4 * * 2
 
 jobs:
   codeql:
