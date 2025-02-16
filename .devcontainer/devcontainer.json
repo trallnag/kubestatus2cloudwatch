@@ -1,0 +1,51 @@
+{
+  "name": "kubestatus2cloudwatch",
+
+  "workspaceFolder": "/workspaces/kubestatus2cloudwatch",
+
+  "dockerComposeFile": "docker-compose.yaml",
+
+  "service": "vscode",
+
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": { "path": "/usr/bin/zsh" }
+        },
+        "go.lintTool": "golangci-lint",
+        "go.lintFlags": ["--fast"],
+        "go.alternateTools": {
+          "golangci-lint": "/home/linuxbrew/.linuxbrew/bin/golangci-lint"
+        }
+      },
+
+      "extensions": [
+        "EditorConfig.EditorConfig",
+        "Gerrnperl.outline-map",
+        "GitHub.copilot",
+        "GitHub.copilot-chat",
+        "GitHub.vscode-pull-request-github",
+        "Gruntfuggly.todo-tree",
+        "Tyriar.sort-lines",
+        "VisualStudioExptTeam.vscodeintellicode",
+        "charliermarsh.ruff",
+        "donjayamanne.githistory",
+        "github.vscode-github-actions",
+        "golang.go",
+        "mhutchie.git-graph",
+        "mkhl.shfmt",
+        "nefrob.vscode-just-syntax",
+        "redhat.vscode-yaml",
+        "tamasfe.even-better-toml",
+        "timonwong.shellcheck",
+        "tomoki1207.selectline-statusbar",
+        "waderyan.gitblame",
+        "yzhang.markdown-all-in-one"
+      ]
+    }
+  },
+
+  "postStartCommand": "just init"
+}

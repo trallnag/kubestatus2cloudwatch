@@ -1,59 +1,40 @@
 run:
   timeout: 5m
 
-linters-settings:
-  cyclop:
-    max-complexity: 20
-  gocyclo:
-    min-complexity: 20
-
 linters:
-  disable-all: true
-  enable:
-    # Enabled by default.
-    - errcheck
-    - gosimple
-    - govet
-    - ineffassign
-    - staticcheck
-    - typecheck
-    - unused
-    # Disabled by default.
-    - asasalint
-    - asciicheck
-    - bidichk
-    - bodyclose
-    - containedctx
-    - contextcheck
-    - cyclop
-    - decorder
-    - dupl
-    - durationcheck
-    - errchkjson
-    - errname
-    - errorlint
-    - execinquery
-    - exhaustive
-    - exportloopref
-    - forbidigo
-    - gochecknoglobals
-    - gochecknoinits
-    - gocyclo
-    - gosec
-    - lll
-    - maintidx
-    - makezero
-    - nestif
-    - nilerr
-    - nilnil
-    - noctx
-    - nolintlint
-    - nonamedreturns
-    - predeclared
-    - promlinter
-    - tagliatelle
-    - tenv
-    - thelper
-    - tparallel
-    - unconvert
-    - wrapcheck
+  enable-all: true
+
+  disable:
+    - depguard # No need to check for acceptable packages.
+    - tenv # Since v1.64.0 deprecated and replaced by usetesting.
+
+issues:
+  exclude-rules:
+    - {linters: [cyclop], path: "main\\.go", text: "calculated cyclomatic complexity for function PerformScan"} # Big switch statement. Core logic.
+    - {linters: [cyclop], path: "main\\.go", text: "calculated cyclomatic complexity for function main"} # Contains bunch of setup code.
+    - {linters: [err113], text: "do not define dynamic errors, use wrapped static errors instead"} # Dynamic errors are fine.
+    - {linters: [exhaustruct], text: "cloudwatch\\.PutMetricDataInput is missing fields"} # From library. Not all fields are used.
+    - {linters: [exhaustruct], text: "types\\.MetricDatum is missing fields"} # From library. Not all fields are used.
+    - {linters: [exhaustruct], text: "v1\\.GetOptions is missing fields"} # From library. Not all fields are used.
+    - {linters: [exhaustruct], text: "zerolog\\.ConsoleWriter is missing fields"} # From library. Not all fields are used.
+    - {linters: [funlen], path: "main\\.go", text: "Function 'PerformScan' is too long"} # Big switch statement. Core logic.
+    - {linters: [funlen], path: "main\\.go", text: "Function 'main' is too long"} # Contains bunch of setup code.
+    - {linters: [gochecknoglobals], path: "main\\.go", text: "commit is a global variable"} # Global variable is fine.
+    - {linters: [gochecknoglobals], path: "main\\.go", text: "date is a global variable"} # Global variable is fine.
+    - {linters: [perfsprint], text: "fmt\\.Errorf can be replaced with errors\\.New"} # Using fmt.Errorf is fine.
+    - {linters: [varnamelen], path: "config\\.go", text: "variable name 'c' is too short for the scope of its usage"} # Stands for config.
+    - {linters: [varnamelen], text: "variable name 'i' is too short for the scope of its usage"} # Common name for index.
+
+    # Relax rules for tests.
+    - path: .+_test.go
+      linters:
+        - exhaustruct
+        - funlen
+        - paralleltest
+        - varnamelen
+
+# linters-settings:
+#   cyclop:
+#     max-complexity: 20
+#   gocyclo:
+#     min-complexity: 20

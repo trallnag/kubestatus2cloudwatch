@@ -1,0 +1,63 @@
+version: 2
+
+before:
+  hooks:
+    - go mod tidy
+
+builds:
+  - env: [CGO_ENABLED=0]
+    goos: [linux]
+    goarch: [amd64, arm64]
+    ldflags:
+      - >-
+        -s -w
+        -X main.date={{.Date}}
+        -X main.version={{.Version}}
+        -X main.commit={{.Commit}}
+
+dockers:
+  - use: buildx
+    goos: linux
+    goarch: amd64
+    build_flag_templates:
+      - "--platform=linux/amd64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.revision={{.Commit}}"
+      - "--label=org.opencontainers.image.url=https://github.com/trallnag/{{.ProjectName}}"
+    image_templates:
+      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-amd64"
+      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-amd64"
+
+  - use: buildx
+    goos: linux
+    goarch: arm64
+    build_flag_templates:
+      - "--platform=linux/arm64"
+      - "--label=org.opencontainers.image.created={{.Date}}"
+      - "--label=org.opencontainers.image.version={{.Version}}"
+      - "--label=org.opencontainers.image.revision={{.Commit}}"
+      - "--label=org.opencontainers.image.url=https://github.com/trallnag/{{.ProjectName}}"
+    image_templates:
+      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-arm64"
+      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-arm64"
+
+docker_manifests:
+  - name_template: trallnag/{{.ProjectName}}:{{ .Version }}
+    image_templates:
+      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-amd64"
+      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-arm64"
+
+  - name_template: trallnag/kubestatus2cloudwatch:latest
+    image_templates:
+      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-amd64"
+      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-arm64"
+
+# kos:
+#   - repositories: [ghcr.io/trallnag/kubestatus2cloudwatch]
+#     #bare: true
+#     tags: ["{{.Version}}", latest]
+#     platforms: [linux/amd64, linux/arm64]
+
+release:
+  draft: true

@@ -1,57 +1,118 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
+      # Git style.
       - id: check-added-large-files
+        alias: check-added-large-files (check, task)
+        name: Check large files
+
       - id: check-merge-conflict
-      - id: check-symlinks
+        alias: check-merge-conflict (check, task)
+        name: Check merge conflicts
+
+      - id: check-vcs-permalinks
+        alias: check-vcs-permalinks (check, task)
+        name: Check VCS permalinks
+
+      - id: forbid-new-submodules
+        alias: forbid-new-submodules (check, task)
+        name: Check new submodules
+
+      # Common errors.
+      - id: destroyed-symlinks
+        alias: destroyed-symlinks (check, task)
+        name: Check destroyed symlinks
+
+      - id: check-executables-have-shebangs
+        alias: check-executables-have-shebangs (check, task)
+        name: Check executables have shebangs
+
+      - id: check-shebang-scripts-are-executable
+        alias: check-shebang-scripts-are-executable (check, task)
+        name: Check shebang scripts are executable
+
+      - id: check-yaml
+        alias: check-yaml (check, task)
+        name: Check YAML files
+        args: [--unsafe]
+
       - id: end-of-file-fixer
+        alias: end-of-file-fixer (fix, task)
+        name: Fix end of files
+
       - id: fix-byte-order-marker
+        alias: fix-byte-order-marker (fix, task)
+        name: Fix byte order markers
+
       - id: trailing-whitespace
+        alias: trailing-whitespace (fix, task)
+        name: Fix trailing whitespace
+        args: [--markdown-linebreak-ext=md]
 
-  - repo: https://github.com/alessandrojcm/commitlint-pre-commit-hook
-    rev: v9.16.0
-    hooks:
-      - id: commitlint
-        stages: [commit-msg]
-        additional_dependencies: ["@commitlint/config-conventional"]
+      # Cross platform.
+      - id: check-case-conflict
+        alias: check-case-conflict (check, task)
+        name: Check case conflicts
 
-  - repo: https://github.com/psf/black
-    rev: "24.8.0"
-    hooks:
-      - id: black
+      - id: mixed-line-ending
+        alias: mixed-line-ending (fix, task)
+        name: Fix mixed line endings
+        args: [--fix=lf]
 
-  - repo: https://github.com/pycqa/isort
-    rev: "5.13.2"
-    hooks:
-      - id: isort
-        args: [--profile black]
+      # Security.
+      - id: detect-aws-credentials
+        alias: detect-aws-credentials (check, task)
+        name: Detect AWS credentials
+        args: [--allow-missing-credentials]
 
-  - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.13.0
-    hooks:
-      - id: markdownlint-cli2
+      - id: detect-private-key
+        alias: detect-private-key (check, task)
+        name: Detect private keys
 
-  - repo: https://github.com/pre-commit/mirrors-prettier
-    rev: v4.0.0-alpha.8
+  - repo: local
     hooks:
-      - id: prettier
-        types_or: [json, yaml, markdown]
-        args: [--prose-wrap=always]
+      - id: yamlfmt
+        alias: yamlfmt (fix, task)
+        name: Format YAML files with yamlfmt
+        language: system
+        entry: yamlfmt
+        types: [yaml]
 
-  - repo: https://github.com/golangci/golangci-lint
-    rev: v1.59.1
-    hooks:
-      - id: golangci-lint
+      - id: mdformat
+        alias: mdformat (fix)
+        name: Format Markdown files with mdformat
+        language: system
+        entry: mdformat
+        types: [markdown]
 
-  - repo: https://github.com/trallnag/pre-commit-mirror-gofumpt
-    rev: v0.5.0
-    hooks:
+      - id: shfmt
+        alias: shfmt (fix)
+        name: Format shell scripts with shfmt
+        language: system
+        require_serial: true
+        entry: shfmt --write
+        types: [bash, sh]
+
+      - id: shellcheck
+        alias: shellcheck (check)
+        name: Check shell scripts with ShellCheck
+        require_serial: true
+        language: system
+        entry: shellcheck
+        types: [bash, sh]
+
       - id: gofumpt
+        alias: gofumpt (fix)
+        name: Format Go files with gofumpt
+        language: system
+        entry: gofumpt -w
+        types: [go]
 
-ci:
-  autofix_commit_msg: "refactor(pre-commit): Apply hook auto fixes"
-  autoupdate_commit_msg: "build(pre-commit): Apply hook rev updates"
-  skip:
-    # Already run as part of the lint job in the general ci workflow.
-    - golangci-lint
+      - id: golangci-lint
+        alias: golangci-lint (check)
+        name: Check Go files with golangci-lint
+        pass_filenames: false
+        language: system
+        entry: golangci-lint run
+        types: [go]
