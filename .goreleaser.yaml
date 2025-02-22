@@ -24,7 +24,7 @@ dockers:
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.revision={{.Commit}}"
-      - "--label=org.opencontainers.image.url=https://github.com/trallnag/{{.ProjectName}}"
+      - "--label=org.opencontainers.image.source=https://github.com/trallnag/{{.ProjectName}}"
     image_templates:
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-amd64"
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-amd64"
@@ -37,7 +37,7 @@ dockers:
       - "--label=org.opencontainers.image.created={{.Date}}"
       - "--label=org.opencontainers.image.version={{.Version}}"
       - "--label=org.opencontainers.image.revision={{.Commit}}"
-      - "--label=org.opencontainers.image.url=https://github.com/trallnag/{{.ProjectName}}"
+      - "--label=org.opencontainers.image.source=https://github.com/trallnag/{{.ProjectName}}"
     image_templates:
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-arm64"
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-arm64"
