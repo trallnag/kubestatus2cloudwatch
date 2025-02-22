@@ -75,7 +75,7 @@ jobs:
           args: >-
             release
             --clean
-            --release-notes=tmp/release-notes.md
+            --release-notes=.tmp/release-notes.md
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           RELEASE_NAME: ${{ steps.release-name.outputs.value }}
