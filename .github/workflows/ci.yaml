@@ -67,8 +67,8 @@ jobs:
           install: true
           cache: true
           tool_versions: |
-            gofumpt
-            golangci-lint
+            gofumpt latest
+            golangci-lint latest
             shellcheck latest
             shfmt latest
             yamlfmt latest
