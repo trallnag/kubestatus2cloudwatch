@@ -1,8 +1,6 @@
 module github.com/trallnag/kubestatus2cloudwatch
 
-go 1.23.0
-
-toolchain go1.23.4
+go 1.24.0
 
 require (
 	github.com/aws/aws-sdk-go-v2 v1.36.2
