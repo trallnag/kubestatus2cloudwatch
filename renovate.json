@@ -4,8 +4,8 @@
   "extends": [
     ":configMigration",
     "config:recommended",
-    "schedule:monthly",
-    "schedule:automergeMonthly"
+    "schedule:weekends",
+    "schedule:automergeWeekends"
   ],
 
   "commitBody": "Co-authored-by: Tim Schwenke <tim@trallnag.com>",
