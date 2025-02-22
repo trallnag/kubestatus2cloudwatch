@@ -1,7 +1,7 @@
 name: CodeQL
 
 #
-# Scan code with CodeQL on a scheduled basis.
+# This workflow scans code with CodeQL.
 #
 # - https://codeql.github.com
 # - https://github.com/github/codeql-action
@@ -10,21 +10,30 @@ name: CodeQL
 on:
   workflow_dispatch:
   schedule:
-    # At 04:29 on Tuesday.
-    - cron: 29 4 * * 2
+    # At 04:15 on Monday.
+    - cron: 15 4 * * 1
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
 
 jobs:
   codeql:
     name: CodeQL
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        language: [go]
-    runs-on: ubuntu-latest
-
+        language: [actions, go]
     permissions:
+      actions: read
+      contents: read
+      packages: read
       security-events: write
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -34,3 +43,15 @@ jobs:
 
       - name: Perform CodeQL analysis
         uses: github/codeql-action/analyze@v3
+
+  keep-enabled:
+    name: Keep Enabled
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Keep workflow enabled
+        uses: gautamkrishnar/keepalive-workflow@v2

@@ -1,0 +1,147 @@
+name: CI
+
+#
+# The primary workflow for continues integration.
+#
+
+on:
+  workflow_dispatch:
+  pull_request:
+  merge_group:
+  push:
+    branches:
+      - "*"
+  schedule:
+    # At 04:10 on Monday.
+    - cron: 10 4 * * 1
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  fix-check:
+    name: Fix & Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      UV_PYTHON_PREFERENCE: only-system
+      UV_PYTHON_DOWNLOADS: never
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up just
+        uses: extractions/setup-just@v2
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Install tools with uv
+        run: |
+          uv tool install exec-cmds-defer-errors
+          uv tool install filter-pre-commit-hooks
+          uv tool install mdformat
+          uv tool install pre-commit
+
+      - name: Cache pre-Commit cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pre-commit
+          key: |
+            pre-commit cache dir ${{ hashFiles('.pre-commit-config.yaml') }}
+          restore-keys: |
+            pre-commit cache dir
+
+      - name: Install tools with mise
+        uses: jdx/mise-action@v2
+        with:
+          install: true
+          cache: true
+          tool_versions: |
+            gofumpt
+            golangci-lint
+            shellcheck latest
+            shfmt latest
+            yamlfmt latest
+
+      - name: Initialize environment
+        run: |
+          mkdir -p .cache .local .tmp
+
+          exec-cmds-defer-errors --version
+          filter-pre-commit-hooks --version
+          gofumpt --version
+          golangci-lint --version
+          mdformat --version
+          pre-commit --version
+          shellcheck --version
+          shfmt --version
+          uv --version
+          yamlfmt --version
+
+          pre-commit install --install-hooks
+          pre-commit install --install-hooks --hook-type commit-msg
+          pre-commit install --install-hooks --hook-type post-checkout
+          pre-commit install --install-hooks --hook-type post-merge
+
+      - name: Run recipes that fix stuff
+        run: just fix
+
+      - name: Run recipes that check stuff
+        run: just check
+
+      - name: Remove mise file
+        if: cancelled() == false
+        run: rm -f .tool-versions
+
+      - name: Commit and push changes
+        if: |
+          cancelled() == false &&
+          github.actor != 'dependabot[bot]' &&
+          github.ref_type != 'tag' &&
+          startsWith(github.ref, 'refs/head/renovate/') == false
+        id: auto-commit-action
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "ci: Apply automatic improvements"
+          commit_options: --no-verify --signoff
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up just
+        uses: extractions/setup-just@v2
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - name: Run tests
+        run: just test
+
+  keep-enabled:
+    name: Keep Enabled
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Keep workflow enabled
+        uses: gautamkrishnar/keepalive-workflow@v2

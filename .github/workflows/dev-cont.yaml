@@ -1,0 +1,53 @@
+name: Dev Cont
+
+#
+# This workflow creates dev container and runs the default just recipe.
+#
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - .devcontainer/**
+  schedule:
+    # At 04:20 on Monday.
+    - cron: 20 4 * * 1
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  dev-cont:
+    name: Dev Cont
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+
+      - name: Set up dev container CLI
+        run: npm install -g @devcontainers/cli
+
+      - name: Get dev container CLI version
+        run: devcontainer --version
+
+      - name: Create and run dev container
+        run: devcontainer up --workspace-folder=.
+
+      - name: Run task in dev container
+        run: devcontainer exec --workspace-folder=. just
+
+  keep-enabled:
+    name: Keep Enabled
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Keep workflow enabled
+        uses: gautamkrishnar/keepalive-workflow@v2
