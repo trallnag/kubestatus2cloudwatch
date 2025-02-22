@@ -2,6 +2,7 @@
 .local/
 .tmp/
 .vscode/
+config.yaml
 dist/
 
 # Go.

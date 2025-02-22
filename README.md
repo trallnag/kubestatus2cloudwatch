@@ -1,11 +1,11 @@
 [![status](https://img.shields.io/badge/status-active-brightgreen)](#project-status)
 [![release](https://img.shields.io/github/v/release/trallnag/kubestatus2cloudwatch)](https://github.com/trallnag/kubestatus2cloudwatch/releases)
-[![docker pulls](https://img.shields.io/docker/pulls/trallnag/kubestatus2cloudwatch)](https://hub.docker.com/r/trallnag/kubestatus2cloudwatch)
-[![codecov](https://codecov.io/gh/trallnag/kubestatus2cloudwatch/branch/master/graph/badge.svg?token=DBT93R547B)](https://codecov.io/gh/trallnag/kubestatus2cloudwatch)
+[![ci](https://img.shields.io/github/actions/workflow/status/trallnag/kubestatus2cloudwatch/ci.yaml?label=ci)](https://github.com/trallnag/kubestatus2cloudwatch/actions/workflows/ci.yaml)
+[![release](https://img.shields.io/github/actions/workflow/status/trallnag/kubestatus2cloudwatch/release.yaml?label=release)](https://github.com/trallnag/kubestatus2cloudwatch/actions/workflows/release.yaml)
 
 # KubeStatus2CloudWatch <!-- omit from toc -->
 
-Small app written in Go that continuously watches the status of certain
+Small program written in Go that continuously watches the status of certain
 resources in a Kubernetes cluster, aggregates these into a single value, and
 uses that to update a metric in Amazon CloudWatch.
 
@@ -13,23 +13,23 @@ The metric will have the value 1 if all targets are healthy, the value 0 if at
 least one target is unhealthy (according to the configuration), and missing data
 if KubeStatus2CloudWatch is unhealthy / down.
 
-## Table of Contents <!-- omit from toc -->
+## Table of contents <!-- omit from toc -->
 
 - [Motivation](#motivation)
-- [Use Case](#use-case)
-- [Getting Started](#getting-started)
+- [Use case](#use-case)
+- [Getting started](#getting-started)
 - [Configuration](#configuration)
-- [Project Status](#project-status)
+- [Project status](#project-status)
+- [Versioning](#versioning)
 - [Contributing](#contributing)
 - [Licensing](#licensing)
-- [Links](#links)
 
 ## Motivation
 
-Lately I've been using Amazon EKS for running and orchestrating containerized
-workloads. To monitor the clusters and the workloads within them the popular
-tools Prometheus, Grafana, and friends are used. They are hosted within the
-clusters and they will notify my team and me if an alert fires.
+Lately (2022) I've been using Amazon EKS for running and orchestrating
+containerized workloads. To monitor the clusters and the workloads within them
+the popular tools Prometheus, Grafana, and friends are used. They are hosted
+within the clusters and they will notify my team and me if an alert fires.
 
 But what if the observability system itself goes down? We won't get any
 notification in that case. And since it is all self-hosted and self-contained
@@ -41,28 +41,27 @@ in the cluster and manages a CloudWatch metric that reflects the overall status.
 Now I can go ahead and create a CloudWatch alarm and friends to monitor this one
 metric.
 
-I am also interested in learning Go and things related to it. So I took this all
-as an excuse to get my hands dirty.
+I am also interested in learning Go and things related to it.
 
-## Use Case
+## Use case
 
 Here is a high-level overview of the use case described in
 [Motivation](#motivation). KubeStatus2CloudWatch is used as a bridge between
 Kubernetes and CloudWatch. The alarm fires if the metric falls below 1 or is
 missing data for a certain amount of time.
 
-[![assets/use-case-example.drawio.svg](assets/use-case-example.drawio.svg)](assets/use-case-example.drawio.svg)
+[![assets/use-case-example.drawio.svg](./assets/use-case-example.drawio.svg)](./assets/use-case-example.drawio.svg)
 
 KubeStatus2CloudWatch caters to a specific use case and must be combined with
 other tools to be useful.
 
-## Getting Started
+## Getting started
 
 KubeStatus2CloudWatch is written in Go and the code ends up in a single
 executable binary. There are three approaches:
 
-1. Use the provided container images hosted on Docker Hub
-   [here](https://hub.docker.com/r/trallnag/kubestatus2cloudwatch).
+1. Use the provided container images hosted on GitHub Packages
+   [here](https://github.com/trallnag/kubestatus2cloudwatch/pkgs/container/kubestatus2cloudwatch).
 1. Get the binaries from the respective release artifacts
    [here](https://github.com/trallnag/kubestatus2cloudwatch/releases).
 1. Build the binary with `go build` as usual with Go.
@@ -226,7 +225,7 @@ spec:
         app.kubernetes.io/name: kubestatus2cloudwatch
     spec:
       containers:
-        - image: trallnag/kubestatus2cloudwatch:${VERSION}
+        - image: ghcr.io/trallnag/kubestatus2cloudwatch:${VERSION}
           name: kubestatus2cloudwatch
           volumeMounts:
             - name: config
@@ -250,43 +249,29 @@ KubeStatus2CloudWatch is configured with a YAML file that is called
 without a valid configuration file.
 
 A valid exemplary configuration with extensive comments as documentation can be
-found at [`assets/config-example.yaml`](assets/config-example.yaml). It can be
+found at [`assets/config-example.yaml`](./assets/config-example.yaml). It can be
 used as a starting point. The file
-[`assets/config-minimal.yaml`](assets/config-minimal.yaml) contains a minimal
+[`assets/config-minimal.yaml`](./assets/config-minimal.yaml) contains a minimal
 configuration.
 
 As a supplement the corresponding JSON schema at
-[`assets/config.schema.json`](assets/config.schema.json) can be used as well.
+[`assets/config.schema.json`](./assets/config.schema.json) can be used as well.
 
-## Project Status
+## Project status
 
-The project is maintained by me, [trallnag](https://github.com/trallnag), and I
-am interested in keeping it alive as my colleagues and I use it in production. I
-also don't mind developing it further as I like working with Go.
+The project is maintained by me, [Tim](https://github.com/trallnag), and I am
+interested in keeping it alive as I am actively using it.
+
+## Versioning
+
+The project follows [Semantic Versioning](https://semver.org/).
 
 ## Contributing
 
-Contributions are welcome. Please refer to [`CONTRIBUTING.md`](CONTRIBUTING).
-
-Consult [`DEVELOPMENT.md`](DEVELOPMENT.md) for guidance regarding development.
-
-Read [`RELEASE.md`](RELEASE.md) for details about the release process.
+Contributions are welcome. Please refer to [`CONTRIBUTE.md`](./CONTRIBUTE.md).
 
 ## Licensing
 
 This work is licensed under the
-[Apache License](https://choosealicense.com/licenses/apache-2.0/) (Apache-2.0),
-a permissive license whose main conditions require preservation of copyright and
-license notices. See [`LICENSE`](LICENSE) for the license text.
-
-This work comes with an explicit [`NOTICE`](NOTICE) file containing additional
-legal notices and information.
-
-## Links
-
-- CodeCov:
-  [app.codecov.io/gh/trallnag/kubestatus2cloudwatch](https://app.codecov.io/gh/trallnag/kubestatus2cloudwatch)
-- Docker Hub:
-  [hub.docker.com/r/trallnag/kubestatus2cloudwatch](https://hub.docker.com/r/trallnag/kubestatus2cloudwatch)
-- Pre-commit:
-  [results.pre-commit.ci/repo/github/582991925](https://results.pre-commit.ci/repo/github/582991925)
+[ISC license](https://en.wikipedia.org/wiki/ISC_license). See
+[`LICENSE`](./LICENSE) for the license text.
