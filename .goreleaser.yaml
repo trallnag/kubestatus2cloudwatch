@@ -43,12 +43,12 @@ dockers:
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-arm64"
 
 docker_manifests:
-  - name_template: "{{.Env.REGISTRY}}trallnag/{{.ProjectName}}:{{ .Version }}"
+  - name_template: "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{ .Version }}"
     image_templates:
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-amd64"
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-arm64"
 
-  - name_template: "{{.Env.REGISTRY}}trallnag/kubestatus2cloudwatch:latest"
+  - name_template: "{{.Env.REGISTRY}}/trallnag/kubestatus2cloudwatch:latest"
     image_templates:
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-amd64"
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-arm64"
