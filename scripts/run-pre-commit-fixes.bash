@@ -11,7 +11,7 @@ set -euo pipefail
 
 declare -x SKIP
 
-SKIP=$(./scripts/filter_pre_commit_hooks.py fix task)
+SKIP=$(filter-pre-commit-hooks fix task)
 
 (pre-commit run --all-files || pre-commit run --all-files) \
   | (grep --invert-match --regexp='Skipped' || true)

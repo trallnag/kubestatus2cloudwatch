@@ -13,12 +13,18 @@ default: init fix check test
 # Initialize environment.
 init:
   # Create local-only directories.
-  mkdir -p .cache .local tmp
+  mkdir -p \
+    .cache \
+    .local \
+    .tmp
 
   # Check tool availability.
+  exec-cmds-defer-errors --version
+  filter-pre-commit-hooks --version
   go version
   gofumpt --version
   golangci-lint --version
+  goreleaser --version
   mdformat --version
   pre-commit --version
   shellcheck --version
@@ -39,11 +45,23 @@ init:
 update:
   # Try to update tools managed with Homebrew.
   ./scripts/update-pkgs-brew.bash \
-    go gofumpt golangci-lint goreleaser just shellcheck shfmt uv yamlfmt
+    go \
+    gofumpt \
+    golangci-lint \
+    goreleaser \
+    just \
+    shellcheck \
+    shfmt \
+    uv \
+    yamlfmt
 
   # Try to update tools managed with uv.
   ./scripts/update-pkgs-uv.bash \
-    copier mdformat pre-commit
+    copier \
+    exec-cmds-defer-errors \
+    filter-pre-commit-hooks \
+    mdformat \
+    pre-commit
 
   # Update pre-commit repositories and hooks.
   pre-commit autoupdate
@@ -54,7 +72,7 @@ update:
 
 # Run recipes that fix stuff.
 fix:
-  ./scripts/exec_cmds_defer_errors.py \
+  exec-cmds-defer-errors \
     "just fix--pre-commit" \
     "just fix--mdformat" \
     "just fix--shfmt" \
@@ -78,7 +96,7 @@ fix--gofumpt:
 
 # Run recipes that check stuff.
 check:
-  ./scripts/exec_cmds_defer_errors.py \
+  exec-cmds-defer-errors \
     "just check--pre-commit" \
     "just check--shellcheck" \
     "just check--golangci"
@@ -87,7 +105,7 @@ check:
 check--pre-commit:
   ./scripts/run-pre-commit-checks.bash
 
-# Lint shell scripts with ShellCheck
+# Lint shell scripts with ShellCheck.
 check--shellcheck:
   shellcheck **/*.bash **/*.sh
 
@@ -98,3 +116,8 @@ check--golangci:
 # Run Go tests.
 test:
   go test -v -race -covermode=atomic -coverprofile=coverage.out
+
+# Create release notes based on changelog.
+[group('misc')]
+create-release-notes:
+  ./scripts/create-release-notes.bash CHANGELOG.md .tmp/release-notes.md
