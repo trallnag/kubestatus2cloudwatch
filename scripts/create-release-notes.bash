@@ -7,8 +7,8 @@
 
 set -euo pipefail
 
-CHANGELOG_FILE="$0"
-RELEASE_NOTES_FILE="$1"
+CHANGELOG_FILE="$1"
+RELEASE_NOTES_FILE="$2"
 
 mkdir -p "$(dirname "$RELEASE_NOTES_FILE")"
 
