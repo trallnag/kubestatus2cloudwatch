@@ -1,8 +1,8 @@
 .cache/
 .local/
+.tmp/
 .vscode/
 dist/
-tmp/
 
 # Go.
 go.work
