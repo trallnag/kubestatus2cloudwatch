@@ -55,4 +55,4 @@ docker_manifests:
 
 release:
   draft: true
-  name_template: "{{.RELEASE_NAME}}"
+  name_template: "{{.Env.RELEASE_NAME}}"
