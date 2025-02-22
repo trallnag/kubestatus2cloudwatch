@@ -11,6 +11,7 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 - Upgraded direct and indirect dependencies.
 - Switched license from Apache to ISC.
+- Switched container image registry from Docker Hub to GitHub Packages.
 
 ## [1.1.5](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.4...v1.1.5) / 2024-03-09
 
