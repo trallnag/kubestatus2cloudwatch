@@ -53,11 +53,6 @@ docker_manifests:
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-amd64"
       - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-arm64"
 
-# kos:
-#   - repositories: [ghcr.io/trallnag/kubestatus2cloudwatch]
-#     #bare: true
-#     tags: ["{{.Version}}", latest]
-#     platforms: [linux/amd64, linux/arm64]
-
 release:
   draft: true
+  name_template: "{{.RELEASE_NAME}}"
