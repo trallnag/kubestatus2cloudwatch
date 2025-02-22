@@ -39,18 +39,12 @@ jobs:
       - name: Set up just
         uses: extractions/setup-just@v2
 
-      - name: Set up uv
-        uses: astral-sh/setup-uv@v5
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-
-      - name: Install tools with uv
+      - name: Install tools with pipx
         run: |
-          uv tool install exec-cmds-defer-errors
-          uv tool install filter-pre-commit-hooks
-          uv tool install mdformat
-          uv tool install pre-commit
+          pipx install exec-cmds-defer-errors
+          pipx install filter-pre-commit-hooks
+          pipx install mdformat
+          pipx install pre-commit
 
       - name: Cache pre-Commit cache
         uses: actions/cache@v4
@@ -85,7 +79,6 @@ jobs:
           pre-commit --version
           shellcheck --version
           shfmt --version
-          uv --version
           yamlfmt --version
 
           pre-commit install --install-hooks
