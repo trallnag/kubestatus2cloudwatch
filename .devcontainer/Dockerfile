@@ -66,7 +66,6 @@ RUN <<-EOT
     just \
     shellcheck \
     shfmt \
-    syft \
     uv \
     yamlfmt
 EOT

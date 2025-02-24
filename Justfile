@@ -29,7 +29,6 @@ init:
   pre-commit --version
   shellcheck --version
   shfmt --version
-  syft --version
   uv --version
   yamlfmt --version
 
@@ -53,7 +52,6 @@ update:
     just \
     shellcheck \
     shfmt \
-    syft \
     uv \
     yamlfmt
 
