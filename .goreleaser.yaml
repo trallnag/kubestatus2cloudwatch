@@ -18,12 +18,6 @@ builds:
         -X main.version={{ .Version }}
         -X main.commit={{ .Commit }}
 
-sboms:
-  - id: archive
-    artifacts: archive
-  - id: source
-    artifacts: source
-
 dockers:
   - use: buildx
     goos: linux
@@ -61,6 +55,33 @@ docker_manifests:
     image_templates:
       - "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:latest-amd64"
       - "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:latest-arm64"
+
+sboms:
+  - id: archive
+    artifacts: archive
+  - id: source
+    artifacts: source
+
+signs:
+  - cmd: cosign
+    artifacts: checksum
+    output: true
+    certificate: ${artifact}.pem
+    args:
+      - sign-blob
+      - --output-certificate=${certificate}
+      - --output-signature=${signature}
+      - --yes
+      - ${artifact}
+
+docker_signs:
+  - cmd: cosign
+    artifacts: all
+    output: true
+    args:
+      - sign
+      - --yes
+      - ${artifact}@${digest}
 
 release:
   draft: true

@@ -9,7 +9,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ### Changed
 
-- Added SBOMs to release artifacts.
+- Added SBOMs to release artifacts. Does not cover container images.
+- Added Cosign to release artifacts. Checksums, container images, and container
+  manifests are signed.
 
 ## [1.1.6](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.5...v1.1.6) / 2025-02-22
 
