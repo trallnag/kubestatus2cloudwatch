@@ -1,5 +1,8 @@
 version: 2
 
+env:
+  - REGISTRY={{ envOrDefault "REGISTRY" "localhost" }}
+
 before:
   hooks:
     - go mod tidy
@@ -11,9 +14,15 @@ builds:
     ldflags:
       - >-
         -s -w
-        -X main.date={{.Date}}
-        -X main.version={{.Version}}
-        -X main.commit={{.Commit}}
+        -X main.date={{ .Date }}
+        -X main.version={{ .Version }}
+        -X main.commit={{ .Commit }}
+
+sboms:
+  - id: archive
+    artifacts: archive
+  - id: source
+    artifacts: source
 
 dockers:
   - use: buildx
@@ -21,38 +30,38 @@ dockers:
     goarch: amd64
     build_flag_templates:
       - "--platform=linux/amd64"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.revision={{.Commit}}"
-      - "--label=org.opencontainers.image.source=https://github.com/trallnag/{{.ProjectName}}"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.revision={{ .Commit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/trallnag/{{ .ProjectName }}"
     image_templates:
-      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-amd64"
-      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-amd64"
+      - "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:latest-amd64"
+      - "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:{{ .Version }}-amd64"
 
   - use: buildx
     goos: linux
     goarch: arm64
     build_flag_templates:
       - "--platform=linux/arm64"
-      - "--label=org.opencontainers.image.created={{.Date}}"
-      - "--label=org.opencontainers.image.version={{.Version}}"
-      - "--label=org.opencontainers.image.revision={{.Commit}}"
-      - "--label=org.opencontainers.image.source=https://github.com/trallnag/{{.ProjectName}}"
+      - "--label=org.opencontainers.image.created={{ .Date }}"
+      - "--label=org.opencontainers.image.version={{ .Version }}"
+      - "--label=org.opencontainers.image.revision={{ .Commit }}"
+      - "--label=org.opencontainers.image.source=https://github.com/trallnag/{{ .ProjectName }}"
     image_templates:
-      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-arm64"
-      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-arm64"
+      - "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:latest-arm64"
+      - "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:{{ .Version }}-arm64"
 
 docker_manifests:
-  - name_template: "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{ .Version }}"
+  - name_template: "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:{{  .Version  }}"
     image_templates:
-      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-amd64"
-      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:{{.Version}}-arm64"
+      - "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:{{ .Version }}-amd64"
+      - "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:{{ .Version }}-arm64"
 
-  - name_template: "{{.Env.REGISTRY}}/trallnag/kubestatus2cloudwatch:latest"
+  - name_template: "{{ .Env.REGISTRY }}/trallnag/kubestatus2cloudwatch:latest"
     image_templates:
-      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-amd64"
-      - "{{.Env.REGISTRY}}/trallnag/{{.ProjectName}}:latest-arm64"
+      - "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:latest-amd64"
+      - "{{ .Env.REGISTRY }}/trallnag/{{ .ProjectName }}:latest-arm64"
 
 release:
   draft: true
-  name_template: "{{.Env.RELEASE_NAME}}"
+  name_template: "{{ .Env.RELEASE_NAME }}"

@@ -19,6 +19,7 @@ following tools are required:
 - [Pre-commit](https://pre-commit.com/) for managing pre-commit hooks.
 - [ShellCheck](https://github.com/koalaman/shellcheck) for shell script linting.
 - [Shfmt](https://github.com/mvdan/sh) for shell script formatting.
+- [Syft](https://github.com/anchore/syft) for generation SBOMs.
 
 Same goes for the following utilities:
 
