@@ -34,10 +34,10 @@ jobs:
       UV_PYTHON_DOWNLOADS: never
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Set up just
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v3.0.0
 
       - name: Install tools with pipx
         run: |
@@ -47,7 +47,7 @@ jobs:
           pipx install pre-commit
 
       - name: Cache pre-Commit cache
-        uses: actions/cache@v4
+        uses: actions/cache@v4.2.2
         with:
           path: ~/.cache/pre-commit
           key: |
@@ -56,7 +56,7 @@ jobs:
             pre-commit cache dir
 
       - name: Install tools with mise
-        uses: jdx/mise-action@v2
+        uses: jdx/mise-action@v2.1.11
         with:
           install: true
           cache: true
@@ -103,7 +103,7 @@ jobs:
           github.ref_type != 'tag' &&
           startsWith(github.ref, 'refs/head/renovate/') == false
         id: auto-commit-action
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v5.1.0
         with:
           commit_message: "ci: Apply automatic improvements"
           commit_options: --no-verify --signoff
@@ -113,13 +113,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Set up just
-        uses: extractions/setup-just@v2
+        uses: extractions/setup-just@v3.0.0
 
       - name: Setup Go
-        uses: actions/setup-go@v5
+        uses: actions/setup-go@v5.4.0
         with:
           go-version-file: go.mod
           cache: true
@@ -134,7 +134,7 @@ jobs:
       actions: write
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
 
       - name: Keep workflow enabled
-        uses: gautamkrishnar/keepalive-workflow@v2
+        uses: gautamkrishnar/keepalive-workflow@2.0.10
