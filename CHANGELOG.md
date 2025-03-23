@@ -7,7 +7,9 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ## Unreleased
 
-Nothing.
+### Changed
+
+- Upgraded direct and indirect dependencies.
 
 ## [1.1.7](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.6...v1.1.7) / 2025-02-24
 
