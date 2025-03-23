@@ -11,6 +11,7 @@ on:
   push:
     branches:
       - "*"
+      - "renovate/**"
   schedule:
     # At 04:10 on Monday.
     - cron: 10 4 * * 1
