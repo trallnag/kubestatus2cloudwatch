@@ -5,7 +5,7 @@
     ":configMigration",
     "config:recommended",
     "schedule:weekends",
-    "schedule:automergeWeekends"
+    "helpers:pinGitHubActionDigests"
   ],
 
   "commitBody": "Co-authored-by: Tim Schwenke <tim@trallnag.com>",
@@ -16,7 +16,7 @@
 
   "semanticCommits": "enabled",
 
-  "automergeType": "branch",
+  "prHourlyLimit": 10,
 
   "lockFileMaintenance": {
     "enabled": true
@@ -25,17 +25,5 @@
   "pre-commit": {
     "enabled": true,
     "prBodyNotes": [""]
-  },
-
-  "packageRules": [
-    {
-      "automerge": true,
-      "matchUpdateTypes": [
-        "minor",
-        "patch",
-        "pin",
-        "digest"
-      ]
-    }
-  ]
+  }
 }

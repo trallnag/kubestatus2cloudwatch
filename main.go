@@ -1,8 +1,10 @@
 package main
 
 import (
+	"cmp"
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -22,35 +24,51 @@ import (
 )
 
 var (
-	date    = "unknown"
-	version = "unknown"
-	commit  = "unknown"
+	program   = "kubestatus2cloudwatch"
+	version   = "n/a"
+	buildDate = "n/a"
+	gitCommit = "n/a"
 )
 
 func main() {
-	if len(os.Args) > 1 && (os.Args[1] == "-v" || os.Args[1] == "--version") {
-		fmt.Printf( //nolint:forbidigo // Using `fmt.Printf` is fine here.
-			"Welcome to KubeStatus2CloudWatch.\nDate: %s\nVersion: %s\nCommit: %s\n",
-			date, version, commit,
-		)
+	configFlag := flag.String("config", "", "Path to the configuration file.")
+	verboseFlag := flag.Bool("verbose", false, "Make the program more talkative.")
+	versionFlag := flag.Bool("version", false, "Print version information and exit.")
+
+	flag.Parse()
+
+	// If requested, just print version information and exit.
+
+	if *versionFlag {
+		if *verboseFlag {
+			fmt.Fprintf(
+				os.Stdout,
+				"Program: %s\n"+
+					"Version: %s\n"+
+					"BuildDate: %s\n"+
+					"GitCommit: %s\n",
+				program, version, buildDate, gitCommit,
+			)
+		} else {
+			fmt.Fprintf(os.Stdout, "%s %s\n", program, version)
+		}
+
 		os.Exit(0)
 	}
 
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	// Load configuration based on given path.
 
-	// Handle configuration.
-
-	configPath, err := filepath.Abs("config.yaml")
+	config, err := NewConfig(cmp.Or(
+		*configFlag, os.Getenv("KS2CW_CONFIG_PATH"), "config.yaml",
+	))
 	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to find config file.")
-	}
-
-	config, err := NewConfig(configPath)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create config.")
+		fmt.Fprintf(os.Stderr, "Failed to create config: %v\n", err)
+		os.Exit(1)
 	}
 
 	// Set up logging based on config.
+
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
 	if config.Logging.Pretty {
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
@@ -62,21 +80,21 @@ func main() {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 	}
 
-	log.Info().Str("date", date).Str("version", version).Str("commit", commit).
-		Msg("Welcome to KubeStatus2CloudWatch.")
+	log.Info().
+		Str("program", "kubestatus2cloudwatch").
+		Str("version", version).
+		Str("buildDate", buildDate).
+		Str("gitCommit", gitCommit).
+		Send()
 
-	// Kubernetes setup.
+	// Set up Kubernetes client.
 
-	var kconfig *rest.Config
+	var kubeConfig *rest.Config
 
 	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
-		log.Info().Msg("Creating in-cluster Kubernetes config.")
-
-		kconfig, err = rest.InClusterConfig()
+		kubeConfig, err = rest.InClusterConfig()
 	} else {
-		log.Info().Msg("Creating out-of-cluster Kubernetes config.")
-
-		kconfig, err = clientcmd.BuildConfigFromFlags(
+		kubeConfig, err = clientcmd.BuildConfigFromFlags(
 			"", filepath.Join(homedir.HomeDir(), ".kube", "config"),
 		)
 	}
@@ -85,17 +103,12 @@ func main() {
 		log.Fatal().Err(err).Msg("Failed to create Kubernetes config.")
 	}
 
-	log.Info().Msg("Creating Kubernetes client set.")
-
-	kubeClient, err := kubernetes.NewForConfig(kconfig)
+	kClient, err := kubernetes.NewForConfig(kubeConfig)
 	if err != nil {
-		log.Fatal().Err(err).
-			Msg("Failed to create Kubernetes client.")
+		log.Fatal().Err(err).Msg("Failed to create Kubernetes client.")
 	}
 
-	// AWS CloudWatch setup.
-
-	log.Info().Msg("Creating AWS config.")
+	// Set up Amazon CloudWatch client.
 
 	awsConfig, err := awsconfig.LoadDefaultConfig(context.TODO())
 	if err != nil {
@@ -103,13 +116,13 @@ func main() {
 			Msg("Failed to create AWS SDK config.")
 	}
 
-	cloudwatchClient := cloudwatch.NewFromConfig(awsConfig)
+	cwClient := cloudwatch.NewFromConfig(awsConfig)
 
-	log.Info().Msg("Done with setup. Starting aggregation.")
+	log.Info().Msg("Done with setup. Start aggregation.")
 
 	ExecuteRounds(
 		false, config.Seconds, config.Dry, config.Metric, config.Targets,
-		kubeClient, cloudwatchClient,
+		kClient, cwClient,
 	)
 }
 
@@ -119,7 +132,7 @@ func main() {
 // and CloudWatch are expected to be ready to use.
 func ExecuteRounds(
 	single bool, seconds int, dry bool, metric Metric, targets []Target,
-	kubeClient kubernetes.Interface, cloudwatchClient CWPutMetricDataAPI,
+	kClient kubernetes.Interface, cwClient CWPutMetricDataAPI,
 ) {
 	tickCount := 0
 	ticker := time.NewTicker(time.Duration(seconds) * time.Second)
@@ -131,9 +144,9 @@ func ExecuteRounds(
 		tickLogger.Info().Msg("Executing new tick round.")
 
 		err := UpdateMetric(
-			dry, cloudwatchClient, metric.Namespace,
+			dry, cwClient, metric.Namespace,
 			metric.Name, metric.Dimensions,
-			PerformScan(kubeClient, targets).Success,
+			PerformScan(kClient, targets).Success,
 		)
 		if err != nil {
 			tickLogger.Error().Err(err).Msg("Failed to update metric.")
@@ -213,7 +226,7 @@ type Result struct {
 // targets is collected in the returned struct.
 //
 // Currently only resources of the kind Deployment are supported.
-func PerformScan(kubeClient kubernetes.Interface, targets []Target) Scan {
+func PerformScan(client kubernetes.Interface, targets []Target) Scan {
 	//nolint:exhaustruct // Field "Results" is populated later.
 	scan := Scan{Success: true, Ready: true}
 
@@ -230,7 +243,7 @@ func PerformScan(kubeClient kubernetes.Interface, targets []Target) Scan {
 
 		switch target.Kind {
 		case KindDaemonSet:
-			daemonSet, err := kubeClient.AppsV1().
+			daemonSet, err := client.AppsV1().
 				DaemonSets(target.Namespace).
 				Get(context.TODO(), target.Name, metav1.GetOptions{})
 			if err != nil {
@@ -243,7 +256,7 @@ func PerformScan(kubeClient kubernetes.Interface, targets []Target) Scan {
 				result.Want = int(daemonSet.Status.NumberReady)
 			}
 		case KindDeployment:
-			deployment, err := kubeClient.AppsV1().
+			deployment, err := client.AppsV1().
 				Deployments(target.Namespace).
 				Get(context.TODO(), target.Name, metav1.GetOptions{})
 			if err != nil {
@@ -256,7 +269,7 @@ func PerformScan(kubeClient kubernetes.Interface, targets []Target) Scan {
 				result.Want = int(deployment.Status.ReadyReplicas)
 			}
 		case KindStatefulSet:
-			statefulSet, err := kubeClient.AppsV1().
+			statefulSet, err := client.AppsV1().
 				StatefulSets(target.Namespace).
 				Get(context.TODO(), target.Name, metav1.GetOptions{})
 			if err != nil {

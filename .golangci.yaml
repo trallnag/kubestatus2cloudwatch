@@ -19,8 +19,7 @@ issues:
     - {linters: [exhaustruct], text: "zerolog\\.ConsoleWriter is missing fields"} # From library. Not all fields are used.
     - {linters: [funlen], path: "main\\.go", text: "Function 'PerformScan' is too long"} # Big switch statement. Core logic.
     - {linters: [funlen], path: "main\\.go", text: "Function 'main' is too long"} # Contains bunch of setup code.
-    - {linters: [gochecknoglobals], path: "main\\.go", text: "commit is a global variable"} # Global variable is fine.
-    - {linters: [gochecknoglobals], path: "main\\.go", text: "date is a global variable"} # Global variable is fine.
+    - {linters: [gochecknoglobals], path: "main\\.go", text: "(program|version|buildDate|gitCommit) is a global variable"} # Global variable is fine.
     - {linters: [perfsprint], text: "fmt\\.Errorf can be replaced with errors\\.New"} # Using fmt.Errorf is fine.
     - {linters: [varnamelen], path: "config\\.go", text: "variable name 'c' is too short for the scope of its usage"} # Stands for config.
     - {linters: [varnamelen], text: "variable name 'i' is too short for the scope of its usage"} # Common name for index.
@@ -32,9 +31,3 @@ issues:
         - funlen
         - paralleltest
         - varnamelen
-
-# linters-settings:
-#   cyclop:
-#     max-complexity: 20
-#   gocyclo:
-#     min-complexity: 20
