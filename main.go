@@ -31,6 +31,14 @@ var (
 )
 
 func main() {
+	exitCode := RunMain()
+	os.Exit(exitCode)
+}
+
+func RunMain() int {
+	// Reset the flag set to avoid "flag redefined" errors during tests.
+	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
+
 	configFlag := flag.String("config", "", "Path to the configuration file.")
 	verboseFlag := flag.Bool("verbose", false, "Make the program more talkative.")
 	versionFlag := flag.Bool("version", false, "Print version information and exit.")
@@ -38,7 +46,6 @@ func main() {
 	flag.Parse()
 
 	// If requested, just print version information and exit.
-
 	if *versionFlag {
 		if *verboseFlag {
 			fmt.Fprintf(
@@ -53,7 +60,7 @@ func main() {
 			fmt.Fprintf(os.Stdout, "%s %s\n", program, version)
 		}
 
-		os.Exit(0)
+		return 0
 	}
 
 	// Load configuration based on given path.
@@ -63,7 +70,8 @@ func main() {
 	))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Failed to create config: %v\n", err)
-		os.Exit(1)
+
+		return 1
 	}
 
 	// Set up logging based on config.
@@ -124,6 +132,8 @@ func main() {
 		false, config.Seconds, config.Dry, config.Metric, config.Targets,
 		kClient, cwClient,
 	)
+
+	return 0
 }
 
 // ExecuteRounds indefinitely executes tick rounds (except if single is true,

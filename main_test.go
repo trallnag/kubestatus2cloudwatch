@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
@@ -20,6 +22,110 @@ func TestMain(m *testing.M) {
 	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
 
 	m.Run()
+}
+
+// TestMain_Version tests that Main prints version info.
+func TestMain_Version(t *testing.T) {
+	// Save original os.Args and stdout.
+	originalArgs := os.Args
+	originalStdout := os.Stdout
+
+	// Restore os.Args and stdout after the test.
+	defer func() {
+		os.Args = originalArgs
+		os.Stdout = originalStdout
+	}()
+
+	// Set test arguments.
+	os.Args = []string{"kubestatus2cloudwatch", "--version"}
+
+	// Create a pipe to capture stdout.
+	readPipe, writePipe, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("Failed to create pipe: %v", err)
+	}
+
+	os.Stdout = writePipe
+
+	// Run RunMain in a separate goroutine to avoid blocking.
+	done := make(chan struct{})
+	go func() {
+		RunMain()
+		writePipe.Close()
+		close(done)
+	}()
+
+	// Read from the read end of the pipe.
+
+	var stdout bytes.Buffer
+
+	_, err = stdout.ReadFrom(readPipe)
+	if err != nil {
+		t.Fatalf("Failed to read from pipe: %v", err)
+	}
+
+	// Wait for the runMain function to finish.
+	<-done
+
+	// Assert stdout contains expected output.
+	output := stdout.String()
+	if !strings.Contains(output, "Kubestatus2cloudwatch n/a") {
+		t.Errorf("unexpected output: %s", output)
+	}
+}
+
+// TestMain_VersionVerbose tests that Main prints verbose version info.
+func TestMain_VersionVerbose(t *testing.T) {
+	// Save original os.Args and stdout.
+	originalArgs := os.Args
+	originalStdout := os.Stdout
+
+	// Restore os.Args and stdout after the test.
+	defer func() {
+		os.Args = originalArgs
+		os.Stdout = originalStdout
+	}()
+
+	// Set test arguments.
+	os.Args = []string{"kubestatus2cloudwatch", "--verbose", "--version"}
+
+	// Create a pipe to capture stdout.
+
+	readPipe, writePipe, err := os.Pipe()
+	if err != nil {
+		t.Fatalf("Failed to create pipe: %v", err)
+	}
+
+	os.Stdout = writePipe
+
+	// Run RunMain in a separate goroutine to avoid blocking.
+	done := make(chan struct{})
+	go func() {
+		RunMain()
+		writePipe.Close()
+		close(done)
+	}()
+
+	// Read from the read end of the pipe.
+
+	var stdout bytes.Buffer
+
+	_, err = stdout.ReadFrom(readPipe)
+	if err != nil {
+		t.Fatalf("Failed to read from pipe: %v", err)
+	}
+
+	// Wait for the runMain function to finish.
+	<-done
+
+	// Assert stdout contains expected output.
+	output := stdout.String()
+	if !strings.Contains(output, "Program: Kubestatus2cloudwatch") ||
+		!strings.Contains(output, "Version: n/a") ||
+		!strings.Contains(output, "BuildDate: n/a") ||
+		!strings.Contains(output, "GitCommit: n/a") {
+		t.Errorf("unexpected output: %s", output)
+	}
 }
 
 // TestIsFittingMode tests IsFittingMode.
