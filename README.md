@@ -3,7 +3,7 @@
 [![ci](https://img.shields.io/github/actions/workflow/status/trallnag/kubestatus2cloudwatch/ci.yaml?label=ci)](https://github.com/trallnag/kubestatus2cloudwatch/actions/workflows/ci.yaml)
 [![release](https://img.shields.io/github/actions/workflow/status/trallnag/kubestatus2cloudwatch/release.yaml?label=release)](https://github.com/trallnag/kubestatus2cloudwatch/actions/workflows/release.yaml)
 
-# KubeStatus2CloudWatch <!-- omit from toc -->
+# Kubestatus2cloudwatch <!-- omit from toc -->
 
 Small program written in Go that continuously watches the status of certain
 resources in a Kubernetes cluster, aggregates these into a single value, and
@@ -11,7 +11,7 @@ uses that to update a metric in Amazon CloudWatch.
 
 The metric will have the value 1 if all targets are healthy, the value 0 if at
 least one target is unhealthy (according to the configuration), and missing data
-if KubeStatus2CloudWatch is unhealthy / down.
+if Kubestatus2cloudwatch is unhealthy / down.
 
 ## Table of contents <!-- omit from toc -->
 
@@ -36,7 +36,7 @@ notification in that case. And since it is all self-hosted and self-contained
 there are no SLAs or similar.
 
 We somehow have to monitor the monitoring system. This is where
-KubeStatus2CloudWatch comes in. It scans the status of the monitoring components
+Kubestatus2cloudwatch comes in. It scans the status of the monitoring components
 in the cluster and manages a CloudWatch metric that reflects the overall status.
 Now I can go ahead and create a CloudWatch alarm and friends to monitor this one
 metric.
@@ -46,18 +46,18 @@ I am also interested in learning Go and things related to it.
 ## Use case
 
 Here is a high-level overview of the use case described in
-[Motivation](#motivation). KubeStatus2CloudWatch is used as a bridge between
+[Motivation](#motivation). Kubestatus2cloudwatch is used as a bridge between
 Kubernetes and CloudWatch. The alarm fires if the metric falls below 1 or is
 missing data for a certain amount of time.
 
 [![assets/use-case-example.drawio.svg](./assets/use-case-example.drawio.svg)](./assets/use-case-example.drawio.svg)
 
-KubeStatus2CloudWatch caters to a specific use case and must be combined with
+Kubestatus2cloudwatch caters to a specific use case and must be combined with
 other tools to be useful.
 
 ## Getting started
 
-KubeStatus2CloudWatch is written in Go and the code ends up in a single
+Kubestatus2cloudwatch is written in Go and the code ends up in a single
 executable binary. There are three approaches:
 
 1. Use the provided container images hosted on GitHub Packages
@@ -66,31 +66,31 @@ executable binary. There are three approaches:
    [here](https://github.com/trallnag/kubestatus2cloudwatch/releases).
 1. Build the binary with `go build` as usual with Go.
 
-Create a configuration file for KubeStatus2CloudWatch. Read
+Create a configuration file for Kubestatus2cloudwatch. Read
 [Configuration](#configuration) for more information.
 
 The general approach:
 
-1. Run KubeStatus2CloudWatch locally to make sure it fits your use case. Also
-   write the configuration for KubeStatus2CloudWatch before going into the
+1. Run Kubestatus2cloudwatch locally to make sure it fits your use case. Also
+   write the configuration for Kubestatus2cloudwatch before going into the
    cluster.
 1. Setup the IAM role in AWS. This involves a trust policy that works with IRSA
    and a policy that gives permission to the CloudWatch API.
 1. Setup Kubernetes resources to get the deployment itself to work properly.
    This includes service account, role, role binding, and config map.
-1. Deploy KubeStatus2CloudWatch as a deployment.
+1. Deploy Kubestatus2cloudwatch as a deployment.
 
-Before getting KubeStatus2CloudWatch to run in the cluster, we will first run it
+Before getting Kubestatus2cloudwatch to run in the cluster, we will first run it
 locally. This requires AWS and Kubernetes credentials to be setup.
 
 Place the `config.yaml` you have adjusted to your requirements next to the
 binary. Now execute the binary. You should see in the logs that
-KubeStatus2CloudWatch reads the configuration, configures things, and then
+Kubestatus2cloudwatch reads the configuration, configures things, and then
 starts to scan the targets periodically and update the CloudWatch metric. There
 should be no errors visible. Check the metric in CloudWatch. If everything looks
-fine, you can proceed with deploying KubeStatus2CloudWatch in Kubernetes.
+fine, you can proceed with deploying Kubestatus2cloudwatch in Kubernetes.
 
-Note that KubeStatus2CloudWatch interacts with the Kubernetes and CloudWatch
+Note that Kubestatus2cloudwatch interacts with the Kubernetes and CloudWatch
 APIs, which requires appropriate permissions. IAM Roles for Service Accounts
 (IRSA) is expected to be available in the cluster.
 
@@ -188,7 +188,7 @@ subjects:
     namespace: "${KUBE_NAMESPACE}"
 ```
 
-To provide the configuration file to KubeStatus2CloudWatch, a **Config Map** is
+To provide the configuration file to Kubestatus2cloudwatch, a **Config Map** is
 used:
 
 ```yaml
@@ -244,7 +244,7 @@ expected.
 
 ## Configuration
 
-KubeStatus2CloudWatch is configured with a YAML file that is called
+Kubestatus2cloudwatch is configured with a YAML file that is called
 `config.yaml` and placed right next to binary. The app will crash during startup
 without a valid configuration file.
 

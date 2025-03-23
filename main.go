@@ -24,7 +24,7 @@ import (
 )
 
 var (
-	program   = "kubestatus2cloudwatch"
+	program   = "Kubestatus2cloudwatch"
 	version   = "n/a"
 	buildDate = "n/a"
 	gitCommit = "n/a"

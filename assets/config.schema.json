@@ -2,7 +2,7 @@
   "$schema": "http://json-schema.org/draft-07/schema",
   "$id": "kubestatus2cloudwatch-2023-01-01",
   "type": "object",
-  "title": "KubeStatus2CloudWatch Configuration",
+  "title": "Kubestatus2cloudwatch Configuration",
   "required": ["seconds", "metric", "targets"],
   "properties": {
     "dry": {
