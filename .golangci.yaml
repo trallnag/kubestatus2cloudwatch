@@ -28,6 +28,7 @@ linters:
       - {linters: [varnamelen], text: "variable name 'i' is too short for the scope of its usage"} # Common name for index.
       - path: .+_test.go
         linters:
+          - cyclop
           - exhaustruct
           - funlen
           - paralleltest
