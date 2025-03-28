@@ -7,9 +7,25 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ## Unreleased
 
+### Added
+
+- Added basic CLI to get version, set path to configuration file, and more.
+
 ### Changed
 
 - Upgraded direct and indirect dependencies.
+- **BREAKING**: Changed default log level from `debug` to `info`.
+- **BREAKING**: Changed log format configuration from boolean `pretty` flag to
+  `format` enum with allowed values `json` and `logfmt`.
+- **BREAKING**: Changed logging from zerolog to slog using included handlers for
+  JSON and logfmt depending on configuration.
+- **BREAKING**: Renamed dry run flag from `dry` to `dryRun`.
+
+### Fixed
+
+- Fixed huge bug with the CloudWatch metric being updated using the value of
+  `Success` and not `Ready`. The former attribute shows if the scan itself was
+  successful, not if the scan targets are ready according to the configuration.
 
 ## [1.1.7](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.6...v1.1.7) / 2025-02-24
 

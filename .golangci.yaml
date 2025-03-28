@@ -4,7 +4,11 @@ run:
 linters:
   default: all
   disable:
+    - containedctx
     - depguard
+  settings:
+    errorlint:
+      errorf: false
   exclusions:
     generated: lax
     presets:
@@ -13,21 +17,24 @@ linters:
       - legacy
       - std-error-handling
     rules:
-      - {linters: [cyclop], path: "main\\.go", text: "calculated cyclomatic complexity for function PerformScan"} # Big switch statement. Core logic.
-      - {linters: [cyclop], path: "main\\.go", text: "calculated cyclomatic complexity for function main"} # Contains bunch of setup code.
+      - {linters: [cyclop], path: "main\\.go", text: "calculated cyclomatic complexity for function performScan"} # Big switch statement. Core logic.
+      - {linters: [cyclop], path: "main\\.go", text: "calculated cyclomatic complexity for function runMain"} # Contains bunch of setup code.
       - {linters: [err113], text: "do not define dynamic errors, use wrapped static errors instead"} # Dynamic errors are fine.
+      - {linters: [exhaustruct], text: "clientcmd\\.ConfigOverrides is missing fields"} # From library. Not all fields are used.
       - {linters: [exhaustruct], text: "cloudwatch\\.PutMetricDataInput is missing fields"} # From library. Not all fields are used.
       - {linters: [exhaustruct], text: "types\\.MetricDatum is missing fields"} # From library. Not all fields are used.
       - {linters: [exhaustruct], text: "v1\\.GetOptions is missing fields"} # From library. Not all fields are used.
       - {linters: [exhaustruct], text: "zerolog\\.ConsoleWriter is missing fields"} # From library. Not all fields are used.
-      - {linters: [funlen], path: "main\\.go", text: "Function 'PerformScan' is too long"} # Big switch statement. Core logic.
-      - {linters: [funlen], path: "main\\.go", text: "Function 'RunMain' is too long"} # Contains bunch of setup code.
+      - {linters: [funlen], path: "main\\.go", text: "Function 'performScan' is too long"} # Big switch statement. Core logic.
+      - {linters: [funlen], path: "main\\.go", text: "Function 'runMain' is too long"} # Contains bunch of setup code.
       - {linters: [gochecknoglobals], path: "main\\.go", text: "(program|version|buildDate|gitCommit) is a global variable"} # Global variable is fine.
+      - {linters: [gochecknoglobals], path: "main_test\\.go", text: "dotEnv is a global variable"} # Global variable is fine.
       - {linters: [perfsprint], text: "fmt\\.Errorf can be replaced with errors\\.New"} # Using fmt.Errorf is fine.
-      - {linters: [varnamelen], path: "config\\.go", text: "variable name 'c' is too short for the scope of its usage"} # Stands for config.
+      - {linters: [varnamelen], path: "main\\.go", text: "parameter name 'o' is too short for the scope of its usage"} # Stands for options.
       - {linters: [varnamelen], text: "variable name 'i' is too short for the scope of its usage"} # Common name for index.
       - path: .+_test.go
         linters:
+          - cyclop
           - exhaustruct
           - funlen
           - paralleltest
@@ -39,3 +46,6 @@ formatters:
     - gofumpt
     - goimports
     - golines
+  settings:
+    golines:
+      max-len: 80

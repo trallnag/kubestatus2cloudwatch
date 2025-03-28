@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# This script runs pre-commit hooks that are tagged with "fix" and "task".
+# Runs pre-commit hooks that are tagged with "fix" and "task".
 #
 # Pre-commit is executed twice so that the script only fails if there is
 # something really wrong and not just a successful fix.

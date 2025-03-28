@@ -3,24 +3,21 @@ package main
 import (
 	"cmp"
 	"context"
-	"encoding/json"
 	"flag"
 	"fmt"
+	"log/slog"
 	"os"
-	"path/filepath"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
+	aws "github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
-	cloudwatchtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
+	cw "github.com/aws/aws-sdk-go-v2/service/cloudwatch"
+	cwtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
+	sts "github.com/aws/aws-sdk-go-v2/service/sts"
+	kubemetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kube "k8s.io/client-go/kubernetes"
+	kuberest "k8s.io/client-go/rest"
+	kubeclientcmd "k8s.io/client-go/tools/clientcmd"
 )
 
 var (
@@ -31,21 +28,36 @@ var (
 )
 
 func main() {
-	exitCode := RunMain()
+	ctx := context.Background()
+
+	exitCode := runMain(ctx, nil)
 	os.Exit(exitCode)
 }
 
-func RunMain() int {
-	// Reset the flag set to avoid "flag redefined" errors during tests.
+// runMain is the main entry point for the program. It parses command line
+// arguments, creates a logger if the passed logger is nil, and executes the
+// main logic of the program. The return value represents the exit status.
+func runMain(ctx context.Context, log *slog.Logger) int {
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
-	configFlag := flag.String("config", "", "Path to the configuration file.")
-	verboseFlag := flag.Bool("verbose", false, "Make the program more talkative.")
-	versionFlag := flag.Bool("version", false, "Print version information and exit.")
+	configFlag := flag.String(
+		"config",
+		"",
+		"Path to the configuration file.",
+	)
+	verboseFlag := flag.Bool(
+		"verbose",
+		false,
+		"Make the program more talkative.",
+	)
+	versionFlag := flag.Bool(
+		"version",
+		false,
+		"Print version information and exit.",
+	)
 
 	flag.Parse()
 
-	// If requested, just print version information and exit.
 	if *versionFlag {
 		if *verboseFlag {
 			fmt.Fprintf(
@@ -63,9 +75,7 @@ func RunMain() int {
 		return 0
 	}
 
-	// Load configuration based on given path.
-
-	config, err := NewConfig(cmp.Or(
+	config, err := newConfig(cmp.Or(
 		*configFlag, os.Getenv("KS2CW_CONFIG_PATH"), "config.yaml",
 	))
 	if err != nil {
@@ -74,302 +84,430 @@ func RunMain() int {
 		return 1
 	}
 
-	// Set up logging based on config.
+	if log == nil {
+		handlerOptions := &slog.HandlerOptions{
+			AddSource:   false,
+			Level:       slog.LevelInfo,
+			ReplaceAttr: nil,
+		}
 
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+		if *verboseFlag {
+			handlerOptions.AddSource = true
+		}
 
-	if config.Logging.Pretty {
-		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})
+		if config.Logging.Level == logLevelDebug {
+			handlerOptions.Level = slog.LevelDebug
+		}
+
+		if config.Logging.Format == logFormatJSON {
+			log = slog.New(slog.NewJSONHandler(os.Stderr, handlerOptions))
+		} else {
+			log = slog.New(slog.NewTextHandler(os.Stderr, handlerOptions))
+		}
 	}
 
-	if config.Logging.Level == "info" {
-		zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	} else {
-		zerolog.SetGlobalLevel(zerolog.DebugLevel)
-	}
-
-	log.Info().
-		Str("program", "kubestatus2cloudwatch").
-		Str("version", version).
-		Str("buildDate", buildDate).
-		Str("gitCommit", gitCommit).
-		Send()
-
-	// Set up Kubernetes client.
-
-	var kubeConfig *rest.Config
-
-	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
-		kubeConfig, err = rest.InClusterConfig()
-	} else {
-		kubeConfig, err = clientcmd.BuildConfigFromFlags(
-			"", filepath.Join(homedir.HomeDir(), ".kube", "config"),
-		)
-	}
-
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create Kubernetes config.")
-	}
-
-	kClient, err := kubernetes.NewForConfig(kubeConfig)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create Kubernetes client.")
-	}
-
-	// Set up Amazon CloudWatch client.
-
-	awsConfig, err := awsconfig.LoadDefaultConfig(context.TODO())
-	if err != nil {
-		log.Fatal().Err(err).
-			Msg("Failed to create AWS SDK config.")
-	}
-
-	cwClient := cloudwatch.NewFromConfig(awsConfig)
-
-	log.Info().Msg("Done with setup. Start aggregation.")
-
-	ExecuteRounds(
-		false, config.Seconds, config.Dry, config.Metric, config.Targets,
-		kClient, cwClient,
+	log.Info("Program information",
+		slog.String("program", program),
+		slog.String("version", version),
+		slog.String("buildDate", buildDate),
+		slog.String("gitCommit", gitCommit),
 	)
+
+	kubernetesClient, err := newKubernetesClient()
+	if err != nil {
+		log.Error("Failed to create Kubernetes client.",
+			slog.Any("error", err),
+		)
+
+		return 1
+	}
+
+	cloudwatchClient, err := newCloudwatchClient(ctx)
+	if err != nil {
+		log.Error("Failed to create CloudWatch client.",
+			slog.Any("error", err),
+		)
+
+		return 1
+	}
+
+	if err = executeRounds(&executeRoundsOptions{
+		ctx:      ctx,
+		log:      log,
+		dry:      config.DryRun,
+		kClient:  kubernetesClient,
+		cwClient: cloudwatchClient,
+		single:   false,
+		seconds:  config.Seconds,
+		metric:   config.Metric,
+		targets:  config.Targets,
+	}); err != nil {
+		log.Error("Failure during round execution.",
+			slog.Any("error", err),
+		)
+
+		return 1
+	}
 
 	return 0
 }
 
-// ExecuteRounds indefinitely executes tick rounds (except if single is true,
-// in which case only a single tick round is executed). From the config the
-// keys seconds, dry, metric, and targets are used. The clients for Kubernetes
-// and CloudWatch are expected to be ready to use.
-func ExecuteRounds(
-	single bool, seconds int, dry bool, metric Metric, targets []Target,
-	kClient kubernetes.Interface, cwClient CWPutMetricDataAPI,
-) {
-	tickCount := 0
-	ticker := time.NewTicker(time.Duration(seconds) * time.Second)
+// newKubernetesClient creates and configures a new Kubernetes client.
+func newKubernetesClient() (*kube.Clientset, error) {
+	var config *kuberest.Config
 
-	for ; true; <-ticker.C {
-		tickCount++
-		tickStart := time.Now()
-		tickLogger := log.With().Int("tickCount", tickCount).Logger()
-		tickLogger.Info().Msg("Executing new tick round.")
+	var err error
 
-		err := UpdateMetric(
-			dry, cwClient, metric.Namespace,
-			metric.Name, metric.Dimensions,
-			PerformScan(kClient, targets).Success,
-		)
+	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
+		config, err = kuberest.InClusterConfig()
 		if err != nil {
-			tickLogger.Error().Err(err).Msg("Failed to update metric.")
+			return nil, fmt.Errorf(
+				"create in-cluster Kubernetes config: %v", err,
+			)
 		}
+	} else {
+		config, err = kubeclientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			kubeclientcmd.NewDefaultClientConfigLoadingRules(),
+			&kubeclientcmd.ConfigOverrides{},
+		).ClientConfig()
+		if err != nil {
+			return nil, fmt.Errorf(
+				"create out-of-cluster Kubernetes config: %v", err,
+			)
+		}
+	}
 
-		tickDuration := time.Since(tickStart).Truncate(time.Millisecond)
-		tickLogger.Info().
-			Str("tickDuration", tickDuration.String()).
-			Msg("Done with tick round.")
+	client, err := kube.NewForConfig(config)
+	if err != nil {
+		return nil, fmt.Errorf(
+			"create Kubernetes client: %v", err,
+		)
+	}
 
-		if single {
-			ticker.Stop()
+	if _, err = client.Discovery().ServerVersion(); err != nil {
+		return nil, fmt.Errorf(
+			"get Kubernetes server version: %v", err,
+		)
+	}
 
-			break
+	return client, nil
+}
+
+// newCloudwatchClient creates and configures a new CloudWatch client.
+func newCloudwatchClient(ctx context.Context) (*cw.Client, error) {
+	config, err := awsconfig.LoadDefaultConfig(ctx)
+	if err != nil {
+		return nil, fmt.Errorf("create AWS SDK config: %v", err)
+	}
+
+	stsClient := sts.NewFromConfig(config)
+
+	if _, err = stsClient.GetCallerIdentity(
+		ctx, &sts.GetCallerIdentityInput{},
+	); err != nil {
+		return nil, fmt.Errorf("get AWS caller identity: %v", err)
+	}
+
+	return cw.NewFromConfig(config), nil
+}
+
+// executeRoundsOptions holds the input for the executeRounds function.
+type executeRoundsOptions struct {
+	ctx context.Context
+	log *slog.Logger
+	dry bool
+
+	// Clients for Kubernetes and CloudWatch.
+	kClient  kube.Interface
+	cwClient cwPutMetricDataAPI
+
+	// Single run flag. If enabled, only a single tick round is executed.
+	single bool
+
+	// Seconds between tick rounds.
+	seconds int
+
+	// Metric to update.
+	metric metric
+
+	// Targets to scan.
+	targets []target
+}
+
+// executeRounds executes tick rounds.
+func executeRounds(o *executeRoundsOptions) error {
+	tickCount := 0
+
+	ticker := time.NewTicker(time.Duration(o.seconds) * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-o.ctx.Done():
+			o.log.Info("Received shutdown signal. Stopping.")
+
+			return nil
+		case <-ticker.C:
+			tickCount++
+			tickStart := time.Now()
+			tickLog := o.log.With(slog.Int("tickCount", tickCount))
+			tickLog.Info("Executing new tick round.")
+
+			scan := performScan(&performScanOptions{
+				ctx:     o.ctx,
+				log:     tickLog,
+				client:  o.kClient,
+				targets: o.targets,
+			})
+
+			if err := updateMetric(&updateMetricOptions{
+				ctx:        o.ctx,
+				dry:        o.dry,
+				client:     o.cwClient,
+				namespace:  o.metric.Namespace,
+				name:       o.metric.Name,
+				dimensions: o.metric.Dimensions,
+				value:      scan.ready,
+			}); err != nil {
+				return fmt.Errorf("update metric: %v", err)
+			}
+
+			tickDuration := time.Since(tickStart).Truncate(time.Millisecond)
+			tickLog.Info("Done with tick round",
+				slog.String("duration", tickDuration.String()),
+			)
+
+			if o.single {
+				tickLog.Info("Single round requested. Stopping.")
+
+				return nil
+			}
 		}
 	}
 }
 
-// IsFittingMode checks if the given and expected number of target instances is
+// isFittingMode checks if the given and expected number of target instances is
 // fitting the mode. Two modes are supported: "AllOfThem" requires all replicas
 // to be ready. "AtLeastOne" requires at least one replica to be ready.
-func IsFittingMode(mode string, got int, want int) bool {
+func isFittingMode(mode string, got int, want int) bool {
 	switch mode {
-	case ModeAllOfThem:
+	case modeAllOfThem:
 		return got == want
-	case ModeAtLeastOne:
+	case modeAtLeastOne:
 		return want == 0 || got > 0
 	default:
 		return false
 	}
 }
 
-// Scan stores data regarding a single scan run (that includes one or more
-// targets). The "Success" field is false of one or more target scans failed
+// scan stores data regarding a single scan run (that includes one or more
+// targets). The "success" field is false of one or more target scans failed
 // or did not match expected condition and status.
-type Scan struct {
-	// Success is false if at least one target scan failed for example due to
+type scan struct {
+	// success is false if at least one target scan failed for example due to
 	// the target resource not being found or a network error while calling.
-	Success bool `json:"success"`
+	success bool
 
 	// Shows if all targets are ready or if at least one target is not ready.
-	Ready bool `json:"ready"`
+	// Basically, if at least one result in the list of results is success=false
+	// or ready=false, this is false.
+	ready bool
 
 	// List of all results by target. One result per target.
-	Results []Result `json:"results"`
+	results []result
 }
 
-// Result holds information regarding a single target scan in a scan. Based on
+// result holds information regarding a single target scan in a scan. Based on
 // the given target configuration. Several fields are simply passed through.
-type Result struct {
+type result struct {
 	// Was the scan for this target successful? Meaning did the Kubernetes API
 	// query succeed or not (for example due to target not existing). Only if
-	// this is true, "Ready" is valid.
-	Success bool `json:"success"`
+	// this is true, "ready" is valid.
+	success bool
 
 	// Shows if the target is ready or not according to configured mode.
-	Ready bool `json:"ready"`
+	ready bool
 
 	// Type of the scanned target. For example "Deployment" or "StatefulSet".
-	Kind string `json:"kind"`
+	kind string
 
-	// Namespace of the scanned target. For example "kube-system".
-	Namespace string `json:"namespace"`
+	// namespace of the scanned target. For example "kube-system".
+	namespace string
 
-	// Name of the scanned target. For example "prometheus".
-	Name string `json:"name"`
+	// name of the scanned target. For example "prometheus".
+	name string
 
-	// Mode of the scanned target. For example "AllOfThem".
-	Mode string `json:"mode"`
+	// mode of the scanned target. For example "AllOfThem".
+	mode string
 
-	Got  int `json:"got"`
-	Want int `json:"want"`
+	// Ready information.
+	got  int
+	want int
 }
 
-// PerformScan queries the Kubernetes API for all given targets and checks
-// condition status of the respective resources. The results of individual
-// targets is collected in the returned struct.
-//
-// Currently only resources of the kind Deployment are supported.
-func PerformScan(client kubernetes.Interface, targets []Target) Scan {
-	//nolint:exhaustruct // Field "Results" is populated later.
-	scan := Scan{Success: true, Ready: true}
+// performScanOptions holds the input for the performScan function.
+type performScanOptions struct {
+	ctx context.Context
+	log *slog.Logger
 
-	for _, target := range targets {
-		//nolint:exhaustruct // Fields "Got" and "Want" are populated later.
-		result := Result{
-			Success:   true,
-			Ready:     true,
-			Kind:      target.Kind,
-			Namespace: target.Namespace,
-			Name:      target.Name,
-			Mode:      target.Mode,
+	// Kubernetes client.
+	client kube.Interface
+
+	// Targets to scan.
+	targets []target
+}
+
+// performScan queries the Kubernetes API for all given targets and checks
+// condition status of the respective resources. The results of individual
+// target scans are collected in the returned struct. Errors are logged and then
+// swallowed.
+func performScan(o *performScanOptions) scan {
+	scan := scan{success: true, ready: true, results: nil}
+
+	for _, target := range o.targets {
+		result := result{
+			success:   true,
+			ready:     true,
+			kind:      target.Kind,
+			namespace: target.Namespace,
+			name:      target.Name,
+			mode:      target.Mode,
+			got:       0,
+			want:      0,
 		}
 
 		switch target.Kind {
-		case KindDaemonSet:
-			daemonSet, err := client.AppsV1().
+		case kindDaemonSet:
+			daemonSet, err := o.client.AppsV1().
 				DaemonSets(target.Namespace).
-				Get(context.TODO(), target.Name, metav1.GetOptions{})
+				Get(o.ctx, target.Name, kubemetav1.GetOptions{})
 			if err != nil {
-				log.Error().Err(err).Msg("Failed to query Kubernetes API.")
+				o.log.Error("Failed to query Kubernetes API.",
+					slog.Any("error", err),
+				)
 
-				scan.Success, scan.Ready = false, false
-				result.Success, result.Ready = false, false
+				scan.success, scan.ready = false, false
+				result.success, result.ready = false, false
 			} else {
-				result.Got = int(daemonSet.Status.DesiredNumberScheduled)
-				result.Want = int(daemonSet.Status.NumberReady)
+				result.got = int(daemonSet.Status.DesiredNumberScheduled)
+				result.want = int(daemonSet.Status.NumberReady)
 			}
-		case KindDeployment:
-			deployment, err := client.AppsV1().
+		case kindDeployment:
+			deployment, err := o.client.AppsV1().
 				Deployments(target.Namespace).
-				Get(context.TODO(), target.Name, metav1.GetOptions{})
+				Get(o.ctx, target.Name, kubemetav1.GetOptions{})
 			if err != nil {
-				log.Error().Err(err).Msg("Failed to query Kubernetes API.")
+				o.log.Error("Failed to query Kubernetes API.",
+					slog.Any("error", err),
+				)
 
-				scan.Success, scan.Ready = false, false
-				result.Success, result.Ready = false, false
+				scan.success, scan.ready = false, false
+				result.success, result.ready = false, false
 			} else {
-				result.Got = int(deployment.Status.Replicas)
-				result.Want = int(deployment.Status.ReadyReplicas)
+				result.got = int(deployment.Status.Replicas)
+				result.want = int(deployment.Status.ReadyReplicas)
 			}
-		case KindStatefulSet:
-			statefulSet, err := client.AppsV1().
+		case kindStatefulSet:
+			statefulSet, err := o.client.AppsV1().
 				StatefulSets(target.Namespace).
-				Get(context.TODO(), target.Name, metav1.GetOptions{})
+				Get(o.ctx, target.Name, kubemetav1.GetOptions{})
 			if err != nil {
-				log.Error().Err(err).Msg("Failed to query Kubernetes API.")
+				o.log.Error("Failed to query Kubernetes API.",
+					slog.Any("error", err),
+				)
 
-				scan.Success, scan.Ready = false, false
-				result.Success, result.Ready = false, false
+				scan.success, scan.ready = false, false
+				result.success, result.ready = false, false
 			} else {
-				result.Got = int(statefulSet.Status.Replicas)
-				result.Want = int(statefulSet.Status.ReadyReplicas)
+				result.got = int(statefulSet.Status.Replicas)
+				result.want = int(statefulSet.Status.ReadyReplicas)
 			}
 		default:
-			scan.Success, scan.Ready = false, false
-			result.Success, result.Ready = false, false
+			scan.success, scan.ready = false, false
+			result.success, result.ready = false, false
 		}
 
-		if result.Success {
-			result.Ready = IsFittingMode(target.Mode, result.Got, result.Want)
+		if result.success {
+			result.ready = isFittingMode(target.Mode, result.got, result.want)
 		}
 
-		if !result.Ready {
-			scan.Ready = false
+		if !result.ready {
+			scan.ready = false
 		}
 
-		scan.Results = append(scan.Results, result)
+		scan.results = append(scan.results, result)
 	}
 
-	scanJSON, err := json.Marshal(scan)
-	if err != nil {
-		log.Error().Err(err).Msg("Extraordinary error.")
-	}
-
-	if scan.Success && scan.Ready {
-		log.Debug().RawJSON("scan", scanJSON).
-			Msg("Done with scan. All looking good.")
+	if scan.success && scan.ready {
+		o.log.Debug("Done with scan. All looking good.", slog.Any("scan", scan))
 	} else {
-		log.Info().RawJSON("scan", scanJSON).
-			Msg("Done with scan. Something is wrong.")
+		o.log.Warn("Done with scan. Something is wrong.", slog.Any("scan", scan))
 	}
 
 	return scan
 }
 
-// CWPutMetricDataAPI defines the interface for the PutMetricData function.
+// cwPutMetricDataAPI defines the interface for the PutMetricData function.
 // We use this interface to test the function using a mocked service.
-type CWPutMetricDataAPI interface {
+type cwPutMetricDataAPI interface {
 	PutMetricData(ctx context.Context,
-		params *cloudwatch.PutMetricDataInput,
-		optFns ...func(*cloudwatch.Options),
-	) (*cloudwatch.PutMetricDataOutput, error)
+		params *cw.PutMetricDataInput,
+		optFns ...func(*cw.Options),
+	) (*cw.PutMetricDataOutput, error)
 }
 
-// UpdateMetric updates a metric using PutMetricData. The value of the metric
-// is binary. That's why "value" is a boolean. The parameters "namespace" and
-// "name" must be set, while "dimensions" can be an empty list.
-func UpdateMetric(
-	dry bool,
-	client CWPutMetricDataAPI,
-	namespace string,
-	name string,
-	dimensions []Dimension,
-	value bool,
-) error {
+// updateMetricOptions holds the input for the updateMetric function.
+type updateMetricOptions struct {
+	ctx context.Context
+	dry bool
+
+	// CloudWatch client with required interface.
+	client cwPutMetricDataAPI
+
+	// Namespace and name of the CloudWatch metric to update.
+	namespace string
+	name      string
+
+	// Dimensions of the CloudWatch metric to update.
+	dimensions []dimension
+
+	// Value of the CloudWatch metric to update.
+	value bool
+}
+
+// updateMetric updates a CloudWatch metric using PutMetricData.
+func updateMetric(o *updateMetricOptions) error {
+	if o.dimensions == nil {
+		o.dimensions = []dimension{}
+	}
+
 	metricValue := 0.0
-	if value {
+	if o.value {
 		metricValue = 1.0
 	}
 
-	metricDimensions := []cloudwatchtypes.Dimension{}
-	for _, configDimension := range dimensions {
-		metricDimensions = append(metricDimensions, cloudwatchtypes.Dimension{
+	metricDimensions := []cwtypes.Dimension{}
+	for _, configDimension := range o.dimensions {
+		metricDimensions = append(metricDimensions, cwtypes.Dimension{
 			Name:  aws.String(configDimension.Name),
 			Value: aws.String(configDimension.Value),
 		})
 	}
 
-	input := &cloudwatch.PutMetricDataInput{
-		Namespace: aws.String(namespace),
-		MetricData: []cloudwatchtypes.MetricDatum{{
-			MetricName: aws.String(name),
-			Unit:       cloudwatchtypes.StandardUnitNone,
-			Value:      aws.Float64(metricValue),
-			Dimensions: metricDimensions,
-		}},
-	}
-
-	if !dry {
-		_, err := client.PutMetricData(context.TODO(), input)
+	if !o.dry {
+		_, err := o.client.PutMetricData(o.ctx,
+			&cw.PutMetricDataInput{
+				Namespace: aws.String(o.namespace),
+				MetricData: []cwtypes.MetricDatum{{
+					MetricName: aws.String(o.name),
+					Unit:       cwtypes.StandardUnitNone,
+					Value:      aws.Float64(metricValue),
+					Dimensions: metricDimensions,
+				}},
+			},
+		)
 		if err != nil {
-			return fmt.Errorf("failed to update metric: %w", err)
+			return fmt.Errorf("update metric: %v", err)
 		}
 	}
 

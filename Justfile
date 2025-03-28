@@ -120,7 +120,15 @@ check--golangci:
 
 # Run Go tests.
 test:
-  go test -v -race -covermode=atomic -coverprofile=coverage.out
+  go test --race --covermode=atomic --coverprofile=coverage.out
+
+# Run Go unit tests.
+test--short:
+  go test --race --covermode=atomic --coverprofile=coverage.out --skip ^TestIntegration.+$
+
+# Run Go integration tests.
+test--long:
+  go test --race --covermode=atomic --coverprofile=coverage.out --run ^TestIntegration.+$
 
 # Create release notes based on changelog.
 [group('misc')]

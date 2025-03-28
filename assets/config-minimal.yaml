@@ -1,6 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/trallnag/kubestatus2cloudwatch/refs/heads/master/assets/config.schema.json
-
-seconds: 60
+# yaml-language-server: $schema=config.schema.json
 
 metric:
   namespace: MyNamespace
