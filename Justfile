@@ -76,7 +76,8 @@ fix:
     "just fix--pre-commit" \
     "just fix--mdformat" \
     "just fix--shfmt" \
-    "just fix--gofumpt"
+    "just fix--gofumpt" \
+    "just fix--golangci"
 
 # Run pre-commit hooks that fix stuff.
 fix--pre-commit:
@@ -93,6 +94,10 @@ fix--shfmt:
 # Format Go files with gofumpt.
 fix--gofumpt:
   gofumpt -w .
+
+# Format Go files with formatters in golangci-lint.
+fix--golangci:
+  golangci-lint fmt
 
 # Run recipes that check stuff.
 check:
