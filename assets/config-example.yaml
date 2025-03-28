@@ -3,7 +3,7 @@
 # Skip updating CloudWatch metric. Optional. Defaults to false.
 dry: false
 
-# Scan interval. 60 seconds are recommended. Must be >= 5. Required.
+# Scan interval. 60 seconds are recommended. Must be >= 1. Required.
 seconds: 60
 
 # Logging configuration. Optional. Defaults to debug log level and structured

@@ -11,10 +11,9 @@
       "default": false
     },
     "seconds": {
-      "description": "Scan interval. 60 seconds are recommended. Must be >= 5. Required.",
+      "description": "Scan interval. 60 seconds are recommended. Must be >= 1. Required.",
       "type": "integer",
-      "minimum": 5,
-      "default": 0
+      "minimum": 1
     },
     "logging": {
       "description": "Logging configuration. Optional. Defaults to debug log level and structured logs using JSON.",

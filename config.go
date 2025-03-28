@@ -31,7 +31,7 @@ const (
 	ModeAtLeastOne = "AtLeastOne"
 )
 
-const MinSeconds = 5
+const MinSeconds = 1
 
 // Target is a single Kubernetes target to scan.
 type Target struct {

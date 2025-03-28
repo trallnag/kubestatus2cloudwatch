@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/trallnag/kubestatus2cloudwatch/refs/heads/master/assets/config.schema.json
+
+seconds: 60
+
+metric:
+  namespace: MyNamespace
+  name: MyMetric
+
+targets:
+  - kind: Deployment
+    namespace: default
+    name: busybox
+    mode: AllOfThem

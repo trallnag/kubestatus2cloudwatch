@@ -50,7 +50,7 @@ func TestNewConfig(t *testing.T) {
 	}, {
 		name:       "8_invalid_targets",
 		configFile: "config-invalid-targets.yaml",
-		ErrSubstr:  "failed validating targets config:",
+		ErrSubstr:  "failed validating targets config",
 		expSuccess: false,
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
