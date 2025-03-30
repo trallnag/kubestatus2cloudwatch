@@ -14,8 +14,9 @@ linters:
       - std-error-handling
     rules:
       - {linters: [cyclop], path: "main\\.go", text: "calculated cyclomatic complexity for function PerformScan"} # Big switch statement. Core logic.
-      - {linters: [cyclop], path: "main\\.go", text: "calculated cyclomatic complexity for function main"} # Contains bunch of setup code.
+      - {linters: [cyclop], path: "main\\.go", text: "calculated cyclomatic complexity for function RunMain"} # Contains bunch of setup code.
       - {linters: [err113], text: "do not define dynamic errors, use wrapped static errors instead"} # Dynamic errors are fine.
+      - {linters: [exhaustruct], text: "clientcmd\\.ConfigOverrides is missing fields"} # From library. Not all fields are used.
       - {linters: [exhaustruct], text: "cloudwatch\\.PutMetricDataInput is missing fields"} # From library. Not all fields are used.
       - {linters: [exhaustruct], text: "types\\.MetricDatum is missing fields"} # From library. Not all fields are used.
       - {linters: [exhaustruct], text: "v1\\.GetOptions is missing fields"} # From library. Not all fields are used.
