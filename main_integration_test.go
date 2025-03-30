@@ -86,6 +86,4 @@ func TestIntegrationRunMain(t *testing.T) {
 	t.Setenv("KS2CW_CONFIG_PATH", configFile.Name())
 
 	RunMain()
-
-
 }
