@@ -7,20 +7,19 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	cloudwatchtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
+	"github.com/aws/aws-sdk-go-v2/service/sts"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/client-go/util/homedir"
 )
 
 var (
@@ -36,7 +35,6 @@ func main() {
 }
 
 func RunMain() int {
-	// Reset the flag set to avoid "flag redefined" errors during tests.
 	flag.CommandLine = flag.NewFlagSet(os.Args[0], flag.ExitOnError)
 
 	configFlag := flag.String("config", "", "Path to the configuration file.")
@@ -45,7 +43,6 @@ func RunMain() int {
 
 	flag.Parse()
 
-	// If requested, just print version information and exit.
 	if *versionFlag {
 		if *verboseFlag {
 			fmt.Fprintf(
@@ -63,8 +60,6 @@ func RunMain() int {
 		return 0
 	}
 
-	// Load configuration based on given path.
-
 	config, err := NewConfig(cmp.Or(
 		*configFlag, os.Getenv("KS2CW_CONFIG_PATH"), "config.yaml",
 	))
@@ -73,8 +68,6 @@ func RunMain() int {
 
 		return 1
 	}
-
-	// Set up logging based on config.
 
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 
@@ -95,45 +88,70 @@ func RunMain() int {
 		Str("gitCommit", gitCommit).
 		Send()
 
-	// Set up Kubernetes client.
+	log.Info().Msg("Done with setup. Start aggregation.")
 
-	var kubeConfig *rest.Config
+	ExecuteRounds(
+		false,
+		config.Seconds,
+		config.Dry,
+		config.Metric,
+		config.Targets,
+		newKubernetesClient(),
+		newCloudwatchClient(),
+	)
+
+	return 0
+}
+
+// newKubernetesClient creates a new Kubernetes client.
+func newKubernetesClient() *kubernetes.Clientset {
+	var config *rest.Config
+	var err error
 
 	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
-		kubeConfig, err = rest.InClusterConfig()
+		config, err = rest.InClusterConfig()
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to create in-cluster Kubernetes config.")
+		}
 	} else {
-		kubeConfig, err = clientcmd.BuildConfigFromFlags(
-			"", filepath.Join(homedir.HomeDir(), ".kube", "config"),
-		)
+		config, err = clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
+			clientcmd.NewDefaultClientConfigLoadingRules(),
+			&clientcmd.ConfigOverrides{},
+		).ClientConfig()
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed to create out-of-cluster Kubernetes config.")
+		}
 	}
 
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed to create Kubernetes config.")
-	}
-
-	kClient, err := kubernetes.NewForConfig(kubeConfig)
+	client, err := kubernetes.NewForConfig(config)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed to create Kubernetes client.")
 	}
 
-	// Set up Amazon CloudWatch client.
+	_, err = client.Discovery().ServerVersion()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to get Kubernetes server version.")
+	}
 
-	awsConfig, err := awsconfig.LoadDefaultConfig(context.TODO())
+	return client
+}
+
+// newCloudwatchClient creates a new CloudWatch client.
+func newCloudwatchClient() *cloudwatch.Client {
+	config, err := awsconfig.LoadDefaultConfig(context.TODO())
 	if err != nil {
 		log.Fatal().Err(err).
 			Msg("Failed to create AWS SDK config.")
 	}
 
-	cwClient := cloudwatch.NewFromConfig(awsConfig)
+	stsClient := sts.NewFromConfig(config)
 
-	log.Info().Msg("Done with setup. Start aggregation.")
+	_, err = stsClient.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed to get AWS caller identity.")
+	}
 
-	ExecuteRounds(
-		false, config.Seconds, config.Dry, config.Metric, config.Targets,
-		kClient, cwClient,
-	)
-
-	return 0
+	return cloudwatch.NewFromConfig(config)
 }
 
 // ExecuteRounds indefinitely executes tick rounds (except if single is true,
