@@ -106,6 +106,7 @@ func RunMain() int {
 // newKubernetesClient creates a new Kubernetes client.
 func newKubernetesClient() *kubernetes.Clientset {
 	var config *rest.Config
+
 	var err error
 
 	if os.Getenv("KUBERNETES_SERVICE_HOST") != "" {
