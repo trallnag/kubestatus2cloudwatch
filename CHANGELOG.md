@@ -17,7 +17,8 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 - Changed default log level from `debug` to `info`.
 - Changed log format configuration from boolean `pretty` flag to `format` enum
   with allowed values `json` and `logfmt`.
-- Changed logging from zerolog to slog using included handlers for JSON and logfmt depending on configuration.
+- Changed logging from zerolog to slog using included handlers for JSON and
+  logfmt depending on configuration.
 - Renamed dry run flag from `dry` to `dryRun`.
 
 ### Fixed
