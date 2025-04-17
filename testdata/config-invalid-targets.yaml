@@ -1,13 +1,3 @@
-dry: false
-seconds: 5
-
-logging:
-  level: debug
-  pretty: false
-
 metric:
   namespace: MyNamespace
-  name: PromstackUp
-  dimensions:
-    - name: Cluster
-      value: MyCluster
+  name: MyMetric

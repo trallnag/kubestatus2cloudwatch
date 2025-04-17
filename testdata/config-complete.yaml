@@ -1,18 +1,22 @@
-dry: false
+dryRun: false
 seconds: 5
 
 logging:
   level: debug
-  pretty: false
+  format: logfmt
 
 metric:
   namespace: MyNamespace
-  name: PromstackUp
+  name: MyMetric
   dimensions:
     - name: Cluster
       value: MyCluster
 
 targets:
+  - kind: StatefulSet
+    namespace: observability
+    name: prometheus
+    mode: AllOfThem
   - kind: Deployment
     namespace: default
     name: socat-tunnel
@@ -20,12 +24,4 @@ targets:
   - kind: DaemonSet
     namespace: default
     name: debug-long-queries
-    mode: AllOfThem
-  - kind: StatefulSet
-    namespace: observability
-    name: prometheus-promstack-kube-prometheus-prometheus
-    mode: AllOfThem
-  - kind: StatefulSet
-    namespace: observability
-    name: alertmanager-promstack-kube-prometheus-alertmanager
     mode: AllOfThem
