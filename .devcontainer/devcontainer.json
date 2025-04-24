@@ -7,6 +7,10 @@
 
   "service": "vscode",
 
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {}
+  },
+
   "customizations": {
     "vscode": {
       "settings": {
@@ -18,7 +22,8 @@
         "go.lintFlags": ["--fast"],
         "go.alternateTools": {
           "golangci-lint": "/home/linuxbrew/.linuxbrew/bin/golangci-lint"
-        }
+        },
+        "go.testTimeout": "5m"
       },
 
       "extensions": [

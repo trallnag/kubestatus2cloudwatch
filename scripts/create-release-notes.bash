@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 #
-# This script generates the release notes for the latest release by extracting
-# them from the changelog, formatting them, and writing them to a file.
+# Generates the release notes for the latest release by extracting them from the
+# changelog, formatting them, and writing them to a file.
 #
 
 set -euo pipefail

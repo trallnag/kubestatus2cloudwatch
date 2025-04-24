@@ -3,9 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-
     command: sleep infinity
-
     volumes:
       # Workspace itself.
       - ..:/workspaces/kubestatus2cloudwatch:cached
