@@ -25,5 +25,15 @@
   "pre-commit": {
     "enabled": true,
     "prBodyNotes": [""]
-  }
+  },
+
+  "packageRules": [
+    {
+      "groupName": "GitHub Actions",
+      "groupSlug": "github-actions",
+      "matchUpdateTypes": ["digest"],
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["*"]
+    }
+  ]
 }
