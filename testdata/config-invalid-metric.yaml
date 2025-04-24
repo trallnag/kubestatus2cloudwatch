@@ -1,5 +1,0 @@
-targets:
-  - kind: StatefulSet
-    namespace: observability
-    name: prometheus
-    mode: AllOfThem

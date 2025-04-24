@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# This script updates the given tools managed with uv.
+# Updates the given tools managed with uv.
 #
 
 set -euo pipefail

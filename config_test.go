@@ -6,9 +6,38 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/google/go-cmp/cmp"
-	"github.com/lithammer/dedent"
+	cmp "github.com/google/go-cmp/cmp"
+	dedent "github.com/lithammer/dedent"
 )
+
+// newExampleConfig creates a valid example config.
+func newExampleConfig(t *testing.T) config {
+	t.Helper()
+
+	return config{
+		DryRun:  true,
+		Seconds: 63,
+		Logging: logging{
+			Level:  "debug",
+			Format: "logfmt",
+		},
+		Metric: metric{
+			Namespace: "MyNamespace",
+			Name:      "MyMetric",
+			Dimensions: []dimension{
+				{Name: "Cluster", Value: "MyCluster"},
+			},
+		},
+		Targets: []target{
+			{
+				Kind:      kindStatefulSet,
+				Namespace: "observability",
+				Name:      "prometheus",
+				Mode:      modeAllOfThem,
+			},
+		},
+	}
+}
 
 // TestNewConfig tests that the function newConfig correctly parses
 // configuration files. Validation of the config is not focus of this test.
@@ -25,7 +54,7 @@ func TestNewConfig(t *testing.T) {
 		want := "read config"
 
 		if !strings.Contains(err.Error(), want) {
-			t.Fatalf("Expected error to contain %q, got %q", want, err)
+			t.Errorf("Expected error to contain %q, got %q", want, err)
 		}
 	})
 
@@ -47,7 +76,7 @@ func TestNewConfig(t *testing.T) {
 		want := "unmarshal config"
 
 		if !strings.Contains(err.Error(), want) {
-			t.Fatalf("Expected error to contain %q, got %q", want, err)
+			t.Errorf("Expected error to contain %q, got %q", want, err)
 		}
 	})
 
@@ -68,7 +97,7 @@ func TestNewConfig(t *testing.T) {
 
 		want := "process config"
 		if !strings.Contains(err.Error(), want) {
-			t.Fatalf("Expected error to contain %q, got %q", want, err)
+			t.Errorf("Expected error to contain %q, got %q", want, err)
 		}
 	})
 
@@ -128,7 +157,7 @@ func TestNewConfig(t *testing.T) {
 		}
 
 		if diff := cmp.Diff(wantConfig, gotConfig); diff != "" {
-			t.Fatalf("Config mismatch (-want +got):\n%v", diff)
+			t.Errorf("Config mismatch (-want +got):\n%v", diff)
 		}
 	})
 }
@@ -146,7 +175,7 @@ func TestProcessConfig(t *testing.T) {
 		}
 
 		if processedConfig.Seconds != defaultSeconds {
-			t.Fatalf(
+			t.Errorf(
 				"Unexpected seconds value: got %v, want %v",
 				processedConfig.Seconds,
 				defaultSeconds,
@@ -165,7 +194,7 @@ func TestProcessConfig(t *testing.T) {
 
 		want := "missing: metric.namespace"
 		if !strings.Contains(err.Error(), want) {
-			t.Fatalf("Expected error to contain %q, got %q", want, err)
+			t.Errorf("Expected error to contain %q, got %q", want, err)
 		}
 	})
 
@@ -180,7 +209,7 @@ func TestProcessConfig(t *testing.T) {
 
 		want := "missing: target[0].kind"
 		if !strings.Contains(err.Error(), want) {
-			t.Fatalf("Expected error to contain %q, got %q", want, err)
+			t.Errorf("Expected error to contain %q, got %q", want, err)
 		}
 	})
 
@@ -194,7 +223,7 @@ func TestProcessConfig(t *testing.T) {
 		}
 
 		if processedConfig.Logging.Level != logLevelInfo {
-			t.Fatalf(
+			t.Errorf(
 				"Unexpected log level: got %v, want %v",
 				processedConfig.Logging.Level,
 				logLevelInfo,
@@ -213,7 +242,7 @@ func TestProcessConfig(t *testing.T) {
 
 		want := "logging.level invalid: invalid"
 		if !strings.Contains(err.Error(), want) {
-			t.Fatalf("Expected error to contain %q, got %q", want, err)
+			t.Errorf("Expected error to contain %q, got %q", want, err)
 		}
 	})
 
@@ -227,7 +256,7 @@ func TestProcessConfig(t *testing.T) {
 		}
 
 		if processedConfig.Logging.Format != logFormatJSON {
-			t.Fatalf(
+			t.Errorf(
 				"Unexpected log format: got %v, want %v",
 				processedConfig.Logging.Format,
 				logFormatJSON,
@@ -246,7 +275,7 @@ func TestProcessConfig(t *testing.T) {
 
 		want := "logging.format invalid: invalid"
 		if !strings.Contains(err.Error(), want) {
-			t.Fatalf("Expected error to contain %q, got %q", want, err)
+			t.Errorf("Expected error to contain %q, got %q", want, err)
 		}
 	})
 }
@@ -307,13 +336,13 @@ func TestValidateMetric(t *testing.T) {
 			err := validateMetric(tc.metric)
 			if err != nil {
 				if len(tc.errSubstr) == 0 {
-					t.Fatalf("Unexpected failure: %v", err)
+					t.Errorf("Unexpected failure: %v", err)
 				} else if !strings.Contains(err.Error(), tc.errSubstr) {
-					t.Fatalf("Error does not contain expected substring: %v", err)
+					t.Errorf("Error does not contain expected substring: %v", err)
 				}
 			} else {
 				if len(tc.errSubstr) != 0 {
-					t.Fatal("Unexpected success")
+					t.Errorf("Unexpected success")
 				}
 			}
 		})
@@ -393,44 +422,15 @@ func TestValidateTargets(t *testing.T) {
 			err := validateTargets(tc.targets)
 			if err != nil {
 				if len(tc.errSubstr) == 0 {
-					t.Fatalf("Unexpected failure: %v", err)
+					t.Errorf("Unexpected failure: %v", err)
 				} else if !strings.Contains(err.Error(), tc.errSubstr) {
-					t.Fatalf("Error does not contain expected substring: %v", err)
+					t.Errorf("Error does not contain expected substring: %v", err)
 				}
 			} else {
 				if len(tc.errSubstr) != 0 {
-					t.Fatal("Unexpected success")
+					t.Errorf("Unexpected success")
 				}
 			}
 		})
-	}
-}
-
-// newExampleConfig creates a valid example config.
-func newExampleConfig(t *testing.T) config {
-	t.Helper()
-
-	return config{
-		DryRun:  true,
-		Seconds: 63,
-		Logging: logging{
-			Level:  "debug",
-			Format: "logfmt",
-		},
-		Metric: metric{
-			Namespace: "MyNamespace",
-			Name:      "MyMetric",
-			Dimensions: []dimension{
-				{Name: "Cluster", Value: "MyCluster"},
-			},
-		},
-		Targets: []target{
-			{
-				Kind:      kindStatefulSet,
-				Namespace: "observability",
-				Name:      "prometheus",
-				Mode:      modeAllOfThem,
-			},
-		},
 	}
 }

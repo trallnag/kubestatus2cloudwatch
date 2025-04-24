@@ -9,12 +9,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
-	"github.com/joho/godotenv"
-	appsv1 "k8s.io/api/apps/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime"
-	"k8s.io/client-go/kubernetes/fake"
+	cw "github.com/aws/aws-sdk-go-v2/service/cloudwatch"
+	godotenv "github.com/joho/godotenv"
+	kubeappsv1 "k8s.io/api/apps/v1"
+	kubemetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kuberuntime "k8s.io/apimachinery/pkg/runtime"
+	kubefake "k8s.io/client-go/kubernetes/fake"
 )
 
 var dotEnv map[string]string
@@ -170,43 +170,43 @@ func TestIsFittingMode(t *testing.T) {
 		want    int    // Expected number.
 		fitting bool   // Is it fitting the mode?
 	}{{
-		name:    "1_UnknownMode",
+		name:    "UnknownMode",
 		mode:    "DoesNotExist",
 		got:     1,
 		want:    1,
 		fitting: false,
 	}, {
-		name:    "2_AotFitting",
+		name:    "AotFitting",
 		mode:    modeAllOfThem,
 		got:     3,
 		want:    3,
 		fitting: true,
 	}, {
-		name:    "3_AotNotFitting",
+		name:    "AotNotFitting",
 		mode:    modeAllOfThem,
 		got:     3,
 		want:    5,
 		fitting: false,
 	}, {
-		name:    "4_AotFittingZero",
+		name:    "AotFittingZero",
 		mode:    modeAllOfThem,
 		got:     0,
 		want:    0,
 		fitting: true,
 	}, {
-		name:    "5_AloFittingZero",
+		name:    "AloFittingZero",
 		mode:    modeAtLeastOne,
 		got:     3,
 		want:    0,
 		fitting: true,
 	}, {
-		name:    "6_AloFitting",
+		name:    "AloFitting",
 		mode:    modeAtLeastOne,
 		got:     1,
 		want:    8,
 		fitting: true,
 	}, {
-		name:    "7_AloNotFitting",
+		name:    "AloNotFitting",
 		mode:    modeAtLeastOne,
 		got:     0,
 		want:    3,
@@ -226,15 +226,15 @@ func TestIsFittingMode(t *testing.T) {
 // TestPerformScan tests the performScan function.
 func TestPerformScan(t *testing.T) {
 	for _, tc := range []struct {
-		name             string           // Name of test case.
-		objects          []runtime.Object // Kubernetes objects.
-		targets          []target         // Targets to scan.
-		expResultSuccess []bool           // Expected result success status.
-		expResultReady   []bool           // Expected result ready status.
-		expScanSuccess   bool             // Expected scan success status.
-		expScanReady     bool             // Expected scan ready status.
+		name             string               // Name of test case.
+		objects          []kuberuntime.Object // Kubernetes objects.
+		targets          []target             // Targets to scan.
+		expResultSuccess []bool               // Expected result success status.
+		expResultReady   []bool               // Expected result ready status.
+		expScanSuccess   bool                 // Expected scan success status.
+		expScanReady     bool                 // Expected scan ready status.
 	}{{
-		name: "1_DaemonSetQueryFailure",
+		name: "DaemonSetQueryFailure",
 		targets: []target{
 			{kindDaemonSet, "Foo", "Baz", modeAllOfThem},
 		},
@@ -243,7 +243,7 @@ func TestPerformScan(t *testing.T) {
 		expScanSuccess:   false,
 		expScanReady:     false,
 	}, {
-		name: "2_DeploymentQueryFailure",
+		name: "DeploymentQueryFailure",
 		targets: []target{
 			{kindDeployment, "Foo", "Baz", modeAllOfThem},
 		},
@@ -252,7 +252,7 @@ func TestPerformScan(t *testing.T) {
 		expScanSuccess:   false,
 		expScanReady:     false,
 	}, {
-		name: "3_StatefulsetQueryFailure",
+		name: "StatefulsetQueryFailure",
 		targets: []target{
 			{kindStatefulSet, "Foo", "Baz", modeAllOfThem},
 		},
@@ -261,7 +261,7 @@ func TestPerformScan(t *testing.T) {
 		expScanSuccess:   false,
 		expScanReady:     false,
 	}, {
-		name: "4_UnsupportedKind",
+		name: "UnsupportedKind",
 		targets: []target{
 			{"NotSupported", "Foo", "Baz", modeAllOfThem},
 		},
@@ -270,14 +270,14 @@ func TestPerformScan(t *testing.T) {
 		expScanSuccess:   false,
 		expScanReady:     false,
 	}, {
-		name: "5_DaemonsetSuccessReady",
-		objects: []runtime.Object{
-			&appsv1.DaemonSet{
-				ObjectMeta: metav1.ObjectMeta{
+		name: "DaemonsetSuccessReady",
+		objects: []kuberuntime.Object{
+			&kubeappsv1.DaemonSet{
+				ObjectMeta: kubemetav1.ObjectMeta{
 					Namespace: "Foo",
 					Name:      "Baz",
 				},
-				Status: appsv1.DaemonSetStatus{
+				Status: kubeappsv1.DaemonSetStatus{
 					DesiredNumberScheduled: 1,
 					NumberReady:            1,
 				},
@@ -291,14 +291,14 @@ func TestPerformScan(t *testing.T) {
 		expScanSuccess:   true,
 		expScanReady:     true,
 	}, {
-		name: "6_DeploymentSuccessReady",
-		objects: []runtime.Object{
-			&appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
+		name: "DeploymentSuccessReady",
+		objects: []kuberuntime.Object{
+			&kubeappsv1.Deployment{
+				ObjectMeta: kubemetav1.ObjectMeta{
 					Namespace: "Foo",
 					Name:      "Baz",
 				},
-				Status: appsv1.DeploymentStatus{
+				Status: kubeappsv1.DeploymentStatus{
 					Replicas:      1,
 					ReadyReplicas: 1,
 				},
@@ -312,14 +312,14 @@ func TestPerformScan(t *testing.T) {
 		expScanSuccess:   true,
 		expScanReady:     true,
 	}, {
-		name: "7_StatefulSetSuccessReady",
-		objects: []runtime.Object{
-			&appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
+		name: "StatefulSetSuccessReady",
+		objects: []kuberuntime.Object{
+			&kubeappsv1.StatefulSet{
+				ObjectMeta: kubemetav1.ObjectMeta{
 					Namespace: "Foo",
 					Name:      "Baz",
 				},
-				Status: appsv1.StatefulSetStatus{
+				Status: kubeappsv1.StatefulSetStatus{
 					Replicas:      1,
 					ReadyReplicas: 1,
 				},
@@ -333,14 +333,14 @@ func TestPerformScan(t *testing.T) {
 		expScanSuccess:   true,
 		expScanReady:     true,
 	}, {
-		name: "8_StatefulsetSuccessNotReady",
-		objects: []runtime.Object{
-			&appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
+		name: "StatefulsetSuccessNotReady",
+		objects: []kuberuntime.Object{
+			&kubeappsv1.StatefulSet{
+				ObjectMeta: kubemetav1.ObjectMeta{
 					Namespace: "Foo",
 					Name:      "Baz",
 				},
-				Status: appsv1.StatefulSetStatus{
+				Status: kubeappsv1.StatefulSetStatus{
 					Replicas:      5,
 					ReadyReplicas: 1,
 				},
@@ -354,24 +354,24 @@ func TestPerformScan(t *testing.T) {
 		expScanSuccess:   true,
 		expScanReady:     false,
 	}, {
-		name: "9_FailureMultiMix",
-		objects: []runtime.Object{
-			&appsv1.StatefulSet{
-				ObjectMeta: metav1.ObjectMeta{
+		name: "FailureMultiMix",
+		objects: []kuberuntime.Object{
+			&kubeappsv1.StatefulSet{
+				ObjectMeta: kubemetav1.ObjectMeta{
 					Namespace: "Foo",
 					Name:      "Baz",
 				},
-				Status: appsv1.StatefulSetStatus{
+				Status: kubeappsv1.StatefulSetStatus{
 					Replicas:      5,
 					ReadyReplicas: 1,
 				},
 			},
-			&appsv1.Deployment{
-				ObjectMeta: metav1.ObjectMeta{
+			&kubeappsv1.Deployment{
+				ObjectMeta: kubemetav1.ObjectMeta{
 					Namespace: "Foo",
 					Name:      "Baz",
 				},
-				Status: appsv1.DeploymentStatus{
+				Status: kubeappsv1.DeploymentStatus{
 					Replicas:      1,
 					ReadyReplicas: 1,
 				},
@@ -389,7 +389,7 @@ func TestPerformScan(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			log := newLogger(t)
 
-			fakeClientset := fake.NewSimpleClientset(tc.objects...)
+			fakeClientset := kubefake.NewSimpleClientset(tc.objects...)
 			scan := performScan(&performScanOptions{
 				ctx:     t.Context(),
 				log:     log,
@@ -459,28 +459,24 @@ func TestPerformScan(t *testing.T) {
 	}
 }
 
-// cwPutMetricDataImpl implements CWPutMetricDataAPI. Based on the example
-// provided by AWS [here] on GitHub.
-//
-// [here]: https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/gov2/cloudwatch/CreateCustomMetric
+// cwPutMetricDataImpl implements CWPutMetricDataAPI. Based on this example:
+// https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/gov2/cloudwatch/CreateCustomMetric
 type cwPutMetricDataImpl struct {
 	returnError bool
 }
 
-// PutMetricData implements CWPutMetricDataAPI. Based on the example provided
-// by AWS [here] on GitHub.
-//
-// [here]: https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/gov2/cloudwatch/CreateCustomMetric
+// PutMetricData implements CWPutMetricDataAPI. Based on this example:
+// https://github.com/awsdocs/aws-doc-sdk-examples/tree/main/gov2/cloudwatch/CreateCustomMetric
 func (dt cwPutMetricDataImpl) PutMetricData(
 	_ context.Context,
-	_ *cloudwatch.PutMetricDataInput,
-	_ ...func(*cloudwatch.Options),
-) (*cloudwatch.PutMetricDataOutput, error) {
+	_ *cw.PutMetricDataInput,
+	_ ...func(*cw.Options),
+) (*cw.PutMetricDataOutput, error) {
 	if dt.returnError {
-		return &cloudwatch.PutMetricDataOutput{}, fmt.Errorf("fake error")
+		return &cw.PutMetricDataOutput{}, fmt.Errorf("fake error")
 	}
 
-	return &cloudwatch.PutMetricDataOutput{}, nil
+	return &cw.PutMetricDataOutput{}, nil
 }
 
 // TestUpdateMetric tests the updateMetric function.
@@ -492,22 +488,22 @@ func TestUpdateMetric(t *testing.T) {
 		returnError bool   // Should the mock return an error?
 		expSuccess  bool   // Is the call expected to succeed?
 	}{{
-		name:        "1_SuccessOne",
+		name:        "SuccessOne",
 		value:       true,
 		returnError: false,
 		expSuccess:  true,
 	}, {
-		name:        "2_SuccessZero",
+		name:        "SuccessZero",
 		value:       false,
 		returnError: false,
 		expSuccess:  true,
 	}, {
-		name:        "3_Failure",
+		name:        "Failure",
 		value:       false,
 		returnError: true,
 		expSuccess:  false,
 	}, {
-		name:        "4_DryFailure",
+		name:        "DryFailure",
 		value:       true,
 		dryRun:      true,
 		returnError: true,
@@ -534,7 +530,7 @@ func TestUpdateMetric(t *testing.T) {
 		})
 	}
 
-	t.Run("5_SuccessNilDimensions", func(t *testing.T) {
+	t.Run("SuccessNilDimensions", func(t *testing.T) {
 		err := updateMetric(&updateMetricOptions{
 			ctx:        t.Context(),
 			dry:        false,
@@ -550,28 +546,26 @@ func TestUpdateMetric(t *testing.T) {
 	})
 }
 
-// TestExecuteRounds tests that the executeRounds function behaves correctly.
-// The function never returns an error, so the test cases only check different
-// happy paths.
+// TestExecuteRounds tests the executeRounds function.
 func TestExecuteRounds(t *testing.T) {
 	for _, tc := range []struct {
 		name    string // Name of test case.
 		cwError bool   // Should the mock return an error?
 	}{{
-		name:    "1_CloudwatchSuccess",
+		name:    "CloudwatchSuccess",
 		cwError: false,
 	}, {
-		name:    "2_CloudwatchFailure",
+		name:    "CloudwatchFailure",
 		cwError: true,
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
 			log := newLogger(t)
 
-			executeRounds(&executeRoundsOptions{
+			err := executeRounds(&executeRoundsOptions{
 				ctx:      t.Context(),
 				log:      log,
 				dry:      false,
-				kClient:  fake.NewSimpleClientset(),
+				kClient:  kubefake.NewSimpleClientset(),
 				cwClient: &cwPutMetricDataImpl{tc.cwError},
 				single:   true,
 				seconds:  1,
@@ -587,20 +581,28 @@ func TestExecuteRounds(t *testing.T) {
 					Name:      "Name",
 				}},
 			})
+
+			if tc.cwError && err == nil {
+				t.Errorf("Expected failure, got success")
+			}
+
+			if !tc.cwError && err != nil {
+				t.Errorf("Unexpected failure: %v", err)
+			}
 		})
 	}
 
-	t.Run("3_ContextCancel", func(t *testing.T) {
+	t.Run("ContextCancel", func(t *testing.T) {
 		log := newLogger(t)
 
 		ctx, cancel := context.WithCancel(t.Context())
 		cancel()
 
-		executeRounds(&executeRoundsOptions{
+		err := executeRounds(&executeRoundsOptions{
 			ctx:      ctx,
 			log:      log,
 			dry:      false,
-			kClient:  fake.NewSimpleClientset(),
+			kClient:  kubefake.NewSimpleClientset(),
 			cwClient: &cwPutMetricDataImpl{false},
 			single:   false,
 			seconds:  1,
@@ -616,5 +618,8 @@ func TestExecuteRounds(t *testing.T) {
 				Name:      "Name",
 			}},
 		})
+		if err != nil {
+			t.Errorf("Unexpected failure: %v", err)
+		}
 	})
 }

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 #
-# This script updates the given Homebrew formulae.
+# Updates the given Homebrew formulae.
 #
 
 set -euo pipefail

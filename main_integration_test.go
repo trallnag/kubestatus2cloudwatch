@@ -2,27 +2,28 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"testing"
 	"time"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
+	aws "github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
-	"github.com/aws/aws-sdk-go-v2/credentials"
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
-	"github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
-	"github.com/aws/aws-sdk-go-v2/service/sts"
-	"github.com/docker/go-connections/nat"
-	"github.com/testcontainers/testcontainers-go"
-	"github.com/testcontainers/testcontainers-go/modules/k3s"
-	"github.com/testcontainers/testcontainers-go/modules/localstack"
-	"gopkg.in/yaml.v3"
-	appsv1 "k8s.io/api/apps/v1"
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
+	awscreds "github.com/aws/aws-sdk-go-v2/credentials"
+	cw "github.com/aws/aws-sdk-go-v2/service/cloudwatch"
+	cwtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
+	sts "github.com/aws/aws-sdk-go-v2/service/sts"
+	nat "github.com/docker/go-connections/nat"
+	testcontainers "github.com/testcontainers/testcontainers-go"
+	k3s "github.com/testcontainers/testcontainers-go/modules/k3s"
+	localstack "github.com/testcontainers/testcontainers-go/modules/localstack"
+	yaml "gopkg.in/yaml.v3"
+	kubeappsv1 "k8s.io/api/apps/v1"
+	kubecorev1 "k8s.io/api/core/v1"
+	kubemetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	kubewait "k8s.io/apimachinery/pkg/util/wait"
+	kube "k8s.io/client-go/kubernetes"
+	kubeclientcmd "k8s.io/client-go/tools/clientcmd"
 )
 
 // TestIntegrationRunMain tests behavior of app with K3s and LocalStack.
@@ -47,12 +48,14 @@ func TestIntegrationRunMain(t *testing.T) {
 
 	config, err := newConfig("assets/config-minimal.yaml")
 	if err != nil {
-		t.Fatalf("failed to load config: %v", err)
+		t.Fatalf("Failed to load config: %v", err)
 	}
 
 	config.Seconds = 1
 
-	t.Run("1_Healthy", func(t *testing.T) {
+	t.Run("Healthy", func(t *testing.T) {
+		log := newLogger(t)
+
 		config.Metric.Name = "Healthy"
 		config.Targets = []target{
 			{
@@ -69,11 +72,10 @@ func TestIntegrationRunMain(t *testing.T) {
 			t.Context(),
 			4*time.Second,
 		)
-		t.Cleanup(func() {
-			cancelRunMain()
-		})
 
-		runMain(runMainCtx)
+		t.Cleanup(cancelRunMain)
+
+		runMain(runMainCtx, log)
 
 		lastMetricValue := getLastMetricValue(
 			t,
@@ -81,11 +83,13 @@ func TestIntegrationRunMain(t *testing.T) {
 			config.Metric.Name,
 		)
 		if lastMetricValue < 1 {
-			t.Fatalf("unexpected metric value: %f", lastMetricValue)
+			t.Fatalf("Unexpected metric value: %f", lastMetricValue)
 		}
 	})
 
-	t.Run("2_Unhealthy", func(t *testing.T) {
+	t.Run("Unhealthy", func(t *testing.T) {
+		log := newLogger(t)
+
 		config.Metric.Name = "Unhealthy"
 		config.Targets = []target{
 			{
@@ -102,11 +106,10 @@ func TestIntegrationRunMain(t *testing.T) {
 			t.Context(),
 			4*time.Second,
 		)
-		t.Cleanup(func() {
-			cancelRunMain()
-		})
 
-		runMain(runMainCtx)
+		t.Cleanup(cancelRunMain)
+
+		runMain(runMainCtx, log)
 
 		lastMetricValue := getLastMetricValue(
 			t,
@@ -114,39 +117,40 @@ func TestIntegrationRunMain(t *testing.T) {
 			config.Metric.Name,
 		)
 		if lastMetricValue > 0 {
-			t.Fatalf("unexpected metric value: %f", lastMetricValue)
+			t.Fatalf("Unexpected metric value: %f", lastMetricValue)
 		}
 	})
 }
 
 // setUpDocker sets up the Docker provider and pulls necessary images. It
 // returns the Docker host address. The images are defined in the .env file.
-func setUpDocker(t *testing.T) (dockerHost string) {
+func setUpDocker(t *testing.T) string {
 	t.Helper()
 
 	dockerProvider, err := testcontainers.NewDockerProvider()
 	if err != nil {
-		t.Fatalf("failed to create Docker provider: %v", err)
+		t.Fatalf("Failed to create Docker provider: %v", err)
 	}
+
 	t.Cleanup(func() {
 		dockerProvider.Close()
 	})
 
 	if err = dockerProvider.PullImage(t.Context(), dotEnv["BUSYBOX_IMAGE_NAME"]); err != nil {
-		t.Fatalf("failed to pull Busybox image: %v", err)
+		t.Fatalf("Failed to pull Busybox image: %v", err)
 	}
 
 	if err = dockerProvider.PullImage(t.Context(), dotEnv["KUBERNETES_IMAGE_NAME"]); err != nil {
-		t.Fatalf("failed to pull Kubernetes image: %v", err)
+		t.Fatalf("Failed to pull Kubernetes image: %v", err)
 	}
 
 	if err = dockerProvider.PullImage(t.Context(), dotEnv["LOCALSTACK_IMAGE_NAME"]); err != nil {
-		t.Fatalf("failed to pull LocalStack image: %v", err)
+		t.Fatalf("Failed to pull LocalStack image: %v", err)
 	}
 
-	dockerHost, err = dockerProvider.DaemonHost(t.Context())
+	dockerHost, err := dockerProvider.DaemonHost(t.Context())
 	if err != nil {
-		t.Fatalf("failed to get Docker host: %v", err)
+		t.Fatalf("Failed to get Docker host: %v", err)
 	}
 
 	return dockerHost
@@ -162,60 +166,62 @@ func setUpKubernetes(t *testing.T) {
 	testcontainers.CleanupContainer(t, k3sContainer)
 
 	if err != nil {
-		t.Fatalf("failed to start K3s container: %v", err)
+		t.Fatalf("Failed to start K3s container: %v", err)
 	}
 
 	kubeConfigYaml, err := k3sContainer.GetKubeConfig(t.Context())
 	if err != nil {
-		t.Fatalf("failed to get Kubernetes config: %v", err)
+		t.Fatalf("Failed to get Kubernetes config: %v", err)
 	}
 
 	kubeConfigFile, err := os.CreateTemp(t.TempDir(), "kubeconfig.yaml")
 	if err != nil {
-		t.Fatalf("failed to create Kubernetes config file: %v", err)
+		t.Fatalf("Failed to create Kubernetes config file: %v", err)
 	}
 
 	if _, err := kubeConfigFile.Write(kubeConfigYaml); err != nil {
-		t.Fatalf("failed to write Kubernetes config file: %v", err)
+		t.Fatalf("Failed to write Kubernetes config file: %v", err)
 	}
 
 	if err := kubeConfigFile.Close(); err != nil {
-		t.Fatalf("failed to close Kubernetes config file: %v", err)
+		t.Fatalf("Failed to close Kubernetes config file: %v", err)
 	}
 
 	t.Setenv("KUBECONFIG", kubeConfigFile.Name())
 
-	kubeRestConfig, err := clientcmd.RESTConfigFromKubeConfig(kubeConfigYaml)
+	kubeRestConfig, err := kubeclientcmd.RESTConfigFromKubeConfig(
+		kubeConfigYaml,
+	)
 	if err != nil {
-		t.Fatalf("failed to create Kubernetes REST config: %v", err)
+		t.Fatalf("Failed to create Kubernetes REST config: %v", err)
 	}
 
-	kubeClient, err := kubernetes.NewForConfig(kubeRestConfig)
+	kubeClient, err := kube.NewForConfig(kubeRestConfig)
 	if err != nil {
-		t.Fatalf("failed to create Kubernetes client: %v", err)
+		t.Fatalf("Failed to create Kubernetes client: %v", err)
 	}
 
 	healthyBusyBoxDeployment, err := kubeClient.AppsV1().
 		Deployments("default").
-		Create(t.Context(), &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
+		Create(t.Context(), &kubeappsv1.Deployment{
+			ObjectMeta: kubemetav1.ObjectMeta{
 				Name: "busybox-healthy",
 			},
-			Spec: appsv1.DeploymentSpec{
+			Spec: kubeappsv1.DeploymentSpec{
 				Replicas: getInt32Ptr(t, 2),
-				Selector: &metav1.LabelSelector{
+				Selector: &kubemetav1.LabelSelector{
 					MatchLabels: map[string]string{
 						"app": "busybox-healthy",
 					},
 				},
-				Template: corev1.PodTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
+				Template: kubecorev1.PodTemplateSpec{
+					ObjectMeta: kubemetav1.ObjectMeta{
 						Labels: map[string]string{
 							"app": "busybox-healthy",
 						},
 					},
-					Spec: corev1.PodSpec{
-						Containers: []corev1.Container{
+					Spec: kubecorev1.PodSpec{
+						Containers: []kubecorev1.Container{
 							{
 								Name:  "app",
 								Image: dotEnv["BUSYBOX_IMAGE_NAME"],
@@ -225,46 +231,53 @@ func setUpKubernetes(t *testing.T) {
 					},
 				},
 			},
-		}, metav1.CreateOptions{})
+		}, kubemetav1.CreateOptions{})
 	if err != nil {
-		t.Fatalf("failed to create healthyBusyBoxDeployment: %v", err)
+		t.Fatalf("Failed to create healthyBusyBoxDeployment: %v", err)
 	}
 
-	err = wait.PollUntilContextTimeout(
+	err = kubewait.PollUntilContextTimeout(
 		t.Context(),
 		1*time.Second,
 		25*time.Second,
 		true,
-		func(ctx context.Context) (done bool, err error) {
+		func(ctx context.Context) (bool, error) {
 			healthyBusyBoxDeployment, err = kubeClient.AppsV1().
 				Deployments("default").
-				Get(ctx, healthyBusyBoxDeployment.Name, metav1.GetOptions{})
+				Get(ctx, healthyBusyBoxDeployment.Name, kubemetav1.GetOptions{})
 			if err != nil {
-				return false, err
+				return false, fmt.Errorf(
+					"get healthyBusyBoxDeployment: %v",
+					err,
+				)
 			}
+
 			if healthyBusyBoxDeployment.Status.ReadyReplicas == 2 {
 				return true, nil
 			}
+
 			t.Log("Waiting for healthyBusyBoxDeployment to be ready.")
+
 			return false, nil
 		},
 	)
 	if err != nil {
-		t.Fatalf("failed to get healthyBusyBoxDeployment: %v", err)
+		t.Fatalf("Failed to get healthyBusyBoxDeployment: %v", err)
 	}
 
 	healthyBusyBoxDeployment, err = kubeClient.AppsV1().
 		Deployments("default").
-		Get(t.Context(), healthyBusyBoxDeployment.Name, metav1.GetOptions{})
+		Get(t.Context(), healthyBusyBoxDeployment.Name, kubemetav1.GetOptions{})
 	if err != nil {
-		t.Fatalf("failed to get healthyBusyBoxDeployment: %v", err)
+		t.Fatalf("Failed to get healthyBusyBoxDeployment: %v", err)
 	}
 
 	got := healthyBusyBoxDeployment.Status.ReadyReplicas
 	want := int32(2)
+
 	if got != want {
 		t.Fatalf(
-			"unexpected number of ready replicas for healthyBusyBoxDeployment: got %d, want %d",
+			"Unexpected number of ready replicas for healthyBusyBoxDeployment: got %d, want %d",
 			got,
 			want,
 		)
@@ -272,25 +285,25 @@ func setUpKubernetes(t *testing.T) {
 
 	unhealthyBusyBoxDeployment, err := kubeClient.AppsV1().
 		Deployments("default").
-		Create(t.Context(), &appsv1.Deployment{
-			ObjectMeta: metav1.ObjectMeta{
+		Create(t.Context(), &kubeappsv1.Deployment{
+			ObjectMeta: kubemetav1.ObjectMeta{
 				Name: "busybox-unhealthy",
 			},
-			Spec: appsv1.DeploymentSpec{
+			Spec: kubeappsv1.DeploymentSpec{
 				Replicas: getInt32Ptr(t, 1),
-				Selector: &metav1.LabelSelector{
+				Selector: &kubemetav1.LabelSelector{
 					MatchLabels: map[string]string{
 						"app": "busybox-unhealthy",
 					},
 				},
-				Template: corev1.PodTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
+				Template: kubecorev1.PodTemplateSpec{
+					ObjectMeta: kubemetav1.ObjectMeta{
 						Labels: map[string]string{
 							"app": "busybox-unhealthy",
 						},
 					},
-					Spec: corev1.PodSpec{
-						Containers: []corev1.Container{
+					Spec: kubecorev1.PodSpec{
+						Containers: []kubecorev1.Container{
 							{
 								Name:  "app",
 								Image: dotEnv["BUSYBOX_IMAGE_NAME"],
@@ -300,25 +313,26 @@ func setUpKubernetes(t *testing.T) {
 					},
 				},
 			},
-		}, metav1.CreateOptions{})
+		}, kubemetav1.CreateOptions{})
 	if err != nil {
-		t.Fatalf("failed to create unhealthyBusyBoxDeployment: %v", err)
+		t.Fatalf("Failed to create unhealthyBusyBoxDeployment: %v", err)
 	}
 
 	time.Sleep(1 * time.Second)
 
 	unhealthyBusyBoxDeployment, err = kubeClient.AppsV1().
 		Deployments("default").
-		Get(t.Context(), unhealthyBusyBoxDeployment.Name, metav1.GetOptions{})
+		Get(t.Context(), unhealthyBusyBoxDeployment.Name, kubemetav1.GetOptions{})
 	if err != nil {
-		t.Fatalf("failed to get unhealthyBusyBoxDeployment: %v", err)
+		t.Fatalf("Failed to get unhealthyBusyBoxDeployment: %v", err)
 	}
 
 	got = unhealthyBusyBoxDeployment.Status.ReadyReplicas
 	want = int32(0)
+
 	if got != want {
 		t.Fatalf(
-			"unexpected number of ready replicas for unhealthyBusyBoxDeployment: got %d, want %d",
+			"Unexpected number of ready replicas for unhealthyBusyBoxDeployment: got %d, want %d",
 			got,
 			want,
 		)
@@ -330,7 +344,7 @@ func setUpKubernetes(t *testing.T) {
 func setUpLocalStack(
 	t *testing.T,
 	dockerHost string,
-) (cloudWatchClient *cloudwatch.Client) {
+) *cw.Client {
 	t.Helper()
 
 	localStackContainer, err := localstack.Run(t.Context(),
@@ -342,7 +356,7 @@ func setUpLocalStack(
 	testcontainers.CleanupContainer(t, localStackContainer)
 
 	if err != nil {
-		t.Fatalf("failed to start LocalStack container: %v", err)
+		t.Fatalf("Failed to start LocalStack container: %v", err)
 	}
 
 	localStackPort, err := localStackContainer.MappedPort(
@@ -350,21 +364,21 @@ func setUpLocalStack(
 		nat.Port("4566/tcp"),
 	)
 	if err != nil {
-		t.Fatalf("failed to get LocalStack port: %v", err)
+		t.Fatalf("Failed to get LocalStack port: %v", err)
 	}
 
 	awsEndPoint := "http://" + dockerHost + ":" + localStackPort.Port()
 	t.Logf("LocalStack endpoint: %s", awsEndPoint)
 
 	awsRegion := "eu-central-1"
-	awsKey := "test"
-	awsSecret := "test"
-	awsSession := "test"
+	awsKey := "testKey"
+	awsSecret := "testSecret"
+	awsSession := "testSession"
 
 	awsConfig, err := awsconfig.LoadDefaultConfig(t.Context(),
 		awsconfig.WithRegion(awsRegion),
 		awsconfig.WithCredentialsProvider(
-			credentials.NewStaticCredentialsProvider(
+			awscreds.NewStaticCredentialsProvider(
 				awsKey,
 				awsSecret,
 				awsSession,
@@ -372,7 +386,7 @@ func setUpLocalStack(
 		),
 	)
 	if err != nil {
-		t.Fatalf("failed to load AWS config: %v", err)
+		t.Fatalf("Failed to load AWS config: %v", err)
 	}
 
 	stsClient := sts.NewFromConfig(awsConfig, func(o *sts.Options) {
@@ -383,11 +397,12 @@ func setUpLocalStack(
 		&sts.GetCallerIdentityInput{},
 	)
 	if err != nil {
-		t.Fatalf("failed to get caller identity: %v", err)
+		t.Fatalf("Failed to get caller identity: %v", err)
 	}
+
 	awsCallerIdentityArn := aws.ToString(awsCallerIdentity.Arn)
 	if awsCallerIdentityArn != "arn:aws:iam::000000000000:root" {
-		t.Fatalf("unexpected caller identity: %s", awsCallerIdentityArn)
+		t.Fatalf("Unexpected caller identity: %s", awsCallerIdentityArn)
 	}
 
 	t.Setenv("AWS_ENDPOINT_URL", awsEndPoint)
@@ -397,14 +412,14 @@ func setUpLocalStack(
 	t.Setenv("AWS_SECRET_ACCESS_KEY", awsSecret)
 	t.Setenv("AWS_SESSION_TOKEN", awsSession)
 
-	cloudWatchClient = cloudwatch.NewFromConfig(
+	cwClient := cw.NewFromConfig(
 		awsConfig,
-		func(o *cloudwatch.Options) {
+		func(o *cw.Options) {
 			o.BaseEndpoint = aws.String(awsEndPoint)
 		},
 	)
 
-	return cloudWatchClient
+	return cwClient
 }
 
 // setUpConfig writes given config to a temporary file and sets up env var.
@@ -413,20 +428,20 @@ func setUpConfig(t *testing.T, config config) {
 
 	configYaml, err := yaml.Marshal(config)
 	if err != nil {
-		t.Fatalf("failed to marshal config: %v", err)
+		t.Fatalf("Failed to marshal config: %v", err)
 	}
 
 	configFile, err := os.CreateTemp(t.TempDir(), "config.yaml")
 	if err != nil {
-		t.Fatalf("failed to create config file: %v", err)
+		t.Fatalf("Failed to create config file: %v", err)
 	}
 
 	if _, err := configFile.Write(configYaml); err != nil {
-		t.Fatalf("failed to write config file: %v", err)
+		t.Fatalf("Failed to write config file: %v", err)
 	}
 
 	if err := configFile.Close(); err != nil {
-		t.Fatalf("failed to close config file: %v", err)
+		t.Fatalf("Failed to close config file: %v", err)
 	}
 
 	t.Setenv("KS2CW_CONFIG_PATH", configFile.Name())
@@ -436,7 +451,7 @@ func setUpConfig(t *testing.T, config config) {
 // namespace and other options for CloudWatch are hardcoded.
 func getLastMetricValue(
 	t *testing.T,
-	cloudWatchClient *cloudwatch.Client,
+	cloudWatchClient *cw.Client,
 	metricName string,
 ) float64 {
 	t.Helper()
@@ -445,21 +460,21 @@ func getLastMetricValue(
 	startTime := endTime.Add(-1 * time.Minute)
 
 	result, err := cloudWatchClient.GetMetricStatistics(t.Context(),
-		&cloudwatch.GetMetricStatisticsInput{
+		&cw.GetMetricStatisticsInput{
 			Namespace:  aws.String("MyNamespace"),
 			MetricName: aws.String(metricName),
 			Period:     aws.Int32(60),
 			StartTime:  aws.Time(startTime),
 			EndTime:    aws.Time(endTime),
-			Statistics: []types.Statistic{types.StatisticMaximum},
+			Statistics: []cwtypes.Statistic{cwtypes.StatisticMaximum},
 		},
 	)
 	if err != nil {
-		t.Fatalf("failed to get statistics: %v", err)
+		t.Fatalf("Failed to get statistics: %v", err)
 	}
 
 	if len(result.Datapoints) == 0 {
-		t.Fatalf("no data points found for metric: %s", metricName)
+		t.Fatalf("No data points found for metric: %s", metricName)
 	}
 
 	latest := result.Datapoints[0]

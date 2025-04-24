@@ -11,9 +11,9 @@ import (
 
 	aws "github.com/aws/aws-sdk-go-v2/aws"
 	awsconfig "github.com/aws/aws-sdk-go-v2/config"
-	awscw "github.com/aws/aws-sdk-go-v2/service/cloudwatch"
-	awscwtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
-	awssts "github.com/aws/aws-sdk-go-v2/service/sts"
+	cw "github.com/aws/aws-sdk-go-v2/service/cloudwatch"
+	cwtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
+	sts "github.com/aws/aws-sdk-go-v2/service/sts"
 	kubemetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kube "k8s.io/client-go/kubernetes"
 	kuberest "k8s.io/client-go/rest"
@@ -162,7 +162,7 @@ func newKubernetesClient() (*kube.Clientset, error) {
 		config, err = kuberest.InClusterConfig()
 		if err != nil {
 			return nil, fmt.Errorf(
-				"failed to create in-cluster Kubernetes config: %w", err,
+				"create in-cluster Kubernetes config: %v", err,
 			)
 		}
 	} else {
@@ -172,7 +172,7 @@ func newKubernetesClient() (*kube.Clientset, error) {
 		).ClientConfig()
 		if err != nil {
 			return nil, fmt.Errorf(
-				"failed to create out-of-cluster Kubernetes config: %w", err,
+				"create out-of-cluster Kubernetes config: %v", err,
 			)
 		}
 	}
@@ -180,13 +180,13 @@ func newKubernetesClient() (*kube.Clientset, error) {
 	client, err := kube.NewForConfig(config)
 	if err != nil {
 		return nil, fmt.Errorf(
-			"failed to create Kubernetes client: %w", err,
+			"create Kubernetes client: %v", err,
 		)
 	}
 
 	if _, err = client.Discovery().ServerVersion(); err != nil {
 		return nil, fmt.Errorf(
-			"failed to get Kubernetes server version: %w", err,
+			"get Kubernetes server version: %v", err,
 		)
 	}
 
@@ -194,21 +194,21 @@ func newKubernetesClient() (*kube.Clientset, error) {
 }
 
 // newCloudwatchClient creates and configures a new CloudWatch client.
-func newCloudwatchClient(ctx context.Context) (*awscw.Client, error) {
+func newCloudwatchClient(ctx context.Context) (*cw.Client, error) {
 	config, err := awsconfig.LoadDefaultConfig(ctx)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create AWS SDK config: %w", err)
+		return nil, fmt.Errorf("create AWS SDK config: %v", err)
 	}
 
-	stsClient := awssts.NewFromConfig(config)
+	stsClient := sts.NewFromConfig(config)
 
 	if _, err = stsClient.GetCallerIdentity(
-		ctx, &awssts.GetCallerIdentityInput{},
+		ctx, &sts.GetCallerIdentityInput{},
 	); err != nil {
-		return nil, fmt.Errorf("failed to get AWS caller identity: %w", err)
+		return nil, fmt.Errorf("get AWS caller identity: %v", err)
 	}
 
-	return awscw.NewFromConfig(config), nil
+	return cw.NewFromConfig(config), nil
 }
 
 // executeRoundsOptions holds the input for the executeRounds function.
@@ -309,6 +309,8 @@ type scan struct {
 	success bool
 
 	// Shows if all targets are ready or if at least one target is not ready.
+	// Basically, if at least one result in the list of results is success=false
+	// or ready=false, this is false.
 	ready bool
 
 	// List of all results by target. One result per target.
@@ -449,9 +451,9 @@ func performScan(o *performScanOptions) scan {
 // We use this interface to test the function using a mocked service.
 type cwPutMetricDataAPI interface {
 	PutMetricData(ctx context.Context,
-		params *awscw.PutMetricDataInput,
-		optFns ...func(*awscw.Options),
-	) (*awscw.PutMetricDataOutput, error)
+		params *cw.PutMetricDataInput,
+		optFns ...func(*cw.Options),
+	) (*cw.PutMetricDataOutput, error)
 }
 
 // updateMetricOptions holds the input for the updateMetric function.
@@ -484,9 +486,9 @@ func updateMetric(o *updateMetricOptions) error {
 		metricValue = 1.0
 	}
 
-	metricDimensions := []awscwtypes.Dimension{}
+	metricDimensions := []cwtypes.Dimension{}
 	for _, configDimension := range o.dimensions {
-		metricDimensions = append(metricDimensions, awscwtypes.Dimension{
+		metricDimensions = append(metricDimensions, cwtypes.Dimension{
 			Name:  aws.String(configDimension.Name),
 			Value: aws.String(configDimension.Value),
 		})
@@ -494,18 +496,18 @@ func updateMetric(o *updateMetricOptions) error {
 
 	if !o.dry {
 		_, err := o.client.PutMetricData(o.ctx,
-			&awscw.PutMetricDataInput{
+			&cw.PutMetricDataInput{
 				Namespace: aws.String(o.namespace),
-				MetricData: []awscwtypes.MetricDatum{{
+				MetricData: []cwtypes.MetricDatum{{
 					MetricName: aws.String(o.name),
-					Unit:       awscwtypes.StandardUnitNone,
+					Unit:       cwtypes.StandardUnitNone,
 					Value:      aws.Float64(metricValue),
 					Dimensions: metricDimensions,
 				}},
 			},
 		)
 		if err != nil {
-			return fmt.Errorf("failed to update metric: %w", err)
+			return fmt.Errorf("update metric: %v", err)
 		}
 	}
 
