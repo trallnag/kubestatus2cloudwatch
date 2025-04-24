@@ -3,107 +3,141 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 
 	"gopkg.in/yaml.v3"
 )
 
-// Dimension is a single CloudWatch metric dimension.
-type Dimension struct {
+// Interval specficiation.
+const (
+	minSeconds     = 1
+	defaultSeconds = 60
+)
+
+// Allowed logging levels.
+const (
+	logLevelDebug = "debug"
+	logLevelInfo  = "info"
+)
+
+// Allowed logging formats.
+const (
+	logFormatJSON   = "json"
+	logFormatLogfmt = "logfmt"
+)
+
+// logging configures logging.
+type logging struct {
+	Level  string `yaml:"level"`
+	Format string `yaml:"format"`
+}
+
+// dimension is a single CloudWatch metric dimension.
+type dimension struct {
 	Name  string `yaml:"name"`
 	Value string `yaml:"value"`
 }
 
-// Metric configures the CloudWatch metric.
-type Metric struct {
+// metric configures the CloudWatch metric.
+type metric struct {
 	Namespace  string      `yaml:"namespace"`
 	Name       string      `yaml:"name"`
-	Dimensions []Dimension `yaml:"dimensions"`
+	Dimensions []dimension `yaml:"dimensions"`
 }
 
+// Allowed target modes.
 const (
-	KindDaemonSet   = "DaemonSet"
-	KindDeployment  = "Deployment"
-	KindStatefulSet = "StatefulSet"
+	modeAllOfThem  = "AllOfThem"
+	modeAtLeastOne = "AtLeastOne"
 )
 
+// Allowed target kinds.
 const (
-	ModeAllOfThem  = "AllOfThem"
-	ModeAtLeastOne = "AtLeastOne"
+	kindDaemonSet   = "DaemonSet"
+	kindDeployment  = "Deployment"
+	kindStatefulSet = "StatefulSet"
 )
 
-const MinSeconds = 5
-
-// Target is a single Kubernetes target to scan.
-type Target struct {
-	// Type of target. Supported: "Deployment", "StatefulSet", and "DaemonSet".
-	Kind string `yaml:"kind"`
-
-	// Namespace of the target resource.
+// target is a single Kubernetes target to scan.
+type target struct {
+	Kind      string `yaml:"kind"`
 	Namespace string `yaml:"namespace"`
-
-	// Name of the target resource.
-	Name string `yaml:"name"`
-
-	// Mode used for scanning target. "AllOfThem" requires all replicas to
-	// be ready. "AtLeastOne" only requires at least one replica to be ready.
-	Mode string `yaml:"mode"`
+	Name      string `yaml:"name"`
+	Mode      string `yaml:"mode"`
 }
 
-// Config is the central configuration. Use NewConfig to create a new config.
-type Config struct {
+// config is the central configuration.
+// Use NewConfig to create a new config.
+type config struct {
+	DryRun  bool     `yaml:"dryRun"`
 	Seconds int      `yaml:"seconds"`
-	Dry     bool     `yaml:"dry"`
-	Metric  Metric   `yaml:"metric"`
-	Targets []Target `yaml:"targets"`
-	Logging struct {
-		Level  string `yaml:"level"`
-		Pretty bool   `yaml:"pretty"`
-	} `yaml:"logging"`
+	Metric  metric   `yaml:"metric"`
+	Targets []target `yaml:"targets"`
+	Logging logging  `yaml:"logging"`
 }
 
-// NewConfig reads configuration from provided file and performs checks.
-func NewConfig(configPath string) (Config, error) {
-	c := Config{} //nolint:exhaustruct // Config is populated later.
+// newConfig reads and processes the configuration.
+func newConfig(configPath string) (config, error) {
+	config := config{} //nolint:exhaustruct // Config is populated from file.
 
 	configFile, err := os.ReadFile(configPath)
 	if err != nil {
-		return c, fmt.Errorf("read config: %w", err)
+		return config, fmt.Errorf("read config: %v", err)
 	}
 
-	err = yaml.Unmarshal(configFile, &c)
+	err = yaml.Unmarshal(configFile, &config)
 	if err != nil {
-		return c, fmt.Errorf("unmarshal config: %w", err)
+		return config, fmt.Errorf("unmarshal config: %v", err)
 	}
 
-	// Config.Seconds
-	if c.Seconds < MinSeconds {
-		return c, fmt.Errorf("config seconds smaller than %v: %v", MinSeconds, c.Seconds)
+	config, err = processConfig(config)
+	if err != nil {
+		return config, fmt.Errorf("process config: %v", err)
 	}
 
-	// Config.Metric
-	if err = ValidateMetric(c.Metric); err != nil {
-		return c, fmt.Errorf("failed validating metric config: %w", err)
+	return config, nil
+}
+
+// processConfig processes the configuration and validates it.
+// It sets default values and checks for errors.
+func processConfig(config config) (config, error) {
+	if config.Seconds < minSeconds {
+		config.Seconds = defaultSeconds
 	}
 
-	// Config.Targets
-	if err = ValidateTargets(c.Targets); err != nil {
-		return c, fmt.Errorf("failed validating targets config: %w", err)
+	if err := validateMetric(config.Metric); err != nil {
+		return config, fmt.Errorf("validate metric config: %v", err)
 	}
 
-	// Config.Logging.Level
-	if c.Logging.Level == "" {
-		c.Logging.Level = "debug"
-	} else if !ContainsString([]string{"info", "debug"}, c.Logging.Level) {
-		return c, fmt.Errorf(
-			"logging.level not supported: %s", c.Logging.Level,
+	if err := validateTargets(config.Targets); err != nil {
+		return config, fmt.Errorf("validate targets config: %v", err)
+	}
+
+	allowedLogLevels := []string{logLevelDebug, logLevelInfo}
+
+	if config.Logging.Level == "" {
+		config.Logging.Level = logLevelInfo
+	} else if !slices.Contains(allowedLogLevels, config.Logging.Level) {
+		return config, fmt.Errorf(
+			"logging.level invalid: %v", config.Logging.Level,
 		)
 	}
 
-	return c, nil
+	allowedLogFormats := []string{logFormatJSON, logFormatLogfmt}
+
+	if config.Logging.Format == "" {
+		config.Logging.Format = logFormatJSON
+	} else if !slices.Contains(allowedLogFormats, config.Logging.Format) {
+		return config, fmt.Errorf(
+			"logging.format invalid: %v", config.Logging.Format,
+		)
+	}
+
+	return config, nil
 }
 
-// ValidateMetric validates metric configuration.
-func ValidateMetric(metric Metric) error {
+// validateMetric validates the metric configuration.
+func validateMetric(metric metric) error {
 	if metric.Namespace == "" {
 		return fmt.Errorf("missing: metric.namespace")
 	}
@@ -129,8 +163,8 @@ func ValidateMetric(metric Metric) error {
 	return nil
 }
 
-// ValidateTargets validates targets configuration.
-func ValidateTargets(targets []Target) error {
+// validateTargets validates the targets configuration.
+func validateTargets(targets []target) error {
 	if len(targets) == 0 {
 		return fmt.Errorf("missing: targets")
 	}
@@ -141,11 +175,11 @@ func ValidateTargets(targets []Target) error {
 		}
 
 		allowedTargetKinds := []string{
-			KindDeployment, KindStatefulSet, KindDaemonSet,
+			kindDeployment, kindStatefulSet, kindDaemonSet,
 		}
-		if !ContainsString(allowedTargetKinds, target.Kind) {
+		if !slices.Contains(allowedTargetKinds, target.Kind) {
 			return fmt.Errorf(
-				"target[%v].kind not supported: %s", i, target.Kind,
+				"target[%v].kind invalid: %v", i, target.Kind,
 			)
 		}
 
@@ -161,23 +195,13 @@ func ValidateTargets(targets []Target) error {
 			return fmt.Errorf("missing: target[%v].mode", i)
 		}
 
-		allowedTargetModes := []string{ModeAllOfThem, ModeAtLeastOne}
-		if !ContainsString(allowedTargetModes, target.Mode) {
+		allowedTargetModes := []string{modeAllOfThem, modeAtLeastOne}
+		if !slices.Contains(allowedTargetModes, target.Mode) {
 			return fmt.Errorf(
-				"target[%v].mode not supported: %s", i, target.Mode,
+				"target[%v].mode invalid: %v", i, target.Mode,
 			)
 		}
 	}
 
 	return nil
-}
-
-func ContainsString(s []string, str string) bool {
-	for _, v := range s {
-		if v == str {
-			return true
-		}
-	}
-
-	return false
 }

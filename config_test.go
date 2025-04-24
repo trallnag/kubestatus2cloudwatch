@@ -1,212 +1,417 @@
 package main
 
 import (
+	"os"
 	"path/filepath"
 	"strings"
 	"testing"
+
+	cmp "github.com/google/go-cmp/cmp"
+	dedent "github.com/lithammer/dedent"
 )
 
-// TestNewConfig tests NewConfig (and indirectly all the validation functions
-// that are used to reduce the complexity of NewConfig).
-func TestNewConfig(t *testing.T) {
-	for _, tc := range []struct {
-		name       string // Name of test case.
-		configFile string // Name of config file in testdata dir.
-		ErrSubstr  string // Substring expected to be in error string.
-		expSuccess bool   // Is NewConfig call expected to succeed?
-	}{{
-		name:       "1_complete",
-		configFile: "config-complete.yaml",
-		expSuccess: true,
-	}, {
-		name:       "2_file_missing",
-		configFile: "config-nonexisting.yaml",
-		ErrSubstr:  "read config",
-		expSuccess: false,
-	}, {
-		name:       "3_invalid_yaml",
-		configFile: "config-invalid-yaml.yaml",
-		ErrSubstr:  "unmarshal",
-		expSuccess: false,
-	}, {
-		name:       "4_seconds_too_small",
-		configFile: "config-seconds.yaml",
-		ErrSubstr:  "seconds smaller",
-		expSuccess: false,
-	}, {
-		name:       "5_invalid_log_level",
-		configFile: "config-invalid-log-level.yaml",
-		ErrSubstr:  "logging.level not supported",
-		expSuccess: false,
-	}, {
-		name:       "6_log_level_default",
-		configFile: "config-log-level-default.yaml",
-		expSuccess: true,
-	}, {
-		name:       "7_invalid_metric",
-		configFile: "config-invalid-metric.yaml",
-		ErrSubstr:  "failed validating metric config",
-		expSuccess: false,
-	}, {
-		name:       "8_invalid_targets",
-		configFile: "config-invalid-targets.yaml",
-		ErrSubstr:  "failed validating targets config:",
-		expSuccess: false,
-	}} {
-		t.Run(tc.name, func(t *testing.T) {
-			c, err := NewConfig(filepath.Join("testdata", tc.configFile))
-			if tc.expSuccess && err != nil {
-				t.Fatalf("Unexpected failure: %s", err.Error())
-			}
+// newExampleConfig creates a valid example config.
+func newExampleConfig(t *testing.T) config {
+	t.Helper()
 
-			if !tc.expSuccess && err == nil {
-				t.Fatal("Unexpected success.")
-			}
-
-			if !tc.expSuccess && !strings.Contains(err.Error(), tc.ErrSubstr) {
-				t.Fatalf(
-					"Error does not contain expected substring: got %q, want substring %q",
-					err.Error(), tc.ErrSubstr,
-				)
-			}
-
-			if err == nil {
-				if c.Seconds < 5 {
-					t.Errorf("Config seconds must be > 5: got %v", c.Seconds)
-				}
-			}
-		})
+	return config{
+		DryRun:  true,
+		Seconds: 63,
+		Logging: logging{
+			Level:  "debug",
+			Format: "logfmt",
+		},
+		Metric: metric{
+			Namespace: "MyNamespace",
+			Name:      "MyMetric",
+			Dimensions: []dimension{
+				{Name: "Cluster", Value: "MyCluster"},
+			},
+		},
+		Targets: []target{
+			{
+				Kind:      kindStatefulSet,
+				Namespace: "observability",
+				Name:      "prometheus",
+				Mode:      modeAllOfThem,
+			},
+		},
 	}
 }
 
-// TestValidateMetric tests ValidateMetric.
+// TestNewConfig tests that the function newConfig correctly parses
+// configuration files. Validation of the config is not focus of this test.
+func TestNewConfig(t *testing.T) {
+	tempDir := t.TempDir()
+
+	t.Run("ErrorReadConfig", func(t *testing.T) {
+		_, err := newConfig(tempDir)
+
+		if err == nil {
+			t.Fatalf("Expected error, got nil")
+		}
+
+		want := "read config"
+
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("Expected error to contain %q, got %q", want, err)
+		}
+	})
+
+	t.Run("ErrorUnmarshalConfig", func(t *testing.T) {
+		fileContent := "this is definitely not yaml"
+		configPath := filepath.Join(tempDir, "ErrorUnmarshalConfig.yaml")
+
+		err := os.WriteFile(configPath, []byte(fileContent), 0o600)
+		if err != nil {
+			t.Fatalf("Failed to write file: %v", err)
+		}
+
+		_, err = newConfig(configPath)
+
+		if err == nil {
+			t.Fatalf("Expected error, got nil")
+		}
+
+		want := "unmarshal config"
+
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("Expected error to contain %q, got %q", want, err)
+		}
+	})
+
+	t.Run("ErrorProcessConfig", func(t *testing.T) {
+		fileContent := "this: is valid yaml but invalid config"
+		configPath := filepath.Join(tempDir, "ErrorProcessConfig.yaml")
+
+		err := os.WriteFile(configPath, []byte(fileContent), 0o600)
+		if err != nil {
+			t.Fatalf("Failed to write file: %v", err)
+		}
+
+		_, err = newConfig(configPath)
+
+		if err == nil {
+			t.Fatalf("Expected error, got nil")
+		}
+
+		want := "process config"
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("Expected error to contain %q, got %q", want, err)
+		}
+	})
+
+	t.Run("Success", func(t *testing.T) {
+		fileContent := dedent.Dedent(`
+			dryRun: true
+			seconds: 63
+			logging:
+			  level: debug
+			  format: logfmt
+			metric:
+			  namespace: MyNamespace
+			  name: MyMetric
+			  dimensions:
+			    - name: Cluster
+			      value: MyCluster
+			targets:
+			  - kind: StatefulSet
+			    namespace: observability
+			    name: prometheus
+			    mode: AllOfThem
+		`)
+		configPath := filepath.Join(tempDir, "Success.yaml")
+
+		err := os.WriteFile(configPath, []byte(fileContent), 0o600)
+		if err != nil {
+			t.Fatalf("Failed to write file: %v", err)
+		}
+
+		gotConfig, err := newConfig(configPath)
+		if err != nil {
+			t.Fatalf("Failed to create config: %v", err)
+		}
+
+		wantConfig := config{
+			DryRun:  true,
+			Seconds: 63,
+			Logging: logging{
+				Level:  "debug",
+				Format: "logfmt",
+			},
+			Metric: metric{
+				Namespace: "MyNamespace",
+				Name:      "MyMetric",
+				Dimensions: []dimension{
+					{Name: "Cluster", Value: "MyCluster"},
+				},
+			},
+			Targets: []target{
+				{
+					Kind:      kindStatefulSet,
+					Namespace: "observability",
+					Name:      "prometheus",
+					Mode:      modeAllOfThem,
+				},
+			},
+		}
+
+		if diff := cmp.Diff(wantConfig, gotConfig); diff != "" {
+			t.Errorf("Config mismatch (-want +got):\n%v", diff)
+		}
+	})
+}
+
+// TestProcessConfig tests that the processConfig function correctly processes
+// configuration instances, including validation of the metric config and targets config.
+func TestProcessConfig(t *testing.T) {
+	t.Run("SecondsTooSmall", func(t *testing.T) {
+		config := newExampleConfig(t)
+		config.Seconds = minSeconds - 1
+
+		processedConfig, err := processConfig(config)
+		if err != nil {
+			t.Fatalf("Failed to process config: %v", err)
+		}
+
+		if processedConfig.Seconds != defaultSeconds {
+			t.Errorf(
+				"Unexpected seconds value: got %v, want %v",
+				processedConfig.Seconds,
+				defaultSeconds,
+			)
+		}
+	})
+
+	t.Run("InvalidMetric", func(t *testing.T) {
+		config := newExampleConfig(t)
+		config.Metric.Namespace = ""
+
+		_, err := processConfig(config)
+		if err == nil {
+			t.Fatalf("Expected error, got nil")
+		}
+
+		want := "missing: metric.namespace"
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("Expected error to contain %q, got %q", want, err)
+		}
+	})
+
+	t.Run("InvalidTargets", func(t *testing.T) {
+		config := newExampleConfig(t)
+		config.Targets[0].Kind = ""
+
+		_, err := processConfig(config)
+		if err == nil {
+			t.Fatalf("Expected error, got nil")
+		}
+
+		want := "missing: target[0].kind"
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("Expected error to contain %q, got %q", want, err)
+		}
+	})
+
+	t.Run("DefaultLogLevel", func(t *testing.T) {
+		config := newExampleConfig(t)
+		config.Logging.Level = ""
+
+		processedConfig, err := processConfig(config)
+		if err != nil {
+			t.Fatalf("Failed to process config: %v", err)
+		}
+
+		if processedConfig.Logging.Level != logLevelInfo {
+			t.Errorf(
+				"Unexpected log level: got %v, want %v",
+				processedConfig.Logging.Level,
+				logLevelInfo,
+			)
+		}
+	})
+
+	t.Run("InvalidLogLevel", func(t *testing.T) {
+		config := newExampleConfig(t)
+		config.Logging.Level = "invalid"
+
+		_, err := processConfig(config)
+		if err == nil {
+			t.Fatalf("Expected error, got nil")
+		}
+
+		want := "logging.level invalid: invalid"
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("Expected error to contain %q, got %q", want, err)
+		}
+	})
+
+	t.Run("DefaultLogFormat", func(t *testing.T) {
+		config := newExampleConfig(t)
+		config.Logging.Format = ""
+
+		processedConfig, err := processConfig(config)
+		if err != nil {
+			t.Fatalf("Failed to process config: %v", err)
+		}
+
+		if processedConfig.Logging.Format != logFormatJSON {
+			t.Errorf(
+				"Unexpected log format: got %v, want %v",
+				processedConfig.Logging.Format,
+				logFormatJSON,
+			)
+		}
+	})
+
+	t.Run("InvalidLogFormat", func(t *testing.T) {
+		config := newExampleConfig(t)
+		config.Logging.Format = "invalid"
+
+		_, err := processConfig(config)
+		if err == nil {
+			t.Fatalf("Expected error, got nil")
+		}
+
+		want := "logging.format invalid: invalid"
+		if !strings.Contains(err.Error(), want) {
+			t.Errorf("Expected error to contain %q, got %q", want, err)
+		}
+	})
+}
+
+// TestValidateMetric tests the validateMetric function.
 func TestValidateMetric(t *testing.T) {
 	for _, tc := range []struct {
 		name      string // Name of test case.
-		metric    Metric // Initialized metric struct.
-		errSubstr string // Substring expected in error string.
+		metric    metric // Initialized metric struct.
+		errSubstr string // Substring expected to be in error string.
 	}{{
-		name: "1_namespace_empty",
-		metric: Metric{
+		name: "NamespaceEmpty",
+		metric: metric{
 			Name: "Name",
 		},
 		errSubstr: "missing: metric.namespace",
 	}, {
-		name: "2_name_empty",
-		metric: Metric{
+		name: "NameEmpty",
+		metric: metric{
 			Namespace: "Namespace",
 		},
 		errSubstr: "missing: metric.name",
 	}, {
-		name: "3_dimension_name_empty",
-		metric: Metric{
+		name: "DimensionNameEmpty",
+		metric: metric{
 			Name:       "Name",
 			Namespace:  "Namespace",
-			Dimensions: []Dimension{{Value: "Value"}},
+			Dimensions: []dimension{{Value: "Value"}},
 		},
 		errSubstr: "missing: metric.dimensions[0].name",
 	}, {
-		name: "4_dimension_value_empty",
-		metric: Metric{
+		name: "DimensionValueEmpty",
+		metric: metric{
 			Name:       "Name",
 			Namespace:  "Namespace",
-			Dimensions: []Dimension{{Name: "Name"}},
+			Dimensions: []dimension{{Name: "Name"}},
 		},
 		errSubstr: "missing: metric.dimensions[0].value",
 	}, {
-		name: "5_all_is_good",
-		metric: Metric{
+		name: "AllIsGood",
+		metric: metric{
 			Name:      "Name",
 			Namespace: "Namespace",
-			Dimensions: []Dimension{
+			Dimensions: []dimension{
 				{Name: "Name1", Value: "Value1"},
 				{Name: "Name2", Value: "Value2"},
 			},
 		},
+	}, {
+		name: "DimensionsNil",
+		metric: metric{
+			Name:       "Name",
+			Namespace:  "Namespace",
+			Dimensions: nil,
+		},
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
-			err := ValidateMetric(tc.metric)
+			err := validateMetric(tc.metric)
 			if err != nil {
 				if len(tc.errSubstr) == 0 {
-					t.Errorf("Unexpected failure: %s", err.Error())
+					t.Errorf("Unexpected failure: %v", err)
 				} else if !strings.Contains(err.Error(), tc.errSubstr) {
-					t.Errorf(
-						"Err does not contain substr: got %q, want substr %q",
-						err.Error(), tc.errSubstr,
-					)
+					t.Errorf("Error does not contain expected substring: %v", err)
 				}
 			} else {
 				if len(tc.errSubstr) != 0 {
-					t.Error("Unexpected success.")
+					t.Errorf("Unexpected success")
 				}
 			}
 		})
 	}
 }
 
-// TestValidateTargets tests ValidateTargets.
+// TestValidateTargets tests the validateTargets function.
 func TestValidateTargets(t *testing.T) {
 	for _, tc := range []struct {
 		name      string   // Name of test case.
-		targets   []Target // Initialized target structs.
-		errSubstr string   // Substring expected in error string.
+		targets   []target // Initialized target structs.
+		errSubstr string   // Substring expected to be in error string.
 	}{{
-		name:      "1_no_targets",
+		name:      "NoTargets",
 		errSubstr: "missing: targets",
 	}, {
-		name: "2_kind_not_supported",
-		targets: []Target{{
-			Kind:      KindDaemonSet,
+		name: "KindNotSupported",
+		targets: []target{{
+			Kind:      kindDaemonSet,
 			Namespace: "Namespace",
 			Name:      "Name",
-			Mode:      ModeAllOfThem,
+			Mode:      modeAllOfThem,
 		}, {
 			Kind:      "Job",
 			Namespace: "Namespace",
 			Name:      "Name",
-			Mode:      ModeAllOfThem,
+			Mode:      modeAllOfThem,
 		}},
-		errSubstr: "target[1].kind not supported: Job",
+		errSubstr: "target[1].kind invalid: Job",
 	}, {
-		name: "3_mode_not_supported",
-		targets: []Target{{
-			Kind:      KindDaemonSet,
+		name: "ModeNotSupported",
+		targets: []target{{
+			Kind:      kindDaemonSet,
 			Namespace: "Namespace",
 			Name:      "Name",
 			Mode:      "AtLeastTwo",
 		}},
-		errSubstr: "target[0].mode not supported: AtLeastTwo",
+		errSubstr: "target[0].mode invalid: AtLeastTwo",
 	}, {
-		name: "4_kind_empty",
-		targets: []Target{{
+		name: "KindEmpty",
+		targets: []target{{
 			Kind:      "",
 			Namespace: "Namespace",
 			Name:      "Name",
-			Mode:      ModeAtLeastOne,
+			Mode:      modeAtLeastOne,
 		}},
 		errSubstr: "missing: target[0].kind",
 	}, {
-		name: "5_name_empty",
-		targets: []Target{{
-			Kind:      KindDeployment,
+		name: "NameEmpty",
+		targets: []target{{
+			Kind:      kindDeployment,
 			Namespace: "Namespace",
 			Name:      "",
-			Mode:      ModeAtLeastOne,
+			Mode:      modeAtLeastOne,
 		}},
 		errSubstr: "missing: target[0].name",
 	}, {
-		name: "6_namespace_empty",
-		targets: []Target{{
-			Kind:      KindDeployment,
+		name: "NamespaceEmpty",
+		targets: []target{{
+			Kind:      kindDeployment,
 			Namespace: "",
 			Name:      "Name",
-			Mode:      ModeAtLeastOne,
+			Mode:      modeAtLeastOne,
 		}},
 		errSubstr: "missing: target[0].namespace",
 	}, {
-		name: "7_mode_empty",
-		targets: []Target{{
-			Kind:      KindDeployment,
+		name: "ModeEmpty",
+		targets: []target{{
+			Kind:      kindDeployment,
 			Namespace: "Namespace",
 			Name:      "Name",
 			Mode:      "",
@@ -214,19 +419,16 @@ func TestValidateTargets(t *testing.T) {
 		errSubstr: "missing: target[0].mode",
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
-			err := ValidateTargets(tc.targets)
+			err := validateTargets(tc.targets)
 			if err != nil {
 				if len(tc.errSubstr) == 0 {
-					t.Errorf("Unexpected failure: %s", err.Error())
+					t.Errorf("Unexpected failure: %v", err)
 				} else if !strings.Contains(err.Error(), tc.errSubstr) {
-					t.Errorf(
-						"Err does not contain substr: got %q, want substr %q",
-						err.Error(), tc.errSubstr,
-					)
+					t.Errorf("Error does not contain expected substring: %v", err)
 				}
 			} else {
 				if len(tc.errSubstr) != 0 {
-					t.Error("Unexpected success.")
+					t.Errorf("Unexpected success")
 				}
 			}
 		})

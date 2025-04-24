@@ -3,58 +3,88 @@
   "$id": "kubestatus2cloudwatch-2023-01-01",
   "type": "object",
   "title": "Kubestatus2cloudwatch Configuration",
-  "required": ["seconds", "metric", "targets"],
+  "required": [
+    "metric",
+    "targets"
+  ],
   "properties": {
-    "dry": {
-      "description": "Skip updating CLoudWatch metric. Optional. Defaults to false.",
+    "dryRun": {
+      "description": "Flag for dry run mode. If enabled, program runs without side effects. Optional. Defaults to \"false\".",
       "type": "boolean",
       "default": false
     },
     "seconds": {
-      "description": "Scan interval. 60 seconds are recommended. Must be >= 5. Required.",
+      "description": "Scan interval in seconds. Must be greater than 1. Optional. Defaults to 60.",
       "type": "integer",
-      "minimum": 5,
-      "default": 0
+      "minimum": 1
     },
     "logging": {
-      "description": "Logging configuration. Optional. Defaults to debug log level and structured logs using JSON.",
+      "description": "Logging configuration. Optional.",
       "type": "object",
-      "required": ["level", "pretty"],
+      "required": [
+        "level",
+        "format"
+      ],
       "examples": [
         {
           "level": "info",
-          "pretty": true
+          "format": "json"
         }
       ],
       "properties": {
         "level": {
-          "description": "Logging Level. Supported are \"debug\" and \"info\". Optional. Defaults to \"debug\".",
+          "description": "Log Level. Allowed values are \"debug\" and \"info\". Optional. Defaults to \"info\".",
           "type": "string",
           "default": "debug",
-          "enum": ["debug", "info"],
-          "examples": ["debug", "info"]
+          "enum": [
+            "info",
+            "debug"
+          ]
         },
-        "pretty": {
-          "description": "Output logs in human-friendly format. Optional. Defaults to false which emits structured logs using JSON.",
-          "type": "boolean",
-          "default": false
+        "format": {
+          "description": "Log format. Allowed values are \"json\" and \"logfmt\". Optional. Defaults to \"json\".",
+          "type": "string",
+          "default": "json",
+          "enum": [
+            "json",
+            "logfmt"
+          ]
         }
       }
     },
     "metric": {
       "description": "Metric configuration. Required.",
       "type": "object",
-      "required": ["namespace", "name"],
+      "required": [
+        "namespace",
+        "name"
+      ],
+      "examples": [
+        {
+          "namespace": "MyNamespace",
+          "name": "MyMetric",
+          "dimensions": [
+            {
+              "name": "Cluster",
+              "value": "MyCluster"
+            }
+          ]
+        }
+      ],
       "properties": {
         "namespace": {
           "description": "CloudWatch metric namespace. Required.",
           "type": "string",
-          "examples": ["MyMetricNamespace"]
+          "examples": [
+            "MyNamespace"
+          ]
         },
         "name": {
           "description": "CloudWatch metric name. Required.",
           "type": "string",
-          "examples": ["MyMetricName"]
+          "examples": [
+            "MyMetric"
+          ]
         },
         "dimensions": {
           "description": "CloudWatch metric dimensions. Optional. Defaults to empty list.",
@@ -65,17 +95,16 @@
               {
                 "name": "Cluster",
                 "value": "MyCluster"
-              },
-              {
-                "name": "Environment",
-                "value": "PROD"
               }
             ]
           ],
           "items": {
             "description": "Dimension.",
             "type": "object",
-            "required": ["name", "value"],
+            "required": [
+              "name",
+              "value"
+            ],
             "examples": [
               {
                 "name": "Cluster",
@@ -86,12 +115,16 @@
               "name": {
                 "description": "Dimension name. Required.",
                 "type": "string",
-                "examples": ["Cluster"]
+                "examples": [
+                  "Cluster"
+                ]
               },
               "value": {
                 "description": "Dimension value. Required.",
                 "type": "string",
-                "examples": ["MyCluster"]
+                "examples": [
+                  "MyCluster"
+                ]
               }
             }
           }
@@ -103,40 +136,56 @@
       "type": "array",
       "minItems": 1,
       "examples": [
-        {
-          "kind": "StatefulSet",
-          "namespace": "default",
-          "name": "prometheus",
-          "mode": "AllOfThem"
-        }
+        [
+          {
+            "kind": "StatefulSet",
+            "namespace": "observability",
+            "name": "prometheus",
+            "mode": "AllOfThem"
+          }
+        ]
       ],
       "items": {
         "type": "object",
-        "required": ["kind", "namespace", "name", "mode"],
+        "required": [
+          "kind",
+          "namespace",
+          "name",
+          "mode"
+        ],
         "properties": {
           "kind": {
-            "description": "Type of target. Supported are \"DaemonSet\", \"Deployment\", and \"StatefulSet\". Required.",
+            "description": "Type of target. Allowed values are \"DaemonSet\", \"Deployment\", and \"StatefulSet\". Required.",
             "type": "string",
-            "enum": ["DaemonSet", "Deployment", "StatefulSet"],
-            "examples": ["DaemonSet", "Deployment", "StatefulSet"]
+            "enum": [
+              "DaemonSet",
+              "Deployment",
+              "StatefulSet"
+            ]
           },
           "namespace": {
             "description": "Namespace of target. Required.",
             "type": "string",
             "minLength": 1,
-            "examples": ["kube-system"]
+            "examples": [
+              "observability"
+            ]
           },
           "name": {
             "description": "Name of target. Required.",
             "type": "string",
             "minLength": 1,
-            "examples": ["prometheus"]
+            "examples": [
+              "prometheus"
+            ]
           },
           "mode": {
-            "description": "Mode used for scan and evaluation. Supported are \"AllOfThem\" (requires all replicas to be ready) and \"AtLeastOn\" (requires at least one replica to be ready).",
+            "description": "Mode used for scan and evaluation. Allowed values are \"AllOfThem\" (requires all replicas to be ready) and \"AtLeastOn\" (requires at least one replica to be ready). Required.",
             "type": "string",
-            "enum": ["AllOfThem", "AtLeastOne"],
-            "examples": ["AllOfThem", "AtLeastOne"]
+            "enum": [
+              "AllOfThem",
+              "AtLeastOne"
+            ]
           }
         }
       }
