@@ -8,9 +8,9 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/sts v1.33.19
 	github.com/docker/go-connections v0.5.0
 	github.com/google/go-cmp v0.7.0
-	github.com/testcontainers/testcontainers-go v0.36.0
-	github.com/testcontainers/testcontainers-go/modules/k3s v0.36.0
-	github.com/testcontainers/testcontainers-go/modules/localstack v0.36.0
+	github.com/testcontainers/testcontainers-go v0.37.0
+	github.com/testcontainers/testcontainers-go/modules/k3s v0.37.0
+	github.com/testcontainers/testcontainers-go/modules/localstack v0.37.0
 	k8s.io/apimachinery v0.33.0
 	k8s.io/client-go v0.33.0
 )
@@ -49,6 +49,7 @@ require (
 	github.com/moby/docker-image-spec v1.3.1 // indirect
 	github.com/moby/go-archive v0.1.0 // indirect
 	github.com/moby/patternmatcher v0.6.0 // indirect
+	github.com/moby/sys/atomicwriter v0.1.0 // indirect
 	github.com/moby/sys/sequential v0.6.0 // indirect
 	github.com/moby/sys/user v0.4.0 // indirect
 	github.com/moby/sys/userns v0.1.0 // indirect
@@ -73,7 +74,7 @@ require (
 	go.opentelemetry.io/otel/trace v1.35.0 // indirect
 	golang.org/x/crypto v0.37.0 // indirect
 	golang.org/x/mod v0.24.0 // indirect
-	google.golang.org/genproto/googleapis/rpc v0.0.0-20250303144028-a0af3efb3deb // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20250425173222-7b384671a197 // indirect
 	google.golang.org/grpc v1.72.0 // indirect
 	gopkg.in/evanphx/json-patch.v4 v4.12.0 // indirect
 	sigs.k8s.io/randfill v1.0.0 // indirect
@@ -115,3 +116,5 @@ require (
 	sigs.k8s.io/structured-merge-diff/v4 v4.7.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
+
+replace github.com/testcontainers/testcontainers-go/modules/localstack => github.com/trallnag/testcontainers-go/modules/localstack v0.0.0-20250426175911-26d834ac8f90

@@ -9,6 +9,9 @@ linters:
   settings:
     errorlint:
       errorf: false
+    gomoddirectives:
+      replace-allow-list:
+        - github.com/testcontainers/testcontainers-go/modules/localstack
   exclusions:
     generated: lax
     presets:

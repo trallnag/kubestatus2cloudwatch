@@ -31,11 +31,18 @@
 
   "packageRules": [
     {
+      "description": "Group official GitHub Actions.",
       "groupName": "GitHub Actions (official)",
       "groupSlug": "github-actions-official",
       "matchUpdateTypes": ["digest"],
       "matchManagers": ["github-actions"],
       "matchPackageNames": ["actions/**"]
+    },
+    {
+      "description": "Disable testcontainer Go packages.",
+      "enabled": false,
+      "matchManagers": ["gomod"],
+      "matchPackageNames": ["/.+testcontainers-go.+/"]
     }
   ],
   "customManagers": [
