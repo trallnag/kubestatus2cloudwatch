@@ -4,8 +4,10 @@
   "extends": [
     ":configMigration",
     "config:recommended",
-    "schedule:weekends",
-    "helpers:pinGitHubActionDigests"
+    "docker:enableMajor",
+    "docker:pinDigests",
+    "helpers:pinGitHubActionDigests",
+    "schedule:weekends"
   ],
 
   "commitBody": "Co-authored-by: Tim Schwenke <tim@trallnag.com>",
