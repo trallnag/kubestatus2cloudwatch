@@ -37,5 +37,17 @@
       "matchManagers": ["github-actions"],
       "matchPackageNames": ["actions/**"]
     }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Manage *_IMAGE_NAME variables in .env pointing to Docker images",
+      "fileMatch": ["^\\.env$"],
+      "matchStrings": [
+        "(^|\\n)^.+_IMAGE_NAME=\"(?<depName>.+):(?<currentValue>.+)\"($|\\n)"
+      ],
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "docker"
+    }
   ]
 }
