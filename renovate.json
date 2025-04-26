@@ -31,11 +31,11 @@
 
   "packageRules": [
     {
-      "groupName": "GitHub Actions",
-      "groupSlug": "github-actions",
+      "groupName": "GitHub Actions (official)",
+      "groupSlug": "github-actions-official",
       "matchUpdateTypes": ["digest"],
       "matchManagers": ["github-actions"],
-      "matchPackageNames": ["*"]
+      "matchPackageNames": ["actions/**"]
     }
   ]
 }
