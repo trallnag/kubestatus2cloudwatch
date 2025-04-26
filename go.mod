@@ -117,4 +117,4 @@ require (
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
 
-replace github.com/testcontainers/testcontainers-go/modules/localstack => github.com/trallnag/testcontainers-go/modules/localstack v0.0.0-20250426175911-26d834ac8f90
+replace github.com/testcontainers/testcontainers-go/modules/localstack => github.com/trallnag/testcontainers-go/modules/localstack v0.0.0-20250425121554-70d92b9b3c89
