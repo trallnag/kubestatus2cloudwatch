@@ -1,4 +1,4 @@
-FROM  mcr.microsoft.com/devcontainers/base:latest
+FROM  mcr.microsoft.com/devcontainers/base:latest@sha256:eb406d55b2ecd2f8a31d23e4bee50af112d688d169da7457f436f5825c3cef12
 
 USER vscode
 
