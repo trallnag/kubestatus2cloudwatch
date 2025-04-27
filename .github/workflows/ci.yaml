@@ -36,6 +36,10 @@ jobs:
     steps:
       - id: skip
         uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5.3.1
+        with:
+          concurrent_skipping: always
+          skip_after_successful_duplicate: true
+          do_not_skip: '["pull_request", "workflow_dispatch", "schedule", "merge_group"]'
 
   fix-check:
     needs: skip
