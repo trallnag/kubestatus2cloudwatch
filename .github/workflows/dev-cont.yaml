@@ -20,7 +20,21 @@ defaults:
     shell: bash
 
 jobs:
+  skip:
+    name: Skip
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    outputs:
+      skip: ${{ steps.skip.outputs.should_skip }}
+    steps:
+      - id: skip
+        uses: fkirc/skip-duplicate-actions@v5.3.1
+
   dev-cont:
+    needs: skip
+    if: needs.skip.outputs.skip != 'true'
     name: Dev Cont
     runs-on: ubuntu-latest
     steps:

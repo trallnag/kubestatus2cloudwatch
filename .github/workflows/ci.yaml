@@ -25,7 +25,21 @@ defaults:
     shell: bash
 
 jobs:
+  skip:
+    name: Skip
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: read
+    outputs:
+      skip: ${{ steps.skip.outputs.should_skip }}
+    steps:
+      - id: skip
+        uses: fkirc/skip-duplicate-actions@v5.3.1
+
   fix-check:
+    needs: skip
+    if: needs.skip.outputs.skip != 'true'
     name: Fix & Check
     runs-on: ubuntu-latest
     permissions:
@@ -110,6 +124,8 @@ jobs:
           commit_options: --no-verify --signoff
 
   test:
+    needs: skip
+    if: needs.skip.outputs.skip != 'true'
     name: Test
     runs-on: ubuntu-latest
     steps:
