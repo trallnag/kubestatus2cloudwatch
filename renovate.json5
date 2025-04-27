@@ -46,20 +46,26 @@
       "matchPackageNames": [
         "/.+testcontainers-go.+/",
       ],
-    }
+    },
+    {
+      "description": "Limit allowed versions for k3s.",
+      "matchDepNames": [
+        "docker.io/rancher/k3s",
+      ],
+      "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+-k3s\\d+$/",
+    },
   ],
   "customManagers": [
     {
       "customType": "regex",
-      "description": "Manage *_IMAGE_NAME variables in .env pointing to Docker images",
+      "description": "Manage Docker image versions in .env file.",
+      "datasourceTemplate": "docker",
       "fileMatch": [
         "^\\.env$",
       ],
       "matchStrings": [
-        "(?:^|\\r\\n|\\r|\\n|$).+_IMAGE_NAME=\"(?<depName>.+):(?<currentValue>.+)@(?<currentDigest>sha256:[0-9a-f]+)\"(?:^|\\r\\n|\\r|\\n|$)",
+        "IMAGE_NAME=\"(?<depName>.+):(?<currentValue>.+)@(?<currentDigest>sha256:[0-9a-f]+)\" # versioning=(?<versioning>[a-z]+)\\n",
       ],
-      "datasourceTemplate": "docker",
-      "versioningTemplate": "docker",
-    }
+    },
   ]
 }
