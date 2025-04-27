@@ -1,60 +1,65 @@
 {
-  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
   "extends": [
     ":configMigration",
     "config:recommended",
     "docker:enableMajor",
     "docker:pinDigests",
     "helpers:pinGitHubActionDigests",
-    "schedule:weekends"
+    "schedule:weekends",
   ],
-
   "commitBody": "Co-authored-by: Tim Schwenke <tim@trallnag.com>",
-
   "commitMessageLowerCase": "never",
-
   "minimumReleaseAge": "21 days",
-
   "semanticCommits": "enabled",
-
   "prHourlyLimit": 10,
-
   "lockFileMaintenance": {
-    "enabled": true
+    "enabled": true,
   },
-
   "pre-commit": {
     "enabled": true,
-    "prBodyNotes": [""]
+    "prBodyNotes": [
+      "",
+    ],
   },
-
   "packageRules": [
     {
       "description": "Group official GitHub Actions.",
       "groupName": "GitHub Actions (official)",
       "groupSlug": "github-actions-official",
-      "matchUpdateTypes": ["digest"],
-      "matchManagers": ["github-actions"],
-      "matchPackageNames": ["actions/**"]
+      "matchUpdateTypes": [
+        "digest",
+      ],
+      "matchManagers": [
+        "github-actions",
+      ],
+      "matchPackageNames": [
+        "actions/**",
+      ],
     },
     {
       "description": "Disable testcontainer Go packages.",
       "enabled": false,
-      "matchManagers": ["gomod"],
-      "matchPackageNames": ["/.+testcontainers-go.+/"]
+      "matchManagers": [
+        "gomod",
+      ],
+      "matchPackageNames": [
+        "/.+testcontainers-go.+/",
+      ],
     }
   ],
   "customManagers": [
     {
       "customType": "regex",
       "description": "Manage *_IMAGE_NAME variables in .env pointing to Docker images",
-      "fileMatch": ["^\\.env$"],
+      "fileMatch": [
+        "^\\.env$",
+      ],
       "matchStrings": [
-        "(?:^|\\r\\n|\\r|\\n|$).+_IMAGE_NAME=\"(?<depName>.+):(?<currentValue>.+)@(?<currentDigest>sha256:[0-9a-f]+)\"(?:^|\\r\\n|\\r|\\n|$)"
+        "(?:^|\\r\\n|\\r|\\n|$).+_IMAGE_NAME=\"(?<depName>.+):(?<currentValue>.+)@(?<currentDigest>sha256:[0-9a-f]+)\"(?:^|\\r\\n|\\r|\\n|$)",
       ],
       "datasourceTemplate": "docker",
-      "versioningTemplate": "docker"
+      "versioningTemplate": "docker",
     }
   ]
 }
