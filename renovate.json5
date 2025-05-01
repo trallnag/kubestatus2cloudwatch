@@ -75,6 +75,7 @@
       "matchStrings": [
         "# Renovate: datasource=(?<datasource>.+) depName=(?<depName>.+)\\n\".+\" = \"(?<currentValue>.+)\"\\n",
       ],
+      //"extractVersionTemplate": "v(?<version>.+)",
     },
   ],
     "enabledManagers": ["custom.regex"]
