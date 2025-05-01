@@ -73,7 +73,7 @@
       "description": "Manage tools in mise config file.",
       "fileMatch": ["mise.toml"],
       "matchStrings": [
-        "# Renovate: datasource=(?<datasource>.+) depName=(?<depName>.+)\\n\".+\" = \"(?<currentValue>.+)\"\\n",
+        "# Renovate: datasource=(?<datasource>.+) packageName=(?<packageName>.+)\\n\".+\" = \"(?<currentValue>.+)\"\\n",
       ],
       //"extractVersionTemplate": "v(?<version>.+)",
     },
