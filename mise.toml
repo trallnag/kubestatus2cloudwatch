@@ -1,0 +1,21 @@
+[tools]
+
+# Renovate: datasource=github-release depName=golangci/golangci-lint
+"aqua:golangci/golangci-lint" = "2.1.4"
+
+# Renovate: datasource=github-release depName=google/yamlfmt
+"aqua:google/yamlfmt" = "0.16.0"
+
+# Renovate: datasource=github-release depName=goreleaser/goreleaser
+"aqua:goreleaser/goreleaser" = "2.9.0"
+
+# Renovate: datasource=github-release depName=mvdan/sh
+"aqua:mvdan/sh" = "3.11.0"
+
+"pipx:copier" = "9.7.1"
+"pipx:exec-cmds-defer-errors" = "2.0.2"
+"pipx:filter-pre-commit-hooks" = "2.0.5"
+"pipx:mdformat" = "0.7.22"
+"pipx:pre-commit" = "4.2.0"
+"ubi:koalaman/shellcheck" = "0.10.0"
+"ubi:mvdan/gofumpt" = "0.8.0"

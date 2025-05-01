@@ -55,15 +55,20 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
       - name: Set up just
         uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
 
-      - name: Install tools with pipx
-        run: |
-          pipx install exec-cmds-defer-errors
-          pipx install filter-pre-commit-hooks
-          pipx install mdformat
-          pipx install pre-commit
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.8.2
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v6.0.1
+        with:
+          enable-cache: true
 
       - name: Cache pre-Commit cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
