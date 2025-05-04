@@ -1,7 +1,7 @@
 [tools]
 
 # Renovate: datasource=github-releases packageName=golangci/golangci-lint
-"aqua:golangci/golangci-lint" = "2.1.4"
+"aqua:golangci/golangci-lint" = "2.1.6"
 
 # Renovate: datasource=github-releases packageName=google/yamlfmt
 "aqua:google/yamlfmt" = "0.16.0"
