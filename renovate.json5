@@ -59,15 +59,15 @@
     },
   ],
   "customManagers": [
-    // {
-    //   "customType": "regex",
-    //   "description": "Manage Docker image versions in .env file.",
-    //   "datasourceTemplate": "docker",
-    //   "fileMatch": [".env"],
-    //   "matchStrings": [
-    //     "IMAGE_NAME=\"(?<depName>.+):(?<currentValue>.+)@(?<currentDigest>sha256:[0-9a-f]+)\" # versioning=(?<versioning>[a-z]+)\\n",
-    //   ],
-    // },
+    {
+      "customType": "regex",
+      "description": "Manage Docker image versions in .env file.",
+      "datasourceTemplate": "docker",
+      "fileMatch": [".env"],
+      "matchStrings": [
+        "IMAGE_NAME=\"(?<depName>.+):(?<currentValue>.+)@(?<currentDigest>sha256:[0-9a-f]+)\" # versioning=(?<versioning>[a-z]+)\\n",
+      ],
+    },
     {
       "customType": "regex",
       "description": "Manage tools in mise config file.",
@@ -75,8 +75,6 @@
       "matchStrings": [
         "# Renovate: datasource=(?<datasource>.+) packageName=(?<packageName>.+)\\n\".+\" = \"(?<currentValue>.+)\"\\n",
       ],
-      //"extractVersionTemplate": "v(?<version>.+)",
     },
   ],
-    "enabledManagers": ["custom.regex"]
 }
