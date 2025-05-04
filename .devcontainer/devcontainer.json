@@ -14,19 +14,19 @@
   "customizations": {
     "vscode": {
       "settings": {
-        "terminal.integrated.defaultProfile.linux": "zsh",
-        "terminal.integrated.profiles.linux": {
-          "zsh": { "path": "/usr/bin/zsh" }
-        },
-        "go.lintTool": "golangci-lint",
+        "go.alternateTools.golangci-lint": "/home/vscode/.local/share/mise/shims/golangci-lint",
         "go.lintFlags": ["--fast"],
-        "go.alternateTools": {
-          "golangci-lint": "/home/linuxbrew/.linuxbrew/bin/golangci-lint"
-        },
-        "go.testTimeout": "5m"
+        "go.lintTool": "golangci-lint",
+        "go.testTimeout": "5m",
+        "mise.checkForNewMiseVersion": false,
+        "mise.updateOpenTerminalsEnvAutomatically": true,
+        "shellcheck.executablePath": "/home/vscode/.local/share/mise/shims/shellcheck",
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux.zsh.path": "/usr/bin/zsh"
       },
 
       "extensions": [
+        "BlueGlassBlock.better-json5",
         "EditorConfig.EditorConfig",
         "Gerrnperl.outline-map",
         "GitHub.copilot",
@@ -39,6 +39,7 @@
         "donjayamanne.githistory",
         "github.vscode-github-actions",
         "golang.go",
+        "hverlin.mise-vscode",
         "mhutchie.git-graph",
         "mkhl.shfmt",
         "nefrob.vscode-just-syntax",
@@ -52,5 +53,5 @@
     }
   },
 
-  "postStartCommand": "just init"
+  "postStartCommand": "mise trust && just init"
 }

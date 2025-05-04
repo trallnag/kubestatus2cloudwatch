@@ -4,6 +4,7 @@
 .vscode/
 config.yaml
 dist/
+tmp/
 
 # Go.
 go.work

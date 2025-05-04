@@ -12,56 +12,41 @@ default: init fix check test
 
 # Initialize environment.
 init:
-  # Create local-only directories.
-  mkdir -p \
-    .cache \
-    .local \
-    .tmp
+  mise --version
+  mise install
+
+  # Check mise tool availability.
+  mise exec -- exec-cmds-defer-errors --version
+  mise exec -- filter-pre-commit-hooks --version
+  mise exec -- gofumpt --version
+  mise exec -- golangci-lint --version
+  mise exec -- goreleaser --version
+  mise exec -- mdformat --version
+  mise exec -- pre-commit --version
+  mise exec -- shellcheck --version
+  mise exec -- shfmt --version
+  mise exec -- yamlfmt --version
 
   # Check tool availability.
-  exec-cmds-defer-errors --version
-  filter-pre-commit-hooks --version
   go version
-  gofumpt --version
-  golangci-lint --version
-  goreleaser --version
-  mdformat --version
-  pre-commit --version
-  shellcheck --version
-  shfmt --version
   uv --version
-  yamlfmt --version
 
   # Install pre-commit hooks.
-  pre-commit install --install-hooks
-  pre-commit install --install-hooks --hook-type commit-msg
-  pre-commit install --install-hooks --hook-type post-checkout
-  pre-commit install --install-hooks --hook-type post-merge
+  mise exec -- pre-commit install --install-hooks
+  mise exec -- pre-commit install --install-hooks --hook-type commit-msg
+  mise exec -- pre-commit install --install-hooks --hook-type post-checkout
+  mise exec -- pre-commit install --install-hooks --hook-type post-merge
 
   # Download dependencies for Go project.
   go mod download
 
 # Update dependencies.
 update:
-  # Try to update tools managed with Homebrew.
-  ./scripts/update-pkgs-brew.bash \
-    go \
-    gofumpt \
-    golangci-lint \
-    goreleaser \
-    just \
-    shellcheck \
-    shfmt \
-    uv \
-    yamlfmt
+  # Update tools managed with Homebrew.
+  brew upgrade
 
-  # Try to update tools managed with uv.
-  ./scripts/update-pkgs-uv.bash \
-    copier \
-    exec-cmds-defer-errors \
-    filter-pre-commit-hooks \
-    mdformat \
-    pre-commit
+  # Update tools managed with mise.
+  mise upgrade --bump
 
   # Update pre-commit repositories and hooks.
   pre-commit autoupdate
@@ -133,4 +118,4 @@ test--long:
 # Create release notes based on changelog.
 [group('misc')]
 create-release-notes:
-  ./scripts/create-release-notes.bash CHANGELOG.md .tmp/release-notes.md
+  ./scripts/create-release-notes.bash CHANGELOG.md tmp/release-notes.md

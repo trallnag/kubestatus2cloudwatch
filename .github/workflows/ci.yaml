@@ -53,17 +53,30 @@ jobs:
       UV_PYTHON_DOWNLOADS: never
     steps:
       - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2`
 
       - name: Set up just
         uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
 
-      - name: Install tools with pipx
-        run: |
-          pipx install exec-cmds-defer-errors
-          pipx install filter-pre-commit-hooks
-          pipx install mdformat
-          pipx install pre-commit
+      - name: Install Cosign
+        uses: sigstore/cosign-installer@v3.8.2
+
+      - name: Extract mise tools with pipx backend
+        run: mkdir -p tmp && grep -F -e pipx mise.toml | tee tmp/mise-pipx.toml
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.6.0
+        with:
+          cache: pip
+          cache-dependency-path: |
+            tmp/mise-pipx.toml
+
+      - name: Set up Astral uv
+        uses: astral-sh/setup-uv@v6.0.1
+        with:
+          enable-cache: true
+          cache-dependency-glob: |
+            tmp/mise-pipx.toml
 
       - name: Cache pre-Commit cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
@@ -74,46 +87,17 @@ jobs:
           restore-keys: |
             pre-commit cache dir
 
-      - name: Install tools with mise
+      - name: Set up mise
         uses: jdx/mise-action@7a111ead46986ccad89a74ad013ba2a7c08c9e67 # v2.2.1
         with:
           install: true
           cache: true
-          tool_versions: |
-            gofumpt latest
-            golangci-lint latest
-            shellcheck latest
-            shfmt latest
-            yamlfmt latest
-
-      - name: Initialize environment
-        run: |
-          mkdir -p .cache .local .tmp
-
-          exec-cmds-defer-errors --version
-          filter-pre-commit-hooks --version
-          gofumpt --version
-          golangci-lint --version
-          mdformat --version
-          pre-commit --version
-          shellcheck --version
-          shfmt --version
-          yamlfmt --version
-
-          pre-commit install --install-hooks
-          pre-commit install --install-hooks --hook-type commit-msg
-          pre-commit install --install-hooks --hook-type post-checkout
-          pre-commit install --install-hooks --hook-type post-merge
 
       - name: Run recipes that fix stuff
         run: just fix
 
       - name: Run recipes that check stuff
         run: just check
-
-      - name: Remove mise file
-        if: cancelled() == false
-        run: rm -f .tool-versions
 
       - name: Commit and push changes
         if: |
