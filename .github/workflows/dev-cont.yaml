@@ -49,12 +49,6 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
 
-      - name: Setup tmate session
-        if: false
-        uses: mxschmitt/action-tmate@7b6a61a73bbb9793cb80ad69b8dd8ac19261834c # v3.22
-        with:
-          limit-access-to-actor: true
-
       - name: Set up dev container CLI
         run: npm install -g @devcontainers/cli
 
