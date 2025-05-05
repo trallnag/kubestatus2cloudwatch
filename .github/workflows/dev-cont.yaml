@@ -56,18 +56,15 @@ jobs:
           limit-access-to-actor: true
 
       - name: Set up dev container CLI
-        run: |
-          npm install -g @devcontainers/cli
+        run: npm install -g @devcontainers/cli
 
       - name: Get dev container CLI version
-        run: |
-          devcontainer --version
+        run: devcontainer --version
 
       - name: Create and run dev container
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          devcontainer up --workspace-folder=.
+        run: devcontainer up --workspace-folder=.
 
       - name: Check that token is set in dev container
         run: |
