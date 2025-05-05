@@ -1,12 +1,7 @@
-.cache/
-.local/
-.tmp/
+*.out
+*.test
 .vscode/
 config.yaml
 dist/
-tmp/
-
-# Go.
 go.work
-*.out
-*.test
+tmp/
