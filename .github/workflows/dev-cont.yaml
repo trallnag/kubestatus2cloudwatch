@@ -7,7 +7,7 @@ name: Dev Cont
 on:
   workflow_dispatch:
   push:
-    tags-ignore:
+    branches:
       - '**'
     paths:
       - .github/workflows/dev-cont.yaml
