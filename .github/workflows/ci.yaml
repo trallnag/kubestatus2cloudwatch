@@ -53,7 +53,7 @@ jobs:
       UV_PYTHON_DOWNLOADS: never
     steps:
       - name: Check out repository
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2`
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Set up just
         uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
@@ -116,6 +116,12 @@ jobs:
         with:
           install: true
           cache: true
+
+      - name: Setup tmate session
+        if: false
+        uses: mxschmitt/action-tmate@7b6a61a73bbb9793cb80ad69b8dd8ac19261834c # v3.22
+        with:
+          limit-access-to-actor: true
 
       - name: Run recipes that fix stuff
         run: just fix
