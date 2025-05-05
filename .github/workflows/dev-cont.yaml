@@ -58,4 +58,7 @@ jobs:
         run: devcontainer up --workspace-folder=.
 
       - name: Run task in dev container
-        run: devcontainer exec --workspace-folder=. just
+        run: |
+          devcontainer exec \
+            --workspace-folder=. \
+            /usr/bin/env zsh --login -c just
