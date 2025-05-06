@@ -99,4 +99,4 @@ RUN <<-EOT
   mv /tmp/zshrc ~/.zshrc
 EOT
 
-CMD ["/usr/bin/zsh", "--interactive" , "--login"]
+CMD ["/usr/bin/env", "zsh", "--interactive" , "--login"]
