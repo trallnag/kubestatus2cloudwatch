@@ -53,5 +53,5 @@
     }
   },
 
-  "postStartCommand": "/usr/bin/env zsh --interactive --login -c \"mise trust && just init\""
+  "postStartCommand": "/usr/bin/env zsh --interactive --login -c \"mise trust && MISE_VERBOSE=1 just init\""
 }
