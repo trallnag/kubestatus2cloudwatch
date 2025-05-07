@@ -1,79 +1,83 @@
 {
-  $schema: "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": [
-    ":configMigration",
-    "config:recommended",
-    "docker:enableMajor",
-    "docker:pinDigests",
-    "helpers:pinGitHubActionDigests",
-    "schedule:weekends",
+  $schema: 'https://docs.renovatebot.com/renovate-schema.json',
+  extends: [
+    ':configMigration',
+    'config:recommended',
+    'docker:enableMajor',
+    'docker:pinDigests',
+    'helpers:pinGitHubActionDigests',
+    'schedule:weekends',
   ],
-  "commitBody": "Co-authored-by: Tim Schwenke <tim@trallnag.com>",
-  "commitMessageLowerCase": "never",
-  "minimumReleaseAge": "21 days",
-  "semanticCommits": "enabled",
-  "prHourlyLimit": 10,
-  "lockFileMaintenance": {
-    "enabled": true,
+  commitBody: 'Co-authored-by: Tim Schwenke <tim@trallnag.com>',
+  commitMessageLowerCase: 'never',
+  minimumReleaseAge: '21 days',
+  semanticCommits: 'enabled',
+  prHourlyLimit: 10,
+  lockFileMaintenance: {
+    enabled: true,
   },
-  "pre-commit": {
-    "enabled": true,
-    "prBodyNotes": [
-      "",
+  'pre-commit': {
+    enabled: true,
+    prBodyNotes: [
+      '',
     ],
   },
-  "mise": {
-    "enabled": false,
+  mise: {
+    enabled: false,
   },
-  "packageRules": [
+  packageRules: [
     {
-      "description": "Group official GitHub Actions.",
-      "groupName": "GitHub Actions (official)",
-      "groupSlug": "github-actions-official",
-      "matchUpdateTypes": [
-        "digest",
+      description: 'Group official GitHub Actions.',
+      groupName: 'GitHub Actions (official)',
+      groupSlug: 'github-actions-official',
+      matchUpdateTypes: [
+        'digest',
       ],
-      "matchManagers": [
-        "github-actions",
+      matchManagers: [
+        'github-actions',
       ],
-      "matchPackageNames": [
-        "actions/**",
+      matchPackageNames: [
+        'actions/**',
       ],
     },
     {
-      "description": "Disable testcontainer Go packages.",
-      "enabled": false,
-      "matchManagers": [
-        "gomod",
+      description: 'Disable testcontainer Go packages.',
+      enabled: false,
+      matchManagers: [
+        'gomod',
       ],
-      "matchPackageNames": [
-        "/.+testcontainers-go.+/",
+      matchPackageNames: [
+        '/.+testcontainers-go.+/',
       ],
     },
     {
-      "description": "Limit allowed versions for k3s.",
-      "matchDepNames": [
-        "docker.io/rancher/k3s",
+      description: 'Limit allowed versions for k3s.',
+      matchDepNames: [
+        'docker.io/rancher/k3s',
       ],
-      "allowedVersions": "/^v\\d+\\.\\d+\\.\\d+-k3s\\d+$/",
+      allowedVersions: '/^v\\d+\\.\\d+\\.\\d+-k3s\\d+$/',
     },
   ],
-  "customManagers": [
+  customManagers: [
     {
-      "customType": "regex",
-      "description": "Manage Docker image versions in .env file.",
-      "datasourceTemplate": "docker",
-      "fileMatch": [".env"],
-      "matchStrings": [
-        "IMAGE_NAME=\"(?<depName>.+):(?<currentValue>.+)@(?<currentDigest>sha256:[0-9a-f]+)\" # versioning=(?<versioning>[a-z]+)\\n",
+      customType: 'regex',
+      description: 'Manage Docker image versions in .env file.',
+      datasourceTemplate: 'docker',
+      managerFilePatterns: [
+        '/.env/',
+      ],
+      matchStrings: [
+        'IMAGE_NAME="(?<depName>.+):(?<currentValue>.+)@(?<currentDigest>sha256:[0-9a-f]+)" # versioning=(?<versioning>[a-z]+)\\n',
       ],
     },
     {
-      "customType": "regex",
-      "description": "Manage tools in mise config file.",
-      "fileMatch": ["mise.toml"],
-      "matchStrings": [
-        "# Renovate: datasource=(?<datasource>.+) packageName=(?<packageName>.+)\\n\".+\" = \"(?<currentValue>.+)\"\\n",
+      customType: 'regex',
+      description: 'Manage tools in mise config file.',
+      managerFilePatterns: [
+        '/mise.toml/',
+      ],
+      matchStrings: [
+        '# Renovate: datasource=(?<datasource>.+) packageName=(?<packageName>.+)\\n".+" = "(?<currentValue>.+)"\\n',
       ],
     },
   ],
