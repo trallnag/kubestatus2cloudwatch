@@ -58,11 +58,11 @@ jobs:
         uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
 
       # Used by mise to verify tools with aqua backend.
-      - name: Install Cosign
+      - name: Set up Cosign
         uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
 
       # Required by golangci-lint.
-      - name: Setup Go
+      - name: Set up Go
         uses: actions/setup-go@0aaccfd150d50ccaeb58ebd88d36e91967a5f35b # v5.4.0
         with:
           go-version: stable
@@ -78,8 +78,8 @@ jobs:
           pipx=tmp/mise-pipx.toml
           gocilint=tmp/mise-gocilint.toml
 
-          echo "pipx=$pipx" >> $GITHUB_OUTPUT
-          echo "gocilint=$gocilint" >> $GITHUB_OUTPUT
+          echo "pipx=$pipx" | tee -a $GITHUB_OUTPUT
+          echo "gocilint=$gocilint" | tee -a $GITHUB_OUTPUT
 
           grep -F -e pipx mise.toml > $pipx
           grep -F -e golangci-lint mise.toml > $gocilint
@@ -112,11 +112,11 @@ jobs:
             pre-commit cache dir
             ${{ hashFiles('.pre-commit-config.yaml') }}
 
-      - name: Get current month
-        id: get-current-month
+      - name: Determine current month
+        id: determine-current-month
         run: |
           current_month=$(date +%m)
-          echo "current-month=$current_month" >> $GITHUB_OUTPUT
+          echo "current-month=$current_month" | tee -a $GITHUB_OUTPUT
 
       # Caching golangci-lint cache dir by itself is not sufficient. The go
       # build cache is also required. This is handled in the next step.
@@ -126,11 +126,11 @@ jobs:
           path: ~/.cache/golangci-lint
           key: >-
             golangci-lint cache dir
-            ${{ steps.get-current-month.outputs.current-month }}
+            ${{ steps.determine-current-month.outputs.current-month }}
             ${{ hashFiles(steps.extract-mise-tools.outputs.gocilint) }}
 
       # Usually the setup-go action will cache the go build cache. But here this
-      # behaviour is problematic because it clashes with the cache of the test
+      # behavior is problematic because it clashes with the cache of the test
       # job. The content of the cache is different.
       - name: Cache go build cache
         uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
@@ -138,7 +138,7 @@ jobs:
           path: ~/.cache/go-build
           key: >-
             go build cache dir
-            ${{ steps.get-current-month.outputs.current-month }}
+            ${{ steps.determine-current-month.outputs.current-month }}
             ${{ hashFiles(steps.extract-mise-tools.outputs.gocilint) }}
 
       - name: Set up mise
