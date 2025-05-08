@@ -7,6 +7,10 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 ## Unreleased
 
+Nothing.
+
+## [2.0.0](https://github.com/trallnag/kubestatus2cloudwatch/compare/v1.1.7...v2.0.0) / 2025-05-08
+
 ### Added
 
 - Added basic CLI to get version, set path to configuration file, and more.
