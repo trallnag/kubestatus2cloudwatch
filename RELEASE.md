@@ -66,7 +66,7 @@ git push origin v$VERSION
 ```
 
 This triggers the release workflow which will build package distributions, build
-and push a container image, and draft a GitHub release. Monitor the Monitor the
+and push a container image, and draft a GitHub release. Monitor the
 [release workflow](https://github.com/trallnag/kubestatus2cloudwatch/actions/workflows/release.yaml).
 run and check the
 [image registry](https://github.com/trallnag/kubestatus2cloudwatch/pkgs/container/kubestatus2cloudwatch).
