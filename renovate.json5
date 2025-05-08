@@ -80,5 +80,17 @@
         '# Renovate: datasource=(?<datasource>.+) packageName=(?<packageName>.+)\\n".+" = "(?<currentValue>.+)"\\n',
       ],
     },
+    {
+      customType: 'regex',
+      description: 'Manage GoReleaser version in release workflow file.',
+      datasourceTemplate: 'github-releases',
+      packageNameTemplate: 'goreleaser/goreleaser',
+      managerFilePatterns: [
+        '.github/workflows/release.yaml',
+      ],
+      matchStrings: [
+        'goreleaser\\n.+version: \\"(?<currentValue>.+)\\"\\n',
+      ],
+    },
   ],
 }
