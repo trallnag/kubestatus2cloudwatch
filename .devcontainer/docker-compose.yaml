@@ -3,10 +3,13 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+
     command: sleep infinity
+
     environment:
       - GITHUB_TOKEN
       - MISE_GITHUB_TOKEN
+
     volumes:
       # Workspace itself.
       - ..:/workspaces/kubestatus2cloudwatch:cached
