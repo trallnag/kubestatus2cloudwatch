@@ -138,6 +138,9 @@ jobs:
           install: true
           cache: true
 
+      - name: Initialize environment
+        run: just init
+
       - name: Run recipes that fix stuff
         run: just fix
 
