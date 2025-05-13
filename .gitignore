@@ -1,7 +1,16 @@
+# General.
+.cache/
+.local/
+.tmp/
+.vscode/
+dist/
+tmp/
+
+# Go.
 *.out
 *.test
-.vscode/
-config.yaml
-dist/
 go.work
+
+# Project.
+config.yaml
 tmp/

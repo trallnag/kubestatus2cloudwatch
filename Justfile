@@ -12,6 +12,13 @@ default: init fix check test
 
 # Initialize environment.
 init:
+  # Create local-only directories.
+  mkdir -p \
+    .cache \
+    .local \
+    .tmp
+
+  # Set up mise environment.
   mise --version
   mise install
 
@@ -118,4 +125,4 @@ test--long:
 # Create release notes based on changelog.
 [group('misc')]
 create-release-notes:
-  ./scripts/create-release-notes.bash CHANGELOG.md tmp/release-notes.md
+  ./scripts/create-release-notes.bash CHANGELOG.md .tmp/release-notes.md
