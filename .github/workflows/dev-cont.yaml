@@ -35,7 +35,6 @@ jobs:
         with:
           concurrent_skipping: always
           skip_after_successful_duplicate: true
-          do_not_skip: '["pull_request", "workflow_dispatch", "schedule", "merge_group"]'
 
   dev-cont:
     needs: skip
