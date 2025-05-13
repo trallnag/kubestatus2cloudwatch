@@ -67,7 +67,7 @@ jobs:
           go-version: stable
           cache: false
 
-      # Extract subset of mise tools configuration to seperate files which are
+      # Extract subset of mise tools configuration to separate files which are
       # used in subsequent steps as part of cache keys.
       - name: Extract mise tools
         id: extract-mise-tools
