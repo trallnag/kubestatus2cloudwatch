@@ -57,8 +57,21 @@ jobs:
       - name: Set up just
         uses: extractions/setup-just@e33e0265a09d6d736e2ee1e0eb685ef1de4669ff # v3.0.0
 
+      - name: Determine mdformat version
+        id: determine-mdformat-version
+        run: |
+          mdformat_version=$(
+            grep \
+              --extended-regexp \
+              --only-matching \
+              --regexp='"pipx:mdformat" = ".+"' \
+              mise.toml \
+              | cut -c20- | rev | cut -c2- | rev
+          )
+          echo "mdformat-version=$mdformat_version" | tee -a $GITHUB_OUTPUT
+
       - name: Install mdformat
-        run: pipx install mdformat
+        run: pipx install mdformat==${{ steps.determine-mdformat-version.outputs.mdformat-version }}
 
       - name: Create release notes
         run: just create-release-notes
