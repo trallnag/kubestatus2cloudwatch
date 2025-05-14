@@ -1,7 +1,7 @@
 name: CodeQL
 
 #
-# This workflow scans code with CodeQL.
+# Scans code with CodeQL.
 #
 # - https://codeql.github.com
 # - https://github.com/github/codeql-action

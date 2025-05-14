@@ -1,7 +1,7 @@
 name: Dev Cont
 
 #
-# This workflow creates dev container and runs the default just recipe.
+# Creates dev container and runs the default just recipe.
 #
 
 on:
