@@ -9,6 +9,7 @@ services:
     environment:
       - GITHUB_TOKEN
       - MISE_GITHUB_TOKEN
+      - HOMEBREW_GITHUB_API_TOKEN
 
     volumes:
       # Workspace itself.
