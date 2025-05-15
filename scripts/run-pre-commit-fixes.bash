@@ -9,9 +9,13 @@
 
 set -euo pipefail
 
+mx() {
+  mise exec -- "$@"
+}
+
 declare -x SKIP
 
-SKIP=$(filter-pre-commit-hooks fix task)
+SKIP=$(mx filter-pre-commit-hooks fix task)
 
-(pre-commit run --all-files || pre-commit run --all-files) \
+(mx pre-commit run --all-files || mx pre-commit run --all-files) \
   | (grep --invert-match --regexp='Skipped' || true)
