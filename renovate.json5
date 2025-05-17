@@ -6,7 +6,7 @@
     'docker:enableMajor',
     'docker:pinDigests',
     'helpers:pinGitHubActionDigests',
-    'schedule:weekends',
+    'schedule:monthly',
   ],
   commitBody: 'Co-authored-by: Tim Schwenke <tim@trallnag.com>',
   commitMessageLowerCase: 'never',
