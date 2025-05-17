@@ -16,7 +16,7 @@
 "pipx:copier" = "9.7.1"
 
 # Renovate: datasource=github-releases packageName=trallnag/exec-cmds-defer-errors
-"pipx:exec-cmds-defer-errors" = "2.0.2"
+"pipx:exec-cmds-defer-errors" = "2.1.1"
 
 # Renovate: datasource=github-releases packageName=trallnag/filter-pre-commit-hooks
 "pipx:filter-pre-commit-hooks" = "2.0.5"
