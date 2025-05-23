@@ -10,6 +10,7 @@ services:
       - GITHUB_TOKEN
       - MISE_GITHUB_TOKEN
       - HOMEBREW_GITHUB_API_TOKEN
+      - RENOVATE_GITHUB_COM_TOKEN
 
     volumes:
       # Workspace itself.
