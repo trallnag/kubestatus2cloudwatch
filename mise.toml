@@ -1,19 +1,36 @@
 [tools]
 
-# Renovate: datasource=github-releases packageName=golangci/golangci-lint
-"aqua:golangci/golangci-lint" = "2.1.6"
-
-# Renovate: datasource=github-releases packageName=google/yamlfmt
-"aqua:google/yamlfmt" = "0.16.0"
-
-# Renovate: datasource=github-releases packageName=goreleaser/goreleaser
-"aqua:goreleaser/goreleaser" = "2.9.0"
-
-# Renovate: datasource=github-releases packageName=mvdan/sh
-"aqua:mvdan/sh" = "3.11.0"
+#
+# Tools from the mise registry.
+#
 
 # Renovate: datasource=github-releases packageName=copier-org/copier
-"pipx:copier" = "9.7.1"
+copier = "9.7.1"
+
+# Renovate: datasource=github-releases packageName=mvdan/gofumpt
+gofumpt = "0.8.0"
+
+# Renovate: datasource=github-releases packageName=golangci/golangci-lint
+golangci-lint = "2.1.6"
+
+# Renovate: datasource=github-releases packageName=goreleaser/goreleaser
+goreleaser = "2.9.0"
+
+# Renovate: datasource=github-releases packageName=pre-commit/pre-commit
+pre-commit = "4.2.0"
+
+# Renovate: datasource=github-releases packageName=koalaman/shellcheck
+shellcheck = "0.10.0"
+
+# Renovate: datasource=github-releases packageName=mvdan/sh
+shfmt = "3.11.0"
+
+# Renovate: datasource=github-releases packageName=google/yamlfmt
+yamlfmt = "0.16.0"
+
+#
+# Tools with explicit backends.
+#
 
 # Renovate: datasource=github-releases packageName=trallnag/exec-cmds-defer-errors
 "pipx:exec-cmds-defer-errors" = "2.1.1"
@@ -23,12 +40,3 @@
 
 # Renovate: datasource=pypi packageName=mdformat
 "pipx:mdformat" = "0.7.22"
-
-# Renovate: datasource=github-releases packageName=pre-commit/pre-commit
-"pipx:pre-commit" = "4.2.0"
-
-# Renovate: datasource=github-releases packageName=koalaman/shellcheck
-"ubi:koalaman/shellcheck" = "0.10.0"
-
-# Renovate: datasource=github-releases packageName=mvdan/gofumpt
-"ubi:mvdan/gofumpt" = "0.8.0"
