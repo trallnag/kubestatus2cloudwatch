@@ -9,6 +9,8 @@ ARG APT_PKGS="\
   curl \
   dnsutils \
   gnupg2 \
+  python-is-python3 \
+  python3 \
   xxd \
 "
 
