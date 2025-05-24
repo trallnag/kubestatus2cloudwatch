@@ -1,3 +1,5 @@
+# syntax=docker/dockerfile:1
+
 FROM  mcr.microsoft.com/devcontainers/base:bookworm@sha256:a04e0d63bb8087c8931947bed44364b3addeb40591949bbec9b18eafe80fc220
 
 USER vscode
@@ -41,7 +43,10 @@ RUN <<-EOT
 EOT
 
 # Install various packages with Homebrew.
-RUN <<-EOT
+RUN \
+  --mount=type=secret,id=github-token,env=GITHUB_TOKEN \
+  --mount=type=secret,id=homebrew-github-api-token,env=HOMEBREW_GITHUB_API_TOKEN \
+<<-EOT
   eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
   brew install $BREW_PKGS
 EOT

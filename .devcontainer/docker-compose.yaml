@@ -3,6 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      secrets:
+        - github-token
+        - homebrew-github-api-token
 
     command: sleep infinity
 
@@ -15,3 +18,9 @@ services:
     volumes:
       # Workspace itself.
       - ..:/workspaces/kubestatus2cloudwatch:cached
+
+secrets:
+  github-token:
+    environment: GITHUB_TOKEN
+  homebrew-github-api-token:
+    environment: HOMEBREW_GITHUB_API_TOKEN
