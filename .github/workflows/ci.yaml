@@ -141,6 +141,11 @@ jobs:
           install: true
           cache: true
 
+      - name: Setup tmate session
+        uses: mxschmitt/action-tmate@v3
+        with:
+          limit-access-to-actor: true
+
       - name: Initialize environment
         run: just init
 
