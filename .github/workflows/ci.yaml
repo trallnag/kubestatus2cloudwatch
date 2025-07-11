@@ -143,11 +143,6 @@ jobs:
           cache: true
           cache_key_prefix: ${{ steps.set-up-python.outputs.python-version }}
 
-      # - name: Setup tmate session
-      #   uses: mxschmitt/action-tmate@v3
-      #   with:
-      #     limit-access-to-actor: true
-
       - name: Initialize environment
         run: just init
 

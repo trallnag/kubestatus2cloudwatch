@@ -21,7 +21,6 @@ init:
   # Set up mise environment.
   mise --version
   mise install
-  mise reshim --force
 
   # Check mise tool availability.
   mise exec -- exec-cmds-defer-errors --version
