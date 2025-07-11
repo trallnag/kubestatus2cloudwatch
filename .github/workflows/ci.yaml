@@ -84,6 +84,7 @@ jobs:
           grep -F -e golangci-lint mise.toml | tee $gocilint
 
       - name: Set up Python
+        id: set-up-python
         uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.13"
@@ -140,11 +141,12 @@ jobs:
         with:
           install: true
           cache: true
+          cache_key_prefix: ${{ steps.set-up-python.outputs.python-version }}
 
-      - name: Setup tmate session
-        uses: mxschmitt/action-tmate@v3
-        with:
-          limit-access-to-actor: true
+      # - name: Setup tmate session
+      #   uses: mxschmitt/action-tmate@v3
+      #   with:
+      #     limit-access-to-actor: true
 
       - name: Initialize environment
         run: just init
