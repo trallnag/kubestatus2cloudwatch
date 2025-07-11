@@ -89,7 +89,7 @@ jobs:
           python-version: "3.13"
 
       - name: Set up Astral uv
-        uses: astral-sh/setup-uv@6b9c6063abd6010835644d4c2e1bef4cf5cd0fca # v6.0.1
+        uses: astral-sh/setup-uv@445689ea25e0de0a23313031f5fe577c74ae45a1 # v6.3.0
         with:
           enable-cache: true
           cache-dependency-glob: |
