@@ -1,7 +1,7 @@
 name: Dev Cont
 
 #
-# Creates dev container and runs the default just recipe.
+# Creates dev container and runs the init just recipe.
 #
 
 on:
@@ -66,9 +66,9 @@ jobs:
             /usr/bin/env zsh --interactive --login -c \
               "printenv | grep -G -q ^GITHUB_TOKEN="
 
-      - name: Run default just recipe in dev container
+      - name: Run init just recipe in dev container
         run: |
           devcontainer exec \
             --workspace-folder=. \
             /usr/bin/env zsh --interactive --login -c \
-              "just"
+              "just init"
