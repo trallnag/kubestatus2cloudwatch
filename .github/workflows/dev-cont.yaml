@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - '**'
+      - "**"
     paths:
       - .github/workflows/dev-cont.yaml
       - .devcontainer/**
