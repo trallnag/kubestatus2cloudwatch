@@ -1,4 +1,4 @@
-# Devcontainer
+# Dev container
 
 This projects supports [Development Containers](https://containers.dev/).
 
