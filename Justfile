@@ -23,6 +23,7 @@ init:
   mise install
 
   # Check mise tool availability.
+  mise exec -- copier --version
   mise exec -- exec-cmds-defer-errors --version
   mise exec -- filter-pre-commit-hooks --version
   mise exec -- gofumpt --version
