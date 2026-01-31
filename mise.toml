@@ -14,7 +14,7 @@ gofumpt = "0.8.0"
 golangci-lint = "2.1.6"
 
 # Renovate: datasource=github-releases packageName=goreleaser/goreleaser
-goreleaser = "2.9.0"
+goreleaser = "2.13.3"
 
 # Renovate: datasource=github-releases packageName=pre-commit/pre-commit
 pre-commit = "4.2.0"
