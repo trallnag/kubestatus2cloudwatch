@@ -5,7 +5,7 @@
 #
 
 # Renovate: datasource=github-releases packageName=copier-org/copier
-copier = "9.7.1"
+copier = "9.11.3"
 
 # Renovate: datasource=github-releases packageName=mvdan/gofumpt
 gofumpt = "0.8.0"
