@@ -338,7 +338,10 @@ func TestValidateMetric(t *testing.T) {
 				if len(tc.errSubstr) == 0 {
 					t.Errorf("Unexpected failure: %v", err)
 				} else if !strings.Contains(err.Error(), tc.errSubstr) {
-					t.Errorf("Error does not contain expected substring: %v", err)
+					t.Errorf(
+						"Error does not contain expected substring: %v",
+						err,
+					)
 				}
 			} else {
 				if len(tc.errSubstr) != 0 {
@@ -424,7 +427,10 @@ func TestValidateTargets(t *testing.T) {
 				if len(tc.errSubstr) == 0 {
 					t.Errorf("Unexpected failure: %v", err)
 				} else if !strings.Contains(err.Error(), tc.errSubstr) {
-					t.Errorf("Error does not contain expected substring: %v", err)
+					t.Errorf(
+						"Error does not contain expected substring: %v",
+						err,
+					)
 				}
 			} else {
 				if len(tc.errSubstr) != 0 {

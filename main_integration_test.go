@@ -136,15 +136,24 @@ func setUpDocker(t *testing.T) string {
 		dockerProvider.Close()
 	})
 
-	if err = dockerProvider.PullImage(t.Context(), dotEnv["BUSYBOX_IMAGE_NAME"]); err != nil {
+	if err = dockerProvider.PullImage(
+		t.Context(),
+		dotEnv["BUSYBOX_IMAGE_NAME"],
+	); err != nil {
 		t.Fatalf("Failed to pull Busybox image: %v", err)
 	}
 
-	if err = dockerProvider.PullImage(t.Context(), dotEnv["KUBERNETES_IMAGE_NAME"]); err != nil {
+	if err = dockerProvider.PullImage(
+		t.Context(),
+		dotEnv["KUBERNETES_IMAGE_NAME"],
+	); err != nil {
 		t.Fatalf("Failed to pull Kubernetes image: %v", err)
 	}
 
-	if err = dockerProvider.PullImage(t.Context(), dotEnv["LOCALSTACK_IMAGE_NAME"]); err != nil {
+	if err = dockerProvider.PullImage(
+		t.Context(),
+		dotEnv["LOCALSTACK_IMAGE_NAME"],
+	); err != nil {
 		t.Fatalf("Failed to pull LocalStack image: %v", err)
 	}
 

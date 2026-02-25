@@ -169,7 +169,8 @@ func newKubernetesClient() (*kube.Clientset, error) {
 		config, err = kubeclientcmd.NewNonInteractiveDeferredLoadingClientConfig(
 			kubeclientcmd.NewDefaultClientConfigLoadingRules(),
 			&kubeclientcmd.ConfigOverrides{},
-		).ClientConfig()
+		).
+			ClientConfig()
 		if err != nil {
 			return nil, fmt.Errorf(
 				"create out-of-cluster Kubernetes config: %v", err,
@@ -441,7 +442,10 @@ func performScan(o *performScanOptions) scan {
 	if scan.success && scan.ready {
 		o.log.Debug("Done with scan. All looking good.", slog.Any("scan", scan))
 	} else {
-		o.log.Warn("Done with scan. Something is wrong.", slog.Any("scan", scan))
+		o.log.Warn(
+			"Done with scan. Something is wrong.",
+			slog.Any("scan", scan),
+		)
 	}
 
 	return scan
