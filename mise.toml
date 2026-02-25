@@ -11,7 +11,7 @@ copier = "9.7.1"
 gofumpt = "0.8.0"
 
 # Renovate: datasource=github-releases packageName=golangci/golangci-lint
-golangci-lint = "2.1.6"
+golangci-lint = "2.8.0"
 
 # Renovate: datasource=github-releases packageName=goreleaser/goreleaser
 goreleaser = "2.9.0"
