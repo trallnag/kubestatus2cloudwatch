@@ -26,7 +26,7 @@ shellcheck = "0.10.0"
 shfmt = "3.11.0"
 
 # Renovate: datasource=github-releases packageName=google/yamlfmt
-yamlfmt = "0.16.0"
+yamlfmt = "0.21.0"
 
 #
 # Tools with explicit backends.
