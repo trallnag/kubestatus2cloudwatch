@@ -90,7 +90,7 @@ jobs:
         uses: goreleaser/goreleaser-action@9c156ee8a17a598857849441385a2041ef570552 # v6.3.0
         with:
           distribution: goreleaser
-          version: "2.9.0"
+          version: "2.13.3"
           args: >-
             release
             --clean
