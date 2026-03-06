@@ -58,7 +58,7 @@ jobs:
 
       # Used by mise to verify tools with aqua backend.
       - name: Set up Cosign
-        uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb # v3.8.2
+        uses: sigstore/cosign-installer@7e8b541eb2e61bf99390e1afd4be13a184e9ebc5 # v3.10.1
 
       # Required by golangci-lint.
       - name: Set up Go
