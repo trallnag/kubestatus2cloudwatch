@@ -24,24 +24,7 @@ defaults:
     shell: bash
 
 jobs:
-  skip:
-    name: Skip
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      contents: read
-    outputs:
-      skip: ${{ steps.skip.outputs.should_skip }}
-    steps:
-      - id: skip
-        uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5.3.1
-        with:
-          concurrent_skipping: always
-          skip_after_successful_duplicate: true
-
   fix-check:
-    needs: skip
-    if: needs.skip.outputs.skip != 'true'
     name: Fix & Check
     runs-on: ubuntu-latest
     permissions:
@@ -165,10 +148,10 @@ jobs:
           commit_options: --no-verify --signoff
 
   test:
-    needs: skip
-    if: needs.skip.outputs.skip != 'true'
     name: Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2

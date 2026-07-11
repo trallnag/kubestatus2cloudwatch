@@ -22,20 +22,15 @@
         "mise.updateOpenTerminalsEnvAutomatically": true,
         "shellcheck.executablePath": "/home/vscode/.local/share/mise/shims/shellcheck",
         "terminal.integrated.defaultProfile.linux": "zsh",
-        "terminal.integrated.profiles.linux.zsh.path": "/usr/bin/zsh"
       },
 
       "extensions": [
         "BlueGlassBlock.better-json5",
         "EditorConfig.EditorConfig",
-        "Gerrnperl.outline-map",
         "GitHub.copilot",
         "GitHub.copilot-chat",
         "GitHub.vscode-pull-request-github",
-        "Gruntfuggly.todo-tree",
         "Tyriar.sort-lines",
-        "VisualStudioExptTeam.vscodeintellicode",
-        "charliermarsh.ruff",
         "donjayamanne.githistory",
         "github.vscode-github-actions",
         "golang.go",
@@ -47,7 +42,6 @@
         "tamasfe.even-better-toml",
         "timonwong.shellcheck",
         "tomoki1207.selectline-statusbar",
-        "waderyan.gitblame",
         "yzhang.markdown-all-in-one"
       ]
     }

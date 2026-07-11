@@ -23,6 +23,7 @@ ARG BREW_PKGS="\
   jq \
   just \
   mise \
+  ripgrep \
   uv \
   watchexec \
   zsh-completions \

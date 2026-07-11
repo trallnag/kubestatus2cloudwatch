@@ -10,12 +10,25 @@ set shell := [
 # Init, fix, check, and test.
 default: init fix check test
 
+
+# Write a shell fragment that maps tool-specific token variables to
+# GITHUB_TOKEN when only the generic token is available.
+[private]
+handle-tokens:
+  mkdir -p .tmp
+  : > .tmp/handle-tokens.bash
+  if [[ -n "${GITHUB_TOKEN:-}" && -z "${MISE_GITHUB_TOKEN:-}" ]]; then \
+    printf '%s\n' 'export MISE_GITHUB_TOKEN="$GITHUB_TOKEN"' >> .tmp/handle-tokens.bash; fi
+  if [[ -n "${GITHUB_TOKEN:-}" && -z "${HOMEBREW_GITHUB_API_TOKEN:-}" ]]; then \
+    printf '%s\n' 'export HOMEBREW_GITHUB_API_TOKEN="$GITHUB_TOKEN"' >> .tmp/handle-tokens.bash; fi
+
 # Initialize environment.
-init:
+init: handle-tokens
+  . .tmp/handle-tokens.bash
+
   # Create local-only directories.
   mkdir -p \
     .cache \
-    .local \
     .tmp
 
   # Set up mise environment.
@@ -49,7 +62,9 @@ init:
   go mod download
 
 # Update dependencies.
-update:
+update: handle-tokens
+  . .tmp/handle-tokens.bash
+
   # Update tools managed with Homebrew.
   brew upgrade
 

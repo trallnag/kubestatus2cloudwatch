@@ -1,6 +1,5 @@
 # General.
 .cache/
-.local/
 .tmp/
 .vscode/
 dist/

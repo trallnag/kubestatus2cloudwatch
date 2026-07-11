@@ -7,8 +7,6 @@ name: Dev Cont
 on:
   workflow_dispatch:
   push:
-    branches:
-      - "**"
     paths:
       - .github/workflows/dev-cont.yaml
       - .devcontainer/**
@@ -21,26 +19,13 @@ defaults:
     shell: bash
 
 jobs:
-  skip:
-    name: Skip
-    runs-on: ubuntu-latest
-    permissions:
-      actions: write
-      contents: read
-    outputs:
-      skip: ${{ steps.skip.outputs.should_skip }}
-    steps:
-      - id: skip
-        uses: fkirc/skip-duplicate-actions@f75f66ce1886f00957d99748a42c724f4330bdcf # v5.3.1
-        with:
-          concurrent_skipping: always
-          skip_after_successful_duplicate: true
-
   dev-cont:
-    needs: skip
-    if: needs.skip.outputs.skip != 'true'
     name: Dev Cont
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      packages: read
     steps:
       - name: Check out repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
