@@ -106,7 +106,8 @@ func runMain(ctx context.Context, log *slog.Logger) int {
 		}
 	}
 
-	log.Info("Program information",
+	log.Info(
+		"Program information",
 		slog.String("program", program),
 		slog.String("version", version),
 		slog.String("buildDate", buildDate),
@@ -115,7 +116,8 @@ func runMain(ctx context.Context, log *slog.Logger) int {
 
 	kubernetesClient, err := newKubernetesClient()
 	if err != nil {
-		log.Error("Failed to create Kubernetes client.",
+		log.Error(
+			"Failed to create Kubernetes client.",
 			slog.Any("error", err),
 		)
 
@@ -124,7 +126,8 @@ func runMain(ctx context.Context, log *slog.Logger) int {
 
 	cloudwatchClient, err := newCloudwatchClient(ctx)
 	if err != nil {
-		log.Error("Failed to create CloudWatch client.",
+		log.Error(
+			"Failed to create CloudWatch client.",
 			slog.Any("error", err),
 		)
 
@@ -142,7 +145,8 @@ func runMain(ctx context.Context, log *slog.Logger) int {
 		metric:   config.Metric,
 		targets:  config.Targets,
 	}); err != nil {
-		log.Error("Failure during round execution.",
+		log.Error(
+			"Failure during round execution.",
 			slog.Any("error", err),
 		)
 
@@ -274,7 +278,8 @@ func executeRounds(o *executeRoundsOptions) error {
 			}
 
 			tickDuration := time.Since(tickStart).Truncate(time.Millisecond)
-			tickLog.Info("Done with tick round",
+			tickLog.Info(
+				"Done with tick round",
 				slog.String("duration", tickDuration.String()),
 			)
 
@@ -383,7 +388,8 @@ func performScan(o *performScanOptions) scan {
 				DaemonSets(target.Namespace).
 				Get(o.ctx, target.Name, kubemetav1.GetOptions{})
 			if err != nil {
-				o.log.Error("Failed to query Kubernetes API.",
+				o.log.Error(
+					"Failed to query Kubernetes API.",
 					slog.Any("error", err),
 				)
 
@@ -398,7 +404,8 @@ func performScan(o *performScanOptions) scan {
 				Deployments(target.Namespace).
 				Get(o.ctx, target.Name, kubemetav1.GetOptions{})
 			if err != nil {
-				o.log.Error("Failed to query Kubernetes API.",
+				o.log.Error(
+					"Failed to query Kubernetes API.",
 					slog.Any("error", err),
 				)
 
@@ -413,7 +420,8 @@ func performScan(o *performScanOptions) scan {
 				StatefulSets(target.Namespace).
 				Get(o.ctx, target.Name, kubemetav1.GetOptions{})
 			if err != nil {
-				o.log.Error("Failed to query Kubernetes API.",
+				o.log.Error(
+					"Failed to query Kubernetes API.",
 					slog.Any("error", err),
 				)
 
@@ -499,7 +507,8 @@ func updateMetric(o *updateMetricOptions) error {
 	}
 
 	if !o.dry {
-		_, err := o.client.PutMetricData(o.ctx,
+		_, err := o.client.PutMetricData(
+			o.ctx,
 			&cw.PutMetricDataInput{
 				Namespace: aws.String(o.namespace),
 				MetricData: []cwtypes.MetricDatum{{

@@ -356,7 +356,8 @@ func setUpLocalStack(
 ) *cw.Client {
 	t.Helper()
 
-	localStackContainer, err := localstack.Run(t.Context(),
+	localStackContainer, err := localstack.Run(
+		t.Context(),
 		dotEnv["LOCALSTACK_IMAGE_NAME"],
 		testcontainers.WithEnv(map[string]string{
 			"SERVICES": "cloudwatch,iam,sts",
@@ -384,7 +385,8 @@ func setUpLocalStack(
 	awsSecret := "testSecret"
 	awsSession := "testSession"
 
-	awsConfig, err := awsconfig.LoadDefaultConfig(t.Context(),
+	awsConfig, err := awsconfig.LoadDefaultConfig(
+		t.Context(),
 		awsconfig.WithRegion(awsRegion),
 		awsconfig.WithCredentialsProvider(
 			awscreds.NewStaticCredentialsProvider(
@@ -402,7 +404,8 @@ func setUpLocalStack(
 		o.BaseEndpoint = aws.String(awsEndPoint)
 	})
 
-	awsCallerIdentity, err := stsClient.GetCallerIdentity(t.Context(),
+	awsCallerIdentity, err := stsClient.GetCallerIdentity(
+		t.Context(),
 		&sts.GetCallerIdentityInput{},
 	)
 	if err != nil {
@@ -468,7 +471,8 @@ func getLastMetricValue(
 	endTime := time.Now()
 	startTime := endTime.Add(-1 * time.Minute)
 
-	result, err := cloudWatchClient.GetMetricStatistics(t.Context(),
+	result, err := cloudWatchClient.GetMetricStatistics(
+		t.Context(),
 		&cw.GetMetricStatisticsInput{
 			Namespace:  aws.String("MyNamespace"),
 			MetricName: aws.String(metricName),

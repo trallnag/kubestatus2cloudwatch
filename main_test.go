@@ -111,7 +111,8 @@ func TestRunMain_Version(t *testing.T) {
 			output := stdout.String()
 			for _, expOutput := range tc.expOutputs {
 				if !strings.Contains(output, expOutput) {
-					t.Errorf("Unexpected output: %v, expected to contain: %v",
+					t.Errorf(
+						"Unexpected output: %v, expected to contain: %v",
 						output,
 						expOutput,
 					)
@@ -214,7 +215,8 @@ func TestIsFittingMode(t *testing.T) {
 	}} {
 		t.Run(tc.name, func(t *testing.T) {
 			if tc.fitting != isFittingMode(tc.mode, tc.got, tc.want) {
-				t.Errorf("Unexpected return: got %v, want %v",
+				t.Errorf(
+					"Unexpected return: got %v, want %v",
 					tc.fitting,
 					!tc.fitting,
 				)
@@ -398,21 +400,24 @@ func TestPerformScan(t *testing.T) {
 			})
 
 			if scan.success != tc.expScanSuccess {
-				t.Errorf("Unexpected scan success status: got %v, want %v",
+				t.Errorf(
+					"Unexpected scan success status: got %v, want %v",
 					scan.success,
 					tc.expScanSuccess,
 				)
 			}
 
 			if scan.ready != tc.expScanReady {
-				t.Errorf("Unexpected scan ready status: got %v, want %v",
+				t.Errorf(
+					"Unexpected scan ready status: got %v, want %v",
 					scan.success,
 					tc.expScanSuccess,
 				)
 			}
 
 			if len(scan.results) != len(tc.targets) {
-				t.Errorf("Unexpected number of scan results: got %v, want %v",
+				t.Errorf(
+					"Unexpected number of scan results: got %v, want %v",
 					len(scan.results),
 					len(tc.targets),
 				)

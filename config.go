@@ -78,8 +78,10 @@ type config struct {
 
 // newConfig reads and processes the configuration.
 func newConfig(configPath string) (config, error) {
-	config := config{} //nolint:exhaustruct // Config is populated from file.
+	//nolint:exhaustruct // Config is populated from file.
+	config := config{}
 
+	//nolint:gosec // Config is populated from file.
 	configFile, err := os.ReadFile(configPath)
 	if err != nil {
 		return config, fmt.Errorf("read config: %v", err)

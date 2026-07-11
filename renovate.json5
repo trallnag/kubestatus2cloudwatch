@@ -11,8 +11,9 @@
   commitBody: 'Co-authored-by: Tim Schwenke <tim@trallnag.com>',
   commitMessageLowerCase: 'never',
   minimumReleaseAge: '21 days',
+  minimumReleaseAgeBehaviour: 'timestamp-optional',
   semanticCommits: 'enabled',
-  prHourlyLimit: 10,
+  addLabels: ["renovate"],
   lockFileMaintenance: {
     enabled: true,
   },

@@ -5,25 +5,25 @@
 #
 
 # Renovate: datasource=github-releases packageName=copier-org/copier
-copier = "9.11.3"
+copier = "9.16.0"
 
 # Renovate: datasource=github-releases packageName=mvdan/gofumpt
-gofumpt = "0.9.2"
+gofumpt = "0.10.0"
 
 # Renovate: datasource=github-releases packageName=golangci/golangci-lint
-golangci-lint = "2.9.0"
+golangci-lint = "2.12.2"
 
 # Renovate: datasource=github-releases packageName=goreleaser/goreleaser
-goreleaser = "2.13.3"
+goreleaser = "2.17.0"
 
 # Renovate: datasource=github-releases packageName=pre-commit/pre-commit
-pre-commit = "4.5.1"
+pre-commit = "4.6.0"
 
 # Renovate: datasource=github-releases packageName=koalaman/shellcheck
 shellcheck = "0.11.0"
 
 # Renovate: datasource=github-releases packageName=mvdan/sh
-shfmt = "3.12.0"
+shfmt = "3.13.1"
 
 # Renovate: datasource=github-releases packageName=google/yamlfmt
 yamlfmt = "0.21.0"
@@ -33,7 +33,7 @@ yamlfmt = "0.21.0"
 #
 
 # Renovate: datasource=github-releases packageName=trallnag/exec-cmds-defer-errors
-"pipx:exec-cmds-defer-errors" = "2.1.1"
+"pipx:exec-cmds-defer-errors" = "2.1.2"
 
 # Renovate: datasource=github-releases packageName=trallnag/filter-pre-commit-hooks
 "pipx:filter-pre-commit-hooks" = "2.0.5"

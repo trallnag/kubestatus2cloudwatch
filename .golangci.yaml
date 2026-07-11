@@ -6,6 +6,11 @@ linters:
   disable:
     - containedctx
     - depguard
+    - gomodguard # Deprecated.
+    - noinlineerr
+    - prealloc
+    - wsl # Deprecated.
+    - wsl_v5
   settings:
     errorlint:
       errorf: false
@@ -40,6 +45,7 @@ linters:
           - cyclop
           - exhaustruct
           - funlen
+          - goconst
           - paralleltest
           - varnamelen
 formatters:
