@@ -42,16 +42,6 @@
       ],
     },
     {
-      description: 'Disable testcontainer Go packages.',
-      enabled: false,
-      matchManagers: [
-        'gomod',
-      ],
-      matchPackageNames: [
-        '/.+testcontainers-go.+/',
-      ],
-    },
-    {
       description: 'Limit allowed versions for k3s.',
       matchDepNames: [
         'docker.io/rancher/k3s',

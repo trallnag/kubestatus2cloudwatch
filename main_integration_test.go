@@ -13,7 +13,6 @@ import (
 	cw "github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	cwtypes "github.com/aws/aws-sdk-go-v2/service/cloudwatch/types"
 	sts "github.com/aws/aws-sdk-go-v2/service/sts"
-	nat "github.com/docker/go-connections/nat"
 	testcontainers "github.com/testcontainers/testcontainers-go"
 	k3s "github.com/testcontainers/testcontainers-go/modules/k3s"
 	localstack "github.com/testcontainers/testcontainers-go/modules/localstack"
@@ -248,7 +247,7 @@ func setUpKubernetes(t *testing.T) {
 	err = kubewait.PollUntilContextTimeout(
 		t.Context(),
 		1*time.Second,
-		25*time.Second,
+		45*time.Second,
 		true,
 		func(ctx context.Context) (bool, error) {
 			healthyBusyBoxDeployment, err = kubeClient.AppsV1().
@@ -371,7 +370,7 @@ func setUpLocalStack(
 
 	localStackPort, err := localStackContainer.MappedPort(
 		t.Context(),
-		nat.Port("4566/tcp"),
+		"4566/tcp",
 	)
 	if err != nil {
 		t.Fatalf("Failed to get LocalStack port: %v", err)
