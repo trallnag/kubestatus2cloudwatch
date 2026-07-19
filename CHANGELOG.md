@@ -11,10 +11,6 @@ and adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0).
 
 - Upgraded direct and indirect dependencies.
 
-### Changed
-
-- Upgraded direct and indirect dependencies.
-
 ## [2.0.1](https://github.com/trallnag/kubestatus2cloudwatch/compare/v2.0.0...v2.0.1) / 2025-05-14
 
 ### Changed

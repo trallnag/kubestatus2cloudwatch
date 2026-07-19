@@ -83,8 +83,8 @@ Publish the draft.
 
 ### Handling of pre-releases
 
-To publish a version for testing purposes pick a version with the suffix `-a.N`
-where the `N` is an incrementing number starting at 1. Format the changelog
-entry accordingly. The release in GitHub must be marked as a pre-release before
-publishing. Skip the GitHub release entirely depending on the target group of
-the dev release.
+To publish a version for testing purposes pick a version with the suffix
+`-dev.N` where the `N` is an incrementing number starting at 1. Format the
+changelog entry accordingly. The release in GitHub must be marked as a
+pre-release before publishing. Skip the GitHub release entirely depending on the
+target group of the dev release.
