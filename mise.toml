@@ -17,7 +17,7 @@ golangci-lint = "2.12.2"
 goreleaser = "2.17.0"
 
 # Renovate: datasource=github-releases packageName=pre-commit/pre-commit
-pre-commit = "4.6.0"
+pre-commit = "4.6.2"
 
 # Renovate: datasource=github-releases packageName=koalaman/shellcheck
 shellcheck = "0.11.0"
